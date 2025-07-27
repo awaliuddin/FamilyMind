@@ -44,7 +44,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const family = await storage.createFamily({
         name: req.body.name || "My Family",
         inviteCode,
-        createdBy: userId
+        ownerId: userId
       });
 
       // Join the family
@@ -261,7 +261,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json([]);
       }
       
-      const ideas = await storage.getFamilyIdeas(user.familyId);
+      const ideas = await storage.getFamilyIdeas(user.familyId, userId);
       res.json(ideas);
     } catch (error) {
       console.error("Error fetching family ideas:", error);
@@ -472,7 +472,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         storage.getFamilyMembers(user.familyId),
         storage.getCalendarEvents(user.familyId),
         storage.getGroceryLists(user.familyId),
-        storage.getFamilyIdeas(user.familyId)
+        storage.getFamilyIdeas(user.familyId, userId)
       ]);
 
       // Get AI response
@@ -567,7 +567,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const family = await storage.createFamily({
         name: name || "My Family",
         inviteCode,
-        createdBy: userId
+        ownerId: userId
       });
       
       await storage.joinFamily(userId, family.id);

@@ -15,7 +15,7 @@ export async function seedSampleData(userId: string) {
     const family = await storage.createFamily({
       name: "My Family",
       inviteCode,
-      createdBy: userId
+      ownerId: userId
     });
     
     await storage.joinFamily(userId, family.id);

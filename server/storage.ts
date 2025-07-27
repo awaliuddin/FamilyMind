@@ -46,6 +46,7 @@ export interface IStorage {
 
   // Family operations
   createFamily(family: InsertFamily): Promise<Family>;
+  getFamily(familyId: string): Promise<Family | undefined>;
   getFamilyByInviteCode(inviteCode: string): Promise<Family | undefined>;
   joinFamily(userId: string, familyId: string): Promise<User>;
   generateInviteCode(): string;
@@ -70,7 +71,7 @@ export interface IStorage {
   deleteCalendarEvent(id: string): Promise<void>;
 
   // Family ideas
-  getFamilyIdeas(familyId: string): Promise<(FamilyIdea & { userLiked: boolean })[]>;
+  getFamilyIdeas(familyId: string, userId?: string): Promise<(FamilyIdea & { userLiked: boolean })[]>;
   createFamilyIdea(idea: InsertFamilyIdea): Promise<FamilyIdea>;
   likeIdea(ideaId: string, userId: string): Promise<void>;
   unlikeIdea(ideaId: string, userId: string): Promise<void>;
@@ -121,6 +122,11 @@ export class DatabaseStorage implements IStorage {
 
   async createFamily(familyData: InsertFamily): Promise<Family> {
     const [family] = await db.insert(families).values(familyData).returning();
+    return family;
+  }
+
+  async getFamily(familyId: string): Promise<Family | undefined> {
+    const [family] = await db.select().from(families).where(eq(families.id, familyId));
     return family;
   }
 
@@ -222,7 +228,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Family ideas
-  async getFamilyIdeas(familyId: string): Promise<(FamilyIdea & { userLiked: boolean })[]> {
+  async getFamilyIdeas(familyId: string, userId?: string): Promise<(FamilyIdea & { userLiked: boolean })[]> {
     const ideas = await db
       .select()
       .from(familyIdeas)
@@ -231,6 +237,9 @@ export class DatabaseStorage implements IStorage {
 
     const ideasWithLikes = await Promise.all(
       ideas.map(async (idea) => {
+        if (!userId) {
+          return { ...idea, userLiked: false };
+        }
         const [userLike] = await db
           .select()
           .from(ideaLikes)

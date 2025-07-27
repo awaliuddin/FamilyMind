@@ -200,6 +200,22 @@ export class DatabaseStorage implements IStorage {
     await db.delete(groceryItems).where(eq(groceryItems.id, id));
   }
 
+  async updateGroceryList(id: string, updates: Partial<GroceryList>): Promise<GroceryList> {
+    const [updatedList] = await db
+      .update(groceryLists)
+      .set(updates)
+      .where(eq(groceryLists.id, id))
+      .returning();
+    return updatedList;
+  }
+
+  async deleteGroceryList(id: string): Promise<void> {
+    // First delete all items in the list
+    await db.delete(groceryItems).where(eq(groceryItems.listId, id));
+    // Then delete the list itself
+    await db.delete(groceryLists).where(eq(groceryLists.id, id));
+  }
+
   // Calendar events
   async getCalendarEvents(familyId: string): Promise<CalendarEvent[]> {
     return await db

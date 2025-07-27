@@ -176,6 +176,32 @@ export default function FamilyCommandCenter() {
     onError: handleUnauthorizedError,
   });
 
+  const deleteGroceryListMutation = useMutation({
+    mutationFn: async (listId: string) => {
+      const response = await apiRequest('DELETE', `/api/grocery-lists/${listId}`, {});
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/grocery-lists'] });
+      toast({ title: "Grocery list deleted successfully!" });
+    },
+    onError: handleUnauthorizedError,
+  });
+
+  const updateGroceryListMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      const response = await apiRequest('PATCH', `/api/grocery-lists/${id}`, data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/grocery-lists'] });
+      setEditDialogOpen(false);
+      setEditingItem(null);
+      toast({ title: "Grocery list updated successfully!" });
+    },
+    onError: handleUnauthorizedError,
+  });
+
   const createWishlistMutation = useMutation({
     mutationFn: async (item: { item: string; person: string; occasion: string; store?: string; price?: string }) => {
       const response = await apiRequest('POST', '/api/wishlist-items', item);
@@ -316,6 +342,9 @@ export default function FamilyCommandCenter() {
         break;
       case 'grocery':
         updateGroceryItemMutation.mutate({ id, data });
+        break;
+      case 'groceryList':
+        updateGroceryListMutation.mutate({ id, data });
         break;
       case 'vision':
         updateVisionItemMutation.mutate({ id, data });
@@ -622,15 +651,36 @@ export default function FamilyCommandCenter() {
                   {groceryLists.map((list) => (
                     <Card key={list.id} className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
                       <CardHeader>
-                        <div className="flex items-center space-x-3">
-                          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
-                            <ShoppingCart className="h-6 w-6 text-white" />
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
+                              <ShoppingCart className="h-6 w-6 text-white" />
+                            </div>
+                            <div>
+                              <CardTitle className="text-blue-800">{list.store}</CardTitle>
+                              {list.storeTip && (
+                                <p className="text-blue-600 text-sm">💡 {list.storeTip}</p>
+                              )}
+                            </div>
                           </div>
-                          <div>
-                            <CardTitle className="text-blue-800">{list.store}</CardTitle>
-                            {list.storeTip && (
-                              <p className="text-blue-600 text-sm">💡 {list.storeTip}</p>
-                            )}
+                          <div className="flex space-x-1">
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handleEditItem('groceryList', list)}
+                              className="text-blue-600 hover:text-blue-800"
+                            >
+                              <Edit3 className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => deleteGroceryListMutation.mutate(list.id)}
+                              disabled={deleteGroceryListMutation.isPending}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           </div>
                         </div>
                       </CardHeader>
@@ -1301,6 +1351,27 @@ export default function FamilyCommandCenter() {
                   </div>
                 )}
 
+                {editingItem.type === 'groceryList' && (
+                  <>
+                    <div>
+                      <Label htmlFor="edit-grocery-store">Store Name</Label>
+                      <Input
+                        id="edit-grocery-store"
+                        value={editingItem.data.store || ''}
+                        onChange={(e) => handleEditChange('store', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-grocery-tip">Store Tip (optional)</Label>
+                      <Input
+                        id="edit-grocery-tip"
+                        value={editingItem.data.storeTip || ''}
+                        onChange={(e) => handleEditChange('storeTip', e.target.value)}
+                      />
+                    </div>
+                  </>
+                )}
+
                 {editingItem.type === 'vision' && (
                   <>
                     <div>
@@ -1413,10 +1484,10 @@ export default function FamilyCommandCenter() {
                   </Button>
                   <Button 
                     onClick={handleUpdateItem}
-                    disabled={updateCalendarEventMutation.isPending || updateGroceryItemMutation.isPending || updateVisionItemMutation.isPending || updateWishlistItemMutation.isPending}
+                    disabled={updateCalendarEventMutation.isPending || updateGroceryItemMutation.isPending || updateGroceryListMutation.isPending || updateVisionItemMutation.isPending || updateWishlistItemMutation.isPending}
                     className="bg-blue-600 hover:bg-blue-700"
                   >
-                    {(updateCalendarEventMutation.isPending || updateGroceryItemMutation.isPending || updateVisionItemMutation.isPending || updateWishlistItemMutation.isPending) ? (
+                    {(updateCalendarEventMutation.isPending || updateGroceryItemMutation.isPending || updateGroceryListMutation.isPending || updateVisionItemMutation.isPending || updateWishlistItemMutation.isPending) ? (
                       <Loader2 className="h-4 w-4 animate-spin mr-2" />
                     ) : (
                       <Save className="h-4 w-4 mr-2" />

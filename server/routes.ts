@@ -179,6 +179,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch('/api/grocery-lists/:id', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { id: _id, familyId: _familyId, createdAt, updatedAt, ...cleanData } = req.body;
+      const list = await storage.updateGroceryList(id, cleanData);
+      res.json(list);
+    } catch (error) {
+      console.error("Error updating grocery list:", error);
+      res.status(500).json({ message: "Failed to update grocery list" });
+    }
+  });
+
+  app.delete('/api/grocery-lists/:id', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteGroceryList(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting grocery list:", error);
+      res.status(500).json({ message: "Failed to delete grocery list" });
+    }
+  });
+
   // Calendar routes
   app.get('/api/calendar-events', isAuthenticated, async (req: any, res) => {
     try {

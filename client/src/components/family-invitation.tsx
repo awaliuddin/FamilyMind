@@ -24,12 +24,10 @@ export function FamilyInvitation({ user }: FamilyInvitationProps) {
 
   const createFamilyMutation = useMutation({
     mutationFn: async (name: string) => {
-      return await apiRequest("/api/family/create", {
-        method: "POST",
-        body: JSON.stringify({ name }),
-      });
+      const response = await apiRequest("POST", "/api/family/create", { name });
+      return await response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       setGeneratedInviteCode(data.inviteCode);
       setFamilyName("");
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
@@ -49,10 +47,8 @@ export function FamilyInvitation({ user }: FamilyInvitationProps) {
 
   const joinFamilyMutation = useMutation({
     mutationFn: async (code: string) => {
-      return await apiRequest("/api/family/join", {
-        method: "POST",
-        body: JSON.stringify({ inviteCode: code }),
-      });
+      const response = await apiRequest("POST", "/api/family/join", { inviteCode: code });
+      return await response.json();
     },
     onSuccess: () => {
       setInviteCode("");

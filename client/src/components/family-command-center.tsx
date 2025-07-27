@@ -277,15 +277,8 @@ export default function FamilyCommandCenter() {
     
     switch (type) {
       case 'calendar':
-        // Ensure dates are properly formatted for the backend
-        const calendarData = { ...data };
-        if (calendarData.startTime && !(calendarData.startTime instanceof Date)) {
-          calendarData.startTime = new Date(calendarData.startTime);
-        }
-        if (calendarData.endTime && !(calendarData.endTime instanceof Date)) {
-          calendarData.endTime = new Date(calendarData.endTime);
-        }
-        updateCalendarEventMutation.mutate({ id, data: calendarData });
+        // Send data as-is, let the backend handle date conversion
+        updateCalendarEventMutation.mutate({ id, data });
         break;
       case 'grocery':
         updateGroceryItemMutation.mutate({ id, data });
@@ -1113,7 +1106,7 @@ export default function FamilyCommandCenter() {
                         id="edit-start-time"
                         type="datetime-local"
                         value={editingItem.data.startTime ? new Date(editingItem.data.startTime).toISOString().slice(0, 16) : ''}
-                        onChange={(e) => handleEditChange('startTime', e.target.value ? new Date(e.target.value) : null)}
+                        onChange={(e) => handleEditChange('startTime', e.target.value)}
                       />
                     </div>
                     <div>
@@ -1122,7 +1115,7 @@ export default function FamilyCommandCenter() {
                         id="edit-end-time"
                         type="datetime-local"
                         value={editingItem.data.endTime ? new Date(editingItem.data.endTime).toISOString().slice(0, 16) : ''}
-                        onChange={(e) => handleEditChange('endTime', e.target.value ? new Date(e.target.value) : null)}
+                        onChange={(e) => handleEditChange('endTime', e.target.value)}
                       />
                     </div>
                     <div>

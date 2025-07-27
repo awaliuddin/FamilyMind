@@ -138,7 +138,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch('/api/calendar-events/:id', isAuthenticated, async (req, res) => {
     try {
       const { id } = req.params;
-      const event = await storage.updateCalendarEvent(id, req.body);
+      const updateData = { ...req.body };
+      
+      // Convert date strings to Date objects for proper database storage
+      if (updateData.startTime) {
+        updateData.startTime = new Date(updateData.startTime);
+      }
+      if (updateData.endTime) {
+        updateData.endTime = new Date(updateData.endTime);
+      }
+      
+      const event = await storage.updateCalendarEvent(id, updateData);
       res.json(event);
     } catch (error) {
       console.error("Error updating calendar event:", error);

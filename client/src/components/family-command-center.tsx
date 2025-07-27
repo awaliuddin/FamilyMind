@@ -211,6 +211,55 @@ export default function FamilyCommandCenter() {
     onError: handleUnauthorizedError,
   });
 
+  // Delete mutations
+  const deleteCalendarEventMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await apiRequest('DELETE', `/api/calendar-events/${id}`, {});
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/calendar-events'] });
+      toast({ title: "Event deleted successfully!" });
+    },
+    onError: handleUnauthorizedError,
+  });
+
+  const deleteGroceryItemMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await apiRequest('DELETE', `/api/grocery-items/${id}`, {});
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/grocery-lists'] });
+      toast({ title: "Item deleted successfully!" });
+    },
+    onError: handleUnauthorizedError,
+  });
+
+  const deleteVisionItemMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await apiRequest('DELETE', `/api/vision-items/${id}`, {});
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/vision-items'] });
+      toast({ title: "Vision item deleted successfully!" });
+    },
+    onError: handleUnauthorizedError,
+  });
+
+  const deleteWishlistItemMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await apiRequest('DELETE', `/api/wishlist-items/${id}`, {});
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/wishlist-items'] });
+      toast({ title: "Wishlist item deleted successfully!" });
+    },
+    onError: handleUnauthorizedError,
+  });
+
   // Helper functions
   const handleInputChange = (key: string, value: string) => {
     setNewItemInputs(prev => ({ ...prev, [key]: value }));
@@ -537,7 +586,13 @@ export default function FamilyCommandCenter() {
                                 >
                                   <Edit3 className="h-4 w-4" />
                                 </Button>
-                                <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="text-red-500 hover:text-red-700"
+                                  onClick={() => deleteGroceryItemMutation.mutate(item.id)}
+                                  disabled={deleteGroceryItemMutation.isPending}
+                                >
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
                               </div>
@@ -641,6 +696,15 @@ export default function FamilyCommandCenter() {
                               className="text-blue-600 hover:text-blue-800"
                             >
                               <Edit3 className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => deleteCalendarEventMutation.mutate(event.id)}
+                              disabled={deleteCalendarEventMutation.isPending}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
                         </div>
@@ -844,14 +908,25 @@ export default function FamilyCommandCenter() {
                           </div>
                         </div>
                         <div className="mt-3 flex justify-center">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => handleEditItem('vision', item)}
-                            className="text-gray-600 hover:text-gray-800"
-                          >
-                            <Edit3 className="h-4 w-4" />
-                          </Button>
+                          <div className="flex space-x-1">
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handleEditItem('vision', item)}
+                              className="text-gray-600 hover:text-gray-800"
+                            >
+                              <Edit3 className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => deleteVisionItemMutation.mutate(item.id)}
+                              disabled={deleteVisionItemMutation.isPending}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
@@ -961,7 +1036,13 @@ export default function FamilyCommandCenter() {
                             >
                               <Edit3 className="h-4 w-4" />
                             </Button>
-                            <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="text-red-500 hover:text-red-700"
+                              onClick={() => deleteWishlistItemMutation.mutate(item.id)}
+                              disabled={deleteWishlistItemMutation.isPending}
+                            >
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
@@ -1024,7 +1105,7 @@ export default function FamilyCommandCenter() {
                         id="edit-start-time"
                         type="datetime-local"
                         value={editingItem.data.startTime ? new Date(editingItem.data.startTime).toISOString().slice(0, 16) : ''}
-                        onChange={(e) => handleEditChange('startTime', new Date(e.target.value).toISOString())}
+                        onChange={(e) => handleEditChange('startTime', new Date(e.target.value))}
                       />
                     </div>
                     <div>
@@ -1033,7 +1114,7 @@ export default function FamilyCommandCenter() {
                         id="edit-end-time"
                         type="datetime-local"
                         value={editingItem.data.endTime ? new Date(editingItem.data.endTime).toISOString().slice(0, 16) : ''}
-                        onChange={(e) => handleEditChange('endTime', new Date(e.target.value).toISOString())}
+                        onChange={(e) => handleEditChange('endTime', new Date(e.target.value))}
                       />
                     </div>
                     <div>

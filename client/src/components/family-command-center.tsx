@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -42,6 +43,7 @@ import {
   X
 } from "lucide-react";
 import AIChat from "./ai-chat";
+import { FamilyManagement } from "./family-management";
 
 export default function FamilyCommandCenter() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -51,6 +53,7 @@ export default function FamilyCommandCenter() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   // Auth error handler
   const handleUnauthorizedError = (error: Error) => {
@@ -458,6 +461,11 @@ export default function FamilyCommandCenter() {
               <div className="mb-6">
                 <h2 className="text-3xl font-bold text-gray-800 mb-2">Family Dashboard</h2>
                 <p className="text-gray-600">Your family's intelligent command center</p>
+              </div>
+
+              {/* Family Management */}
+              <div className="mb-8">
+                <FamilyManagement user={user} />
               </div>
 
               {/* Quick Stats */}

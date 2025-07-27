@@ -140,13 +140,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const updateData = { ...req.body };
       
+      console.log("Received update data:", updateData);
+      
       // Convert date strings to Date objects for proper database storage
       if (updateData.startTime) {
-        updateData.startTime = new Date(updateData.startTime);
+        console.log("Original startTime:", updateData.startTime, "Type:", typeof updateData.startTime);
+        if (typeof updateData.startTime === 'string') {
+          updateData.startTime = new Date(updateData.startTime);
+        }
+        console.log("Converted startTime:", updateData.startTime);
       }
       if (updateData.endTime) {
-        updateData.endTime = new Date(updateData.endTime);
+        console.log("Original endTime:", updateData.endTime, "Type:", typeof updateData.endTime);
+        if (typeof updateData.endTime === 'string') {
+          updateData.endTime = new Date(updateData.endTime);
+        }
+        console.log("Converted endTime:", updateData.endTime);
       }
+      
+      console.log("Final update data:", updateData);
       
       const event = await storage.updateCalendarEvent(id, updateData);
       res.json(event);

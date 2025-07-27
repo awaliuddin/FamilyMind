@@ -138,29 +138,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch('/api/calendar-events/:id', isAuthenticated, async (req, res) => {
     try {
       const { id } = req.params;
-      const updateData = { ...req.body };
       
-      console.log("Received update data:", updateData);
+      // Remove auto-generated fields and prepare clean update data
+      const { id: _id, userId: _userId, createdAt, updatedAt, ...cleanData } = req.body;
       
       // Convert date strings to Date objects for proper database storage
-      if (updateData.startTime) {
-        console.log("Original startTime:", updateData.startTime, "Type:", typeof updateData.startTime);
-        if (typeof updateData.startTime === 'string') {
-          updateData.startTime = new Date(updateData.startTime);
-        }
-        console.log("Converted startTime:", updateData.startTime);
+      if (cleanData.startTime && typeof cleanData.startTime === 'string') {
+        cleanData.startTime = new Date(cleanData.startTime);
       }
-      if (updateData.endTime) {
-        console.log("Original endTime:", updateData.endTime, "Type:", typeof updateData.endTime);
-        if (typeof updateData.endTime === 'string') {
-          updateData.endTime = new Date(updateData.endTime);
-        }
-        console.log("Converted endTime:", updateData.endTime);
+      if (cleanData.endTime && typeof cleanData.endTime === 'string') {
+        cleanData.endTime = new Date(cleanData.endTime);
       }
       
-      console.log("Final update data:", updateData);
+      console.log("Clean update data:", cleanData);
       
-      const event = await storage.updateCalendarEvent(id, updateData);
+      const event = await storage.updateCalendarEvent(id, cleanData);
       res.json(event);
     } catch (error) {
       console.error("Error updating calendar event:", error);

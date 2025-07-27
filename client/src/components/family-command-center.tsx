@@ -5,6 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -32,7 +36,10 @@ import {
   Home,
   CheckCircle2,
   AlertTriangle,
-  Loader2
+  Loader2,
+  Edit3,
+  Save,
+  X
 } from "lucide-react";
 import AIChat from "./ai-chat";
 
@@ -40,6 +47,8 @@ export default function FamilyCommandCenter() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [chatOpen, setChatOpen] = useState(false);
   const [newItemInputs, setNewItemInputs] = useState<Record<string, string>>({});
+  const [editingItem, setEditingItem] = useState<{ type: string; id: string; data: any } | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -145,9 +154,100 @@ export default function FamilyCommandCenter() {
     onError: handleUnauthorizedError,
   });
 
+  // Update mutations
+  const updateCalendarEventMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<CalendarEvent> }) => {
+      const response = await apiRequest('PATCH', `/api/calendar-events/${id}`, data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/calendar-events'] });
+      setEditDialogOpen(false);
+      setEditingItem(null);
+      toast({ title: "Event updated successfully!" });
+    },
+    onError: handleUnauthorizedError,
+  });
+
+  const updateGroceryItemMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<GroceryItem> }) => {
+      const response = await apiRequest('PATCH', `/api/grocery-items/${id}`, data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/grocery-lists'] });
+      setEditDialogOpen(false);
+      setEditingItem(null);
+      toast({ title: "Item updated successfully!" });
+    },
+    onError: handleUnauthorizedError,
+  });
+
+  const updateVisionItemMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<VisionItem> }) => {
+      const response = await apiRequest('PATCH', `/api/vision-items/${id}`, data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/vision-items'] });
+      setEditDialogOpen(false);
+      setEditingItem(null);
+      toast({ title: "Vision item updated successfully!" });
+    },
+    onError: handleUnauthorizedError,
+  });
+
+  const updateWishlistItemMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<WishListItem> }) => {
+      const response = await apiRequest('PATCH', `/api/wishlist-items/${id}`, data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/wishlist-items'] });
+      setEditDialogOpen(false);
+      setEditingItem(null);
+      toast({ title: "Wishlist item updated successfully!" });
+    },
+    onError: handleUnauthorizedError,
+  });
+
   // Helper functions
   const handleInputChange = (key: string, value: string) => {
     setNewItemInputs(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleEditItem = (type: string, item: any) => {
+    setEditingItem({ type, id: item.id, data: { ...item } });
+    setEditDialogOpen(true);
+  };
+
+  const handleUpdateItem = () => {
+    if (!editingItem) return;
+
+    const { type, id, data } = editingItem;
+    
+    switch (type) {
+      case 'calendar':
+        updateCalendarEventMutation.mutate({ id, data });
+        break;
+      case 'grocery':
+        updateGroceryItemMutation.mutate({ id, data });
+        break;
+      case 'vision':
+        updateVisionItemMutation.mutate({ id, data });
+        break;
+      case 'wishlist':
+        updateWishlistItemMutation.mutate({ id, data });
+        break;
+    }
+  };
+
+  const handleEditChange = (field: string, value: any) => {
+    if (!editingItem) return;
+    setEditingItem(prev => ({
+      ...prev!,
+      data: { ...prev!.data, [field]: value }
+    }));
   };
 
   const getColorClasses = (color: string) => {
@@ -428,9 +528,19 @@ export default function FamilyCommandCenter() {
                                   <Badge variant="secondary" className="text-xs">Auto</Badge>
                                 )}
                               </div>
-                              <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700">
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
+                              <div className="flex space-x-1">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="text-blue-500 hover:text-blue-700"
+                                  onClick={() => handleEditItem('grocery', item)}
+                                >
+                                  <Edit3 className="h-4 w-4" />
+                                </Button>
+                                <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -522,6 +632,16 @@ export default function FamilyCommandCenter() {
                                 </div>
                               </div>
                             </div>
+                          </div>
+                          <div className="flex space-x-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleEditItem('calendar', event)}
+                              className="text-blue-600 hover:text-blue-800"
+                            >
+                              <Edit3 className="h-4 w-4" />
+                            </Button>
                           </div>
                         </div>
                       </CardContent>
@@ -723,6 +843,16 @@ export default function FamilyCommandCenter() {
                             <span className="text-xs">{item.targetDate || 'Ongoing'}</span>
                           </div>
                         </div>
+                        <div className="mt-3 flex justify-center">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleEditItem('vision', item)}
+                            className="text-gray-600 hover:text-gray-800"
+                          >
+                            <Edit3 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </CardContent>
                     </Card>
                   ))}
@@ -823,8 +953,13 @@ export default function FamilyCommandCenter() {
                             </div>
                           </div>
                           <div className="flex items-center space-x-2">
-                            <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-800">
-                              View
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="text-blue-600 hover:text-blue-800"
+                              onClick={() => handleEditItem('wishlist', item)}
+                            >
+                              <Edit3 className="h-4 w-4" />
                             </Button>
                             <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700">
                               <Trash2 className="h-4 w-4" />
@@ -842,6 +977,224 @@ export default function FamilyCommandCenter() {
 
         {/* AI Chat Component */}
         <AIChat isOpen={chatOpen} onClose={() => setChatOpen(false)} />
+
+        {/* Edit Dialog */}
+        <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>
+                Edit {editingItem?.type === 'calendar' ? 'Calendar Event' : 
+                      editingItem?.type === 'grocery' ? 'Grocery Item' :
+                      editingItem?.type === 'vision' ? 'Vision Item' :
+                      editingItem?.type === 'wishlist' ? 'Wishlist Item' : 'Item'}
+              </DialogTitle>
+            </DialogHeader>
+            
+            {editingItem && (
+              <div className="space-y-4">
+                {editingItem.type === 'calendar' && (
+                  <>
+                    <div>
+                      <Label htmlFor="edit-title">Event Title</Label>
+                      <Input
+                        id="edit-title"
+                        value={editingItem.data.title || ''}
+                        onChange={(e) => handleEditChange('title', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-description">Description</Label>
+                      <Textarea
+                        id="edit-description"
+                        value={editingItem.data.description || ''}
+                        onChange={(e) => handleEditChange('description', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-location">Location</Label>
+                      <Input
+                        id="edit-location"
+                        value={editingItem.data.location || ''}
+                        onChange={(e) => handleEditChange('location', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-start-time">Start Time</Label>
+                      <Input
+                        id="edit-start-time"
+                        type="datetime-local"
+                        value={editingItem.data.startTime ? new Date(editingItem.data.startTime).toISOString().slice(0, 16) : ''}
+                        onChange={(e) => handleEditChange('startTime', new Date(e.target.value).toISOString())}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-end-time">End Time</Label>
+                      <Input
+                        id="edit-end-time"
+                        type="datetime-local"
+                        value={editingItem.data.endTime ? new Date(editingItem.data.endTime).toISOString().slice(0, 16) : ''}
+                        onChange={(e) => handleEditChange('endTime', new Date(e.target.value).toISOString())}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-event-type">Event Type</Label>
+                      <Select 
+                        value={editingItem.data.eventType || ''} 
+                        onValueChange={(value) => handleEditChange('eventType', value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select event type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="work">Work</SelectItem>
+                          <SelectItem value="family">Family</SelectItem>
+                          <SelectItem value="sports">Sports</SelectItem>
+                          <SelectItem value="volunteer">Volunteer</SelectItem>
+                          <SelectItem value="personal">Personal</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </>
+                )}
+
+                {editingItem.type === 'grocery' && (
+                  <div>
+                    <Label htmlFor="edit-grocery-name">Item Name</Label>
+                    <Input
+                      id="edit-grocery-name"
+                      value={editingItem.data.name || ''}
+                      onChange={(e) => handleEditChange('name', e.target.value)}
+                    />
+                  </div>
+                )}
+
+                {editingItem.type === 'vision' && (
+                  <>
+                    <div>
+                      <Label htmlFor="edit-vision-title">Dream/Goal Title</Label>
+                      <Input
+                        id="edit-vision-title"
+                        value={editingItem.data.title || ''}
+                        onChange={(e) => handleEditChange('title', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-vision-description">Description</Label>
+                      <Textarea
+                        id="edit-vision-description"
+                        value={editingItem.data.description || ''}
+                        onChange={(e) => handleEditChange('description', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-vision-target-date">Target Date</Label>
+                      <Input
+                        id="edit-vision-target-date"
+                        value={editingItem.data.targetDate || ''}
+                        onChange={(e) => handleEditChange('targetDate', e.target.value)}
+                        placeholder="e.g., Summer 2024, 2025, Ongoing"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-vision-color">Color Theme</Label>
+                      <Select 
+                        value={editingItem.data.color || ''} 
+                        onValueChange={(value) => handleEditChange('color', value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select color" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="pink">Pink</SelectItem>
+                          <SelectItem value="blue">Blue</SelectItem>
+                          <SelectItem value="green">Green</SelectItem>
+                          <SelectItem value="yellow">Yellow</SelectItem>
+                          <SelectItem value="purple">Purple</SelectItem>
+                          <SelectItem value="indigo">Indigo</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </>
+                )}
+
+                {editingItem.type === 'wishlist' && (
+                  <>
+                    <div>
+                      <Label htmlFor="edit-wishlist-item">Item Name</Label>
+                      <Input
+                        id="edit-wishlist-item"
+                        value={editingItem.data.item || ''}
+                        onChange={(e) => handleEditChange('item', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-wishlist-description">Description</Label>
+                      <Textarea
+                        id="edit-wishlist-description"
+                        value={editingItem.data.description || ''}
+                        onChange={(e) => handleEditChange('description', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-wishlist-person">For Whom</Label>
+                      <Input
+                        id="edit-wishlist-person"
+                        value={editingItem.data.person || ''}
+                        onChange={(e) => handleEditChange('person', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-wishlist-occasion">Occasion</Label>
+                      <Input
+                        id="edit-wishlist-occasion"
+                        value={editingItem.data.occasion || ''}
+                        onChange={(e) => handleEditChange('occasion', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-wishlist-store">Store</Label>
+                      <Input
+                        id="edit-wishlist-store"
+                        value={editingItem.data.store || ''}
+                        onChange={(e) => handleEditChange('store', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-wishlist-price">Price</Label>
+                      <Input
+                        id="edit-wishlist-price"
+                        value={editingItem.data.price || ''}
+                        onChange={(e) => handleEditChange('price', e.target.value)}
+                        placeholder="e.g., $49.99"
+                      />
+                    </div>
+                  </>
+                )}
+
+                <div className="flex justify-end space-x-2 pt-4">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setEditDialogOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={handleUpdateItem}
+                    disabled={updateCalendarEventMutation.isPending || updateGroceryItemMutation.isPending || updateVisionItemMutation.isPending || updateWishlistItemMutation.isPending}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    {(updateCalendarEventMutation.isPending || updateGroceryItemMutation.isPending || updateVisionItemMutation.isPending || updateWishlistItemMutation.isPending) ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <Save className="h-4 w-4 mr-2" />
+                    )}
+                    Save Changes
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Footer */}

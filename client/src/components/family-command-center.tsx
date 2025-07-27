@@ -95,6 +95,40 @@ export default function FamilyCommandCenter() {
   });
 
   // Mutations
+  const createGroceryListMutation = useMutation({
+    mutationFn: async ({ store, storeTip }: { store: string; storeTip?: string }) => {
+      const response = await apiRequest('POST', '/api/grocery-lists', { store, storeTip });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/grocery-lists'] });
+      setNewItemInputs(prev => ({ ...prev, 'new-grocery-store': '', 'new-grocery-tip': '' }));
+      toast({ title: "Grocery list created successfully!" });
+    },
+    onError: handleUnauthorizedError,
+  });
+
+  const createCalendarEventMutation = useMutation({
+    mutationFn: async (event: { title: string; description: string; startTime: string; endTime: string; location?: string; eventType: string; color?: string }) => {
+      const response = await apiRequest('POST', '/api/calendar-events', event);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/calendar-events'] });
+      setNewItemInputs(prev => ({ 
+        ...prev, 
+        'new-event-title': '', 
+        'new-event-description': '', 
+        'new-event-location': '',
+        'new-event-start': '',
+        'new-event-end': '',
+        'new-event-type': ''
+      }));
+      toast({ title: "Calendar event created successfully!" });
+    },
+    onError: handleUnauthorizedError,
+  });
+
   const addGroceryItemMutation = useMutation({
     mutationFn: async ({ listId, name }: { listId: string; name: string }) => {
       const response = await apiRequest('POST', '/api/grocery-items', { listId, name });
@@ -532,6 +566,45 @@ export default function FamilyCommandCenter() {
                 <p className="text-gray-600">AI-powered shopping with store-specific optimization</p>
               </div>
 
+              {/* Add New Grocery List */}
+              <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200 mb-6">
+                <CardContent className="p-6">
+                  <h3 className="font-semibold text-blue-800 mb-3 flex items-center">
+                    <ShoppingCart className="h-5 w-5 text-blue-600 mr-2" />
+                    Create New Store List
+                  </h3>
+                  <div className="grid md:grid-cols-2 gap-3">
+                    <Input
+                      placeholder="Store name (e.g., Whole Foods, Target)"
+                      value={newItemInputs['new-grocery-store'] || ''}
+                      onChange={(e) => handleInputChange('new-grocery-store', e.target.value)}
+                    />
+                    <Input
+                      placeholder="Store tip (optional)"
+                      value={newItemInputs['new-grocery-tip'] || ''}
+                      onChange={(e) => handleInputChange('new-grocery-tip', e.target.value)}
+                    />
+                  </div>
+                  <div className="mt-3 flex justify-end">
+                    <Button
+                      onClick={() => {
+                        if (newItemInputs['new-grocery-store']?.trim()) {
+                          createGroceryListMutation.mutate({
+                            store: newItemInputs['new-grocery-store'].trim(),
+                            storeTip: newItemInputs['new-grocery-tip']?.trim() || undefined
+                          });
+                        }
+                      }}
+                      disabled={!newItemInputs['new-grocery-store']?.trim() || createGroceryListMutation.isPending}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create List
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
               {loadingGrocery ? (
                 <div className="flex items-center justify-center h-64">
                   <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
@@ -643,6 +716,84 @@ export default function FamilyCommandCenter() {
                 <h2 className="text-3xl font-bold text-gray-800 mb-2">Family Calendar</h2>
                 <p className="text-gray-600">Smart scheduling with conflict detection</p>
               </div>
+
+              {/* Add New Calendar Event */}
+              <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200 mb-6">
+                <CardContent className="p-6">
+                  <h3 className="font-semibold text-green-800 mb-3 flex items-center">
+                    <Calendar className="h-5 w-5 text-green-600 mr-2" />
+                    Schedule New Event
+                  </h3>
+                  <div className="grid md:grid-cols-2 gap-3 mb-3">
+                    <Input
+                      placeholder="Event title"
+                      value={newItemInputs['new-event-title'] || ''}
+                      onChange={(e) => handleInputChange('new-event-title', e.target.value)}
+                    />
+                    <Input
+                      placeholder="Location (optional)"
+                      value={newItemInputs['new-event-location'] || ''}
+                      onChange={(e) => handleInputChange('new-event-location', e.target.value)}
+                    />
+                  </div>
+                  <div className="grid md:grid-cols-3 gap-3 mb-3">
+                    <Input
+                      type="datetime-local"
+                      placeholder="Start time"
+                      value={newItemInputs['new-event-start'] || ''}
+                      onChange={(e) => handleInputChange('new-event-start', e.target.value)}
+                    />
+                    <Input
+                      type="datetime-local"
+                      placeholder="End time"
+                      value={newItemInputs['new-event-end'] || ''}
+                      onChange={(e) => handleInputChange('new-event-end', e.target.value)}
+                    />
+                    <select
+                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                      value={newItemInputs['new-event-type'] || ''}
+                      onChange={(e) => handleInputChange('new-event-type', e.target.value)}
+                    >
+                      <option value="">Event type</option>
+                      <option value="family">Family</option>
+                      <option value="work">Work</option>
+                      <option value="school">School</option>
+                      <option value="sports">Sports</option>
+                      <option value="medical">Medical</option>
+                      <option value="social">Social</option>
+                    </select>
+                  </div>
+                  <div className="flex justify-end">
+                    <Button
+                      onClick={() => {
+                        if (newItemInputs['new-event-title']?.trim() && 
+                            newItemInputs['new-event-start'] && 
+                            newItemInputs['new-event-end'] && 
+                            newItemInputs['new-event-type']) {
+                          createCalendarEventMutation.mutate({
+                            title: newItemInputs['new-event-title'].trim(),
+                            description: '',
+                            startTime: newItemInputs['new-event-start'],
+                            endTime: newItemInputs['new-event-end'],
+                            location: newItemInputs['new-event-location']?.trim() || undefined,
+                            eventType: newItemInputs['new-event-type'],
+                            color: 'blue'
+                          });
+                        }
+                      }}
+                      disabled={!newItemInputs['new-event-title']?.trim() || 
+                               !newItemInputs['new-event-start'] || 
+                               !newItemInputs['new-event-end'] || 
+                               !newItemInputs['new-event-type'] || 
+                               createCalendarEventMutation.isPending}
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Event
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
 
               {loadingEvents ? (
                 <div className="flex items-center justify-center h-64">

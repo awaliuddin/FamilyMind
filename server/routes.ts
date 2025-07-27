@@ -33,29 +33,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Family management routes
   app.post('/api/family/create', isAuthenticated, async (req: any, res) => {
     try {
-      console.log("Create family request received");
       const userId = req.user.claims.sub;
-      console.log("User ID:", userId);
       const user = await storage.getUser(userId);
-      console.log("User from storage:", user);
       
       if (user?.familyId) {
-        console.log("User already has family:", user.familyId);
         return res.status(400).json({ message: "Already part of a family" });
       }
 
       const inviteCode = storage.generateInviteCode();
-      console.log("Generated invite code:", inviteCode);
       const family = await storage.createFamily({
         name: req.body.name || "My Family",
         inviteCode,
         ownerId: userId
       });
-      console.log("Created family:", family);
 
       // Join the family
-      const updatedUser = await storage.joinFamily(userId, family.id);
-      console.log("User joined family:", updatedUser);
+      await storage.joinFamily(userId, family.id);
       res.json({ family, inviteCode });
     } catch (error) {
       console.error("Error creating family:", error);

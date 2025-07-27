@@ -7,10 +7,13 @@ FamilyMind is an AI-powered family assistant application designed to proactively
 ## Recent Changes (January 27, 2025)
 
 ✓ **Edit Functionality Added**: Users can now edit existing calendar events, grocery items, vision board items, and wishlist items
+✓ **Delete Functionality Added**: Users can now delete calendar events, grocery items, vision board items, and wishlist items
 ✓ **Comprehensive Edit Dialog**: Modal interface with form fields specific to each item type
 ✓ **Update API Routes**: PATCH endpoints for updating all major content types
-✓ **User Interface Enhancements**: Edit buttons added to all item cards with intuitive icons
+✓ **Delete API Routes**: DELETE endpoints for removing all major content types
+✓ **User Interface Enhancements**: Edit and delete buttons added to all item cards with intuitive icons
 ✓ **Sample Data Integration**: New users automatically receive realistic family data upon first login
+✓ **Fixed Calendar Editing**: Resolved date handling issues and auto-generated field conflicts for calendar events
 
 ## User Preferences
 

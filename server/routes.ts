@@ -150,7 +150,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         cleanData.endTime = new Date(cleanData.endTime);
       }
       
-      console.log("Clean update data:", cleanData);
+
       
       const event = await storage.updateCalendarEvent(id, cleanData);
       res.json(event);

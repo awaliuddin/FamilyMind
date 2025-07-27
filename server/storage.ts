@@ -162,16 +162,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateCalendarEvent(id: string, updates: Partial<CalendarEvent>): Promise<CalendarEvent> {
-    console.log("Storage: Updating calendar event with ID:", id);
-    console.log("Storage: Updates to apply:", updates);
-    
     const [updatedEvent] = await db
       .update(calendarEvents)
       .set(updates)
       .where(eq(calendarEvents.id, id))
       .returning();
-    
-    console.log("Storage: Updated event result:", updatedEvent);
     return updatedEvent;
   }
 

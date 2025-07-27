@@ -1,0 +1,184 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(20, 14.3%, 4.1%);
+  --muted: hsl(60, 4.8%, 95.9%);
+  --muted-foreground: hsl(25, 5.3%, 44.7%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(20, 14.3%, 4.1%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(20, 14.3%, 4.1%);
+  --border: hsl(20, 5.9%, 90%);
+  --input: hsl(20, 5.9%, 90%);
+  --primary: hsl(207, 90%, 54%);
+  --primary-foreground: hsl(211, 100%, 99%);
+  --secondary: hsl(60, 4.8%, 95.9%);
+  --secondary-foreground: hsl(24, 9.8%, 10%);
+  --accent: hsl(60, 4.8%, 95.9%);
+  --accent-foreground: hsl(24, 9.8%, 10%);
+  --destructive: hsl(0, 84.2%, 60.2%);
+  --destructive-foreground: hsl(60, 9.1%, 97.8%);
+  --ring: hsl(20, 14.3%, 4.1%);
+  --radius: 0.5rem;
+
+  /* Family-specific color variables */
+  --family-blue: hsl(207, 90%, 54%);
+  --family-pink: hsl(330, 81%, 60%);
+  --family-green: hsl(158, 64%, 52%);
+  --family-amber: hsl(45, 93%, 47%);
+  --family-purple: hsl(271, 91%, 65%);
+}
+
+.dark {
+  --background: hsl(240, 10%, 3.9%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(240, 3.7%, 15.9%);
+  --muted-foreground: hsl(240, 5%, 64.9%);
+  --popover: hsl(240, 10%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(240, 10%, 3.9%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(240, 3.7%, 15.9%);
+  --input: hsl(240, 3.7%, 15.9%);
+  --primary: hsl(207, 90%, 54%);
+  --primary-foreground: hsl(211, 100%, 99%);
+  --secondary: hsl(240, 3.7%, 15.9%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(240, 3.7%, 15.9%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(240, 4.9%, 83.9%);
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+
+  /* Custom family-themed styling */
+  .family-card {
+    transition: all 0.3s ease;
+  }
+
+  .family-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+
+  .ai-chat-bubble {
+    animation: slideIn 0.3s ease-out;
+  }
+
+  @keyframes slideIn {
+    from { 
+      opacity: 0; 
+      transform: translateY(10px); 
+    }
+    to { 
+      opacity: 1; 
+      transform: translateY(0); 
+    }
+  }
+
+  .like-animation {
+    animation: heartBeat 0.6s ease;
+  }
+
+  @keyframes heartBeat {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
+
+  /* Gradient backgrounds */
+  .gradient-bg {
+    background: linear-gradient(135deg, hsl(207, 90%, 54%) 0%, hsl(271, 91%, 65%) 100%);
+  }
+
+  /* Custom scrollbar for chat */
+  .scroll-area-chat::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .scroll-area-chat::-webkit-scrollbar-track {
+    background: hsl(60, 4.8%, 95.9%);
+  }
+
+  .scroll-area-chat::-webkit-scrollbar-thumb {
+    background: hsl(207, 90%, 54%);
+    border-radius: 2px;
+  }
+
+  .scroll-area-chat::-webkit-scrollbar-thumb:hover {
+    background: hsl(207, 90%, 45%);
+  }
+}
+
+/* Family member avatar colors */
+.avatar-mom {
+  border-color: var(--family-pink);
+}
+
+.avatar-dad {
+  border-color: var(--family-blue);
+}
+
+.avatar-kid {
+  border-color: var(--family-amber);
+}
+
+.avatar-family {
+  border-color: var(--family-purple);
+}
+
+/* Store-specific styling */
+.store-walmart {
+  background: linear-gradient(135deg, hsl(207, 90%, 54%) 0%, hsl(207, 90%, 64%) 100%);
+}
+
+.store-costco {
+  background: linear-gradient(135deg, hsl(45, 93%, 47%) 0%, hsl(45, 93%, 57%) 100%);
+}
+
+.store-marianos {
+  background: linear-gradient(135deg, hsl(158, 64%, 52%) 0%, hsl(158, 64%, 62%) 100%);
+}
+
+/* Event type colors */
+.event-work {
+  background-color: hsl(271, 91%, 65%);
+}
+
+.event-family {
+  background-color: hsl(158, 64%, 52%);
+}
+
+.event-sports {
+  background-color: hsl(207, 90%, 54%);
+}
+
+.event-school {
+  background-color: hsl(45, 93%, 47%);
+}
+
+/* Priority indicators */
+.priority-high {
+  background-color: hsl(0, 84.2%, 60.2%);
+}
+
+.priority-medium {
+  background-color: hsl(45, 93%, 47%);
+}
+
+.priority-low {
+  background-color: hsl(158, 64%, 52%);
+}

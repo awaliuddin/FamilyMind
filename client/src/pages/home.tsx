@@ -2,10 +2,18 @@ import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import FamilyCommandCenter from "@/components/family-command-center";
+import { FamilyInvitation } from "@/components/family-invitation";
+import { useQuery } from "@tanstack/react-query";
 
 export default function Home() {
   const { toast } = useToast();
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
+  
+  // Get user data to check if they have a family
+  const { data: userData } = useQuery({
+    queryKey: ["/api/auth/user"],
+    enabled: isAuthenticated,
+  });
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -37,6 +45,15 @@ export default function Home() {
 
   if (!isAuthenticated) {
     return null; // Will redirect via useEffect
+  }
+
+  // Show family invitation if user doesn't have a family
+  if (userData && !userData.familyId) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900 dark:to-indigo-900">
+        <FamilyInvitation user={userData} />
+      </div>
+    );
   }
 
   return <FamilyCommandCenter />;

@@ -30,11 +30,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Family management routes
+  app.post('/api/family/create', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (user?.familyId) {
+        return res.status(400).json({ message: "Already part of a family" });
+      }
+
+      const inviteCode = storage.generateInviteCode();
+      const family = await storage.createFamily({
+        name: req.body.name || "My Family",
+        inviteCode,
+        createdBy: userId
+      });
+
+      // Join the family
+      await storage.joinFamily(userId, family.id);
+      res.json({ family, inviteCode });
+    } catch (error) {
+      console.error("Error creating family:", error);
+      res.status(500).json({ message: "Failed to create family" });
+    }
+  });
+
+  app.post('/api/family/join', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { inviteCode } = req.body;
+      
+      const family = await storage.getFamilyByInviteCode(inviteCode);
+      if (!family) {
+        return res.status(404).json({ message: "Invalid invite code" });
+      }
+
+      const user = await storage.joinFamily(userId, family.id);
+      res.json({ user, family });
+    } catch (error) {
+      console.error("Error joining family:", error);
+      res.status(500).json({ message: "Failed to join family" });
+    }
+  });
+
   // Family members routes
   app.get('/api/family-members', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const members = await storage.getFamilyMembers(userId);
+      const user = await storage.getUser(userId);
+      
+      if (!user?.familyId) {
+        return res.json([]);
+      }
+      
+      const members = await storage.getFamilyMembers(user.familyId);
       res.json(members);
     } catch (error) {
       console.error("Error fetching family members:", error);
@@ -45,7 +95,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/family-members', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const memberData = insertFamilyMemberSchema.parse({ ...req.body, userId });
+      const user = await storage.getUser(userId);
+      
+      if (!user?.familyId) {
+        return res.status(400).json({ message: "Must be part of a family to add members" });
+      }
+      
+      const memberData = insertFamilyMemberSchema.parse({ ...req.body, familyId: user.familyId });
       const member = await storage.createFamilyMember(memberData);
       res.json(member);
     } catch (error) {
@@ -58,7 +114,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/grocery-lists', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const lists = await storage.getGroceryLists(userId);
+      const user = await storage.getUser(userId);
+      
+      if (!user?.familyId) {
+        return res.json([]);
+      }
+      
+      const lists = await storage.getGroceryLists(user.familyId);
       res.json(lists);
     } catch (error) {
       console.error("Error fetching grocery lists:", error);
@@ -69,7 +131,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/grocery-lists', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const listData = insertGroceryListSchema.parse({ ...req.body, userId });
+      const user = await storage.getUser(userId);
+      
+      if (!user?.familyId) {
+        return res.status(400).json({ message: "Must be part of a family to create grocery lists" });
+      }
+      
+      const listData = insertGroceryListSchema.parse({ ...req.body, familyId: user.familyId });
       const list = await storage.createGroceryList(listData);
       res.json(list);
     } catch (error) {
@@ -115,7 +183,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/calendar-events', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const events = await storage.getCalendarEvents(userId);
+      const user = await storage.getUser(userId);
+      
+      if (!user?.familyId) {
+        return res.json([]);
+      }
+      
+      const events = await storage.getCalendarEvents(user.familyId);
       res.json(events);
     } catch (error) {
       console.error("Error fetching calendar events:", error);
@@ -126,7 +200,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/calendar-events', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const eventData = insertCalendarEventSchema.parse({ ...req.body, userId });
+      const user = await storage.getUser(userId);
+      
+      if (!user?.familyId) {
+        return res.status(400).json({ message: "Must be part of a family to create calendar events" });
+      }
+      
+      const eventData = insertCalendarEventSchema.parse({ ...req.body, familyId: user.familyId });
       const event = await storage.createCalendarEvent(eventData);
       res.json(event);
     } catch (error) {
@@ -175,7 +255,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/family-ideas', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const ideas = await storage.getFamilyIdeas(userId);
+      const user = await storage.getUser(userId);
+      
+      if (!user?.familyId) {
+        return res.json([]);
+      }
+      
+      const ideas = await storage.getFamilyIdeas(user.familyId);
       res.json(ideas);
     } catch (error) {
       console.error("Error fetching family ideas:", error);
@@ -186,7 +272,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/family-ideas', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const ideaData = insertFamilyIdeaSchema.parse({ ...req.body, userId });
+      const user = await storage.getUser(userId);
+      
+      if (!user?.familyId) {
+        return res.status(400).json({ message: "Must be part of a family to create family ideas" });
+      }
+      
+      const ideaData = insertFamilyIdeaSchema.parse({ ...req.body, familyId: user.familyId });
       const idea = await storage.createFamilyIdea(ideaData);
       res.json(idea);
     } catch (error) {
@@ -223,7 +315,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/vision-items', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const items = await storage.getVisionItems(userId);
+      const user = await storage.getUser(userId);
+      
+      if (!user?.familyId) {
+        return res.json([]);
+      }
+      
+      const items = await storage.getVisionItems(user.familyId);
       res.json(items);
     } catch (error) {
       console.error("Error fetching vision items:", error);
@@ -234,7 +332,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/vision-items', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const itemData = insertVisionItemSchema.parse({ ...req.body, userId });
+      const user = await storage.getUser(userId);
+      
+      if (!user?.familyId) {
+        return res.status(400).json({ message: "Must be part of a family to create vision items" });
+      }
+      
+      const itemData = insertVisionItemSchema.parse({ ...req.body, familyId: user.familyId });
       const item = await storage.createVisionItem(itemData);
       res.json(item);
     } catch (error) {
@@ -269,7 +373,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/wishlist-items', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const items = await storage.getWishListItems(userId);
+      const user = await storage.getUser(userId);
+      
+      if (!user?.familyId) {
+        return res.json([]);
+      }
+      
+      const items = await storage.getWishListItems(user.familyId);
       res.json(items);
     } catch (error) {
       console.error("Error fetching wishlist items:", error);
@@ -280,7 +390,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/wishlist-items', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const itemData = insertWishListItemSchema.parse({ ...req.body, userId });
+      const user = await storage.getUser(userId);
+      
+      if (!user?.familyId) {
+        return res.status(400).json({ message: "Must be part of a family to create wishlist items" });
+      }
+      
+      const itemData = insertWishListItemSchema.parse({ ...req.body, familyId: user.familyId });
       const item = await storage.createWishListItem(itemData);
       res.json(item);
     } catch (error) {
@@ -336,12 +452,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         context: null
       });
 
-      // Get context for AI
+      // Get user and family context for AI
+      const user = await storage.getUser(userId);
+      
+      if (!user?.familyId) {
+        const response = "I'd be happy to help you manage your family! To get started with all the family features, you'll need to either create a new family or join an existing one. Would you like me to help you set that up?";
+        
+        const aiMessage = await storage.createChatMessage({
+          userId,
+          message: response,
+          messageType: 'assistant',
+          context: { needsFamily: true }
+        });
+        
+        return res.json({ message: response });
+      }
+
       const [familyMembers, upcomingEvents, groceryLists, recentIdeas] = await Promise.all([
-        storage.getFamilyMembers(userId),
-        storage.getCalendarEvents(userId),
-        storage.getGroceryLists(userId),
-        storage.getFamilyIdeas(userId)
+        storage.getFamilyMembers(user.familyId),
+        storage.getCalendarEvents(user.familyId),
+        storage.getGroceryLists(user.familyId),
+        storage.getFamilyIdeas(user.familyId)
       ]);
 
       // Get AI response
@@ -379,8 +510,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/ai/grocery-predictions', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const groceryLists = await storage.getGroceryLists(userId);
-      const familyMembers = await storage.getFamilyMembers(userId);
+      const user = await storage.getUser(userId);
+      
+      if (!user?.familyId) {
+        return res.json([]);
+      }
+      
+      const groceryLists = await storage.getGroceryLists(user.familyId);
+      const familyMembers = await storage.getFamilyMembers(user.familyId);
       
       const predictions = await generateGroceryPredictions(
         groceryLists,
@@ -397,7 +534,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/ai/schedule-conflicts', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const events = await storage.getCalendarEvents(userId);
+      const user = await storage.getUser(userId);
+      
+      if (!user?.familyId) {
+        return res.json([]);
+      }
+      
+      const events = await storage.getCalendarEvents(user.familyId);
       
       const conflicts = await detectScheduleConflicts(events);
       
@@ -405,6 +548,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error detecting schedule conflicts:", error);
       res.status(500).json({ message: "Failed to detect conflicts" });
+    }
+  });
+
+  // Family management routes
+  app.post('/api/family/create', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { name } = req.body;
+      
+      // Check if user already has a family
+      const existingUser = await storage.getUser(userId);
+      if (existingUser?.familyId) {
+        return res.status(400).json({ message: "You're already part of a family" });
+      }
+      
+      const inviteCode = storage.generateInviteCode();
+      const family = await storage.createFamily({
+        name: name || "My Family",
+        inviteCode,
+        createdBy: userId
+      });
+      
+      await storage.joinFamily(userId, family.id);
+      
+      res.json({ family, inviteCode });
+    } catch (error) {
+      console.error("Error creating family:", error);
+      res.status(500).json({ message: "Failed to create family" });
+    }
+  });
+
+  app.post('/api/family/join', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { inviteCode } = req.body;
+      
+      // Check if user already has a family
+      const existingUser = await storage.getUser(userId);
+      if (existingUser?.familyId) {
+        return res.status(400).json({ message: "You're already part of a family" });
+      }
+      
+      const family = await storage.getFamilyByInviteCode(inviteCode);
+      if (!family) {
+        return res.status(404).json({ message: "Invalid invite code" });
+      }
+      
+      await storage.joinFamily(userId, family.id);
+      
+      res.json({ family });
+    } catch (error) {
+      console.error("Error joining family:", error);
+      res.status(500).json({ message: "Failed to join family" });
+    }
+  });
+
+  app.get('/api/family', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user?.familyId) {
+        return res.status(404).json({ message: "No family found" });
+      }
+      
+      const family = await storage.getFamily(user.familyId);
+      const familyMembers = await storage.getFamilyMembers(user.familyId);
+      
+      res.json({ family, members: familyMembers });
+    } catch (error) {
+      console.error("Error fetching family:", error);
+      res.status(500).json({ message: "Failed to fetch family" });
     }
   });
 

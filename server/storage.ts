@@ -1,5 +1,7 @@
 import {
   users,
+  families,
+  familyInvitations,
   familyMembers,
   groceryLists,
   groceryItems,
@@ -11,6 +13,10 @@ import {
   chatMessages,
   type User,
   type UpsertUser,
+  type Family,
+  type InsertFamily,
+  type FamilyInvitation,
+  type InsertFamilyInvitation,
   type FamilyMember,
   type InsertFamilyMember,
   type GroceryList,
@@ -38,37 +44,45 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
 
+  // Family operations
+  createFamily(family: InsertFamily): Promise<Family>;
+  getFamilyByInviteCode(inviteCode: string): Promise<Family | undefined>;
+  joinFamily(userId: string, familyId: string): Promise<User>;
+  generateInviteCode(): string;
+  createFamilyInvitation(invitation: InsertFamilyInvitation): Promise<FamilyInvitation>;
+  getFamilyInvitations(familyId: string): Promise<FamilyInvitation[]>;
+  
   // Family members
-  getFamilyMembers(userId: string): Promise<FamilyMember[]>;
+  getFamilyMembers(familyId: string): Promise<FamilyMember[]>;
   createFamilyMember(member: InsertFamilyMember): Promise<FamilyMember>;
 
   // Grocery lists
-  getGroceryLists(userId: string): Promise<(GroceryList & { items: GroceryItem[] })[]>;
+  getGroceryLists(familyId: string): Promise<(GroceryList & { items: GroceryItem[] })[]>;
   createGroceryList(list: InsertGroceryList): Promise<GroceryList>;
   addGroceryItem(item: InsertGroceryItem): Promise<GroceryItem>;
   updateGroceryItem(id: string, updates: Partial<GroceryItem>): Promise<GroceryItem>;
   deleteGroceryItem(id: string): Promise<void>;
 
   // Calendar events
-  getCalendarEvents(userId: string): Promise<CalendarEvent[]>;
+  getCalendarEvents(familyId: string): Promise<CalendarEvent[]>;
   createCalendarEvent(event: InsertCalendarEvent): Promise<CalendarEvent>;
   updateCalendarEvent(id: string, updates: Partial<CalendarEvent>): Promise<CalendarEvent>;
   deleteCalendarEvent(id: string): Promise<void>;
 
   // Family ideas
-  getFamilyIdeas(userId: string): Promise<(FamilyIdea & { userLiked: boolean })[]>;
+  getFamilyIdeas(familyId: string): Promise<(FamilyIdea & { userLiked: boolean })[]>;
   createFamilyIdea(idea: InsertFamilyIdea): Promise<FamilyIdea>;
   likeIdea(ideaId: string, userId: string): Promise<void>;
   unlikeIdea(ideaId: string, userId: string): Promise<void>;
 
   // Vision board
-  getVisionItems(userId: string): Promise<VisionItem[]>;
+  getVisionItems(familyId: string): Promise<VisionItem[]>;
   createVisionItem(item: InsertVisionItem): Promise<VisionItem>;
   updateVisionItem(id: string, updates: Partial<VisionItem>): Promise<VisionItem>;
   deleteVisionItem(id: string): Promise<void>;
 
   // Wish lists
-  getWishListItems(userId: string): Promise<WishListItem[]>;
+  getWishListItems(familyId: string): Promise<WishListItem[]>;
   createWishListItem(item: InsertWishListItem): Promise<WishListItem>;
   updateWishListItem(id: string, updates: Partial<WishListItem>): Promise<WishListItem>;
   deleteWishListItem(id: string): Promise<void>;
@@ -100,9 +114,42 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  // Family management
+  generateInviteCode(): string {
+    return Math.random().toString(36).substring(2, 8).toUpperCase();
+  }
+
+  async createFamily(familyData: InsertFamily): Promise<Family> {
+    const [family] = await db.insert(families).values(familyData).returning();
+    return family;
+  }
+
+  async getFamilyByInviteCode(inviteCode: string): Promise<Family | undefined> {
+    const [family] = await db.select().from(families).where(eq(families.inviteCode, inviteCode));
+    return family;
+  }
+
+  async joinFamily(userId: string, familyId: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ familyId, updatedAt: new Date() })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  async createFamilyInvitation(invitationData: InsertFamilyInvitation): Promise<FamilyInvitation> {
+    const [invitation] = await db.insert(familyInvitations).values(invitationData).returning();
+    return invitation;
+  }
+
+  async getFamilyInvitations(familyId: string): Promise<FamilyInvitation[]> {
+    return await db.select().from(familyInvitations).where(eq(familyInvitations.familyId, familyId));
+  }
+
   // Family members
-  async getFamilyMembers(userId: string): Promise<FamilyMember[]> {
-    return await db.select().from(familyMembers).where(eq(familyMembers.userId, userId));
+  async getFamilyMembers(familyId: string): Promise<FamilyMember[]> {
+    return await db.select().from(familyMembers).where(eq(familyMembers.familyId, familyId));
   }
 
   async createFamilyMember(member: InsertFamilyMember): Promise<FamilyMember> {
@@ -111,8 +158,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Grocery lists
-  async getGroceryLists(userId: string): Promise<(GroceryList & { items: GroceryItem[] })[]> {
-    const lists = await db.select().from(groceryLists).where(eq(groceryLists.userId, userId));
+  async getGroceryLists(familyId: string): Promise<(GroceryList & { items: GroceryItem[] })[]> {
+    const lists = await db.select().from(groceryLists).where(eq(groceryLists.familyId, familyId));
     
     const listsWithItems = await Promise.all(
       lists.map(async (list) => {
@@ -148,11 +195,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Calendar events
-  async getCalendarEvents(userId: string): Promise<CalendarEvent[]> {
+  async getCalendarEvents(familyId: string): Promise<CalendarEvent[]> {
     return await db
       .select()
       .from(calendarEvents)
-      .where(eq(calendarEvents.userId, userId))
+      .where(eq(calendarEvents.familyId, familyId))
       .orderBy(desc(calendarEvents.startTime));
   }
 
@@ -175,11 +222,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Family ideas
-  async getFamilyIdeas(userId: string): Promise<(FamilyIdea & { userLiked: boolean })[]> {
+  async getFamilyIdeas(familyId: string): Promise<(FamilyIdea & { userLiked: boolean })[]> {
     const ideas = await db
       .select()
       .from(familyIdeas)
-      .where(eq(familyIdeas.userId, userId))
+      .where(eq(familyIdeas.familyId, familyId))
       .orderBy(desc(familyIdeas.likes));
 
     const ideasWithLikes = await Promise.all(
@@ -231,11 +278,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Vision board
-  async getVisionItems(userId: string): Promise<VisionItem[]> {
+  async getVisionItems(familyId: string): Promise<VisionItem[]> {
     return await db
       .select()
       .from(visionItems)
-      .where(eq(visionItems.userId, userId))
+      .where(eq(visionItems.familyId, familyId))
       .orderBy(desc(visionItems.createdAt));
   }
 
@@ -258,11 +305,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Wish lists
-  async getWishListItems(userId: string): Promise<WishListItem[]> {
+  async getWishListItems(familyId: string): Promise<WishListItem[]> {
     return await db
       .select()
       .from(wishListItems)
-      .where(eq(wishListItems.userId, userId))
+      .where(eq(wishListItems.familyId, familyId))
       .orderBy(desc(wishListItems.createdAt));
   }
 

@@ -23,6 +23,27 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
+// Families table - represents a family unit
+export const families = pgTable("families", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  ownerId: varchar("owner_id").notNull(), // The user who created the family
+  inviteCode: varchar("invite_code").unique().notNull(), // 6-character code for joining
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Family invitations table
+export const familyInvitations = pgTable("family_invitations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  familyId: varchar("family_id").references(() => families.id).notNull(),
+  inviterUserId: varchar("inviter_user_id").references(() => users.id).notNull(),
+  inviteeEmail: varchar("invitee_email").notNull(),
+  status: varchar("status").notNull().default("pending"), // 'pending', 'accepted', 'declined'
+  createdAt: timestamp("created_at").defaultNow(),
+  expiresAt: timestamp("expires_at").notNull(),
+});
+
 // User storage table for Replit Auth
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -30,14 +51,17 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
+  familyId: varchar("family_id").references(() => families.id), // User's family
+  role: varchar("role").default("member"), // 'owner', 'admin', 'member'
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Family members table
+// Family members table (represents people in the family, not necessarily users)
 export const familyMembers = pgTable("family_members", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").references(() => users.id).notNull(),
+  familyId: varchar("family_id").references(() => families.id).notNull(),
+  userId: varchar("user_id").references(() => users.id), // null if family member hasn't joined yet
   name: varchar("name").notNull(),
   role: varchar("role").notNull(), // 'parent', 'child'
   color: varchar("color").notNull(), // for calendar and UI theming
@@ -48,7 +72,7 @@ export const familyMembers = pgTable("family_members", {
 // Grocery lists table
 export const groceryLists = pgTable("grocery_lists", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").references(() => users.id).notNull(),
+  familyId: varchar("family_id").references(() => families.id).notNull(),
   store: varchar("store").notNull(),
   storeTip: text("store_tip"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -68,7 +92,7 @@ export const groceryItems = pgTable("grocery_items", {
 // Calendar events table
 export const calendarEvents = pgTable("calendar_events", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").references(() => users.id).notNull(),
+  familyId: varchar("family_id").references(() => families.id).notNull(),
   title: varchar("title").notNull(),
   description: text("description"),
   startTime: timestamp("start_time").notNull(),
@@ -84,7 +108,7 @@ export const calendarEvents = pgTable("calendar_events", {
 // Family ideas table
 export const familyIdeas = pgTable("family_ideas", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").references(() => users.id).notNull(),
+  familyId: varchar("family_id").references(() => families.id).notNull(),
   title: varchar("title").notNull(),
   description: text("description"),
   author: varchar("author").notNull(),
@@ -104,7 +128,7 @@ export const ideaLikes = pgTable("idea_likes", {
 // Vision board items table
 export const visionItems = pgTable("vision_items", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").references(() => users.id).notNull(),
+  familyId: varchar("family_id").references(() => families.id).notNull(),
   title: varchar("title").notNull(),
   description: text("description"),
   author: varchar("author").notNull(),
@@ -118,7 +142,7 @@ export const visionItems = pgTable("vision_items", {
 // Wish list items table
 export const wishListItems = pgTable("wish_list_items", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").references(() => users.id).notNull(),
+  familyId: varchar("family_id").references(() => families.id).notNull(),
   item: varchar("item").notNull(),
   description: text("description"),
   price: varchar("price"),
@@ -146,6 +170,13 @@ export const chatMessages = pgTable("chat_messages", {
 // Type definitions
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
+
+// Family types
+export type Family = typeof families.$inferSelect;
+export type InsertFamily = typeof families.$inferInsert;
+
+export type FamilyInvitation = typeof familyInvitations.$inferSelect;
+export type InsertFamilyInvitation = typeof familyInvitations.$inferInsert;
 
 export type InsertFamilyMember = typeof familyMembers.$inferInsert;
 export type FamilyMember = typeof familyMembers.$inferSelect;

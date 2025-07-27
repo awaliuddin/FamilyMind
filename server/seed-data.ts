@@ -1,47 +1,69 @@
-import { db } from "./db";
-import { 
-  groceryLists, 
-  groceryItems, 
-  calendarEvents, 
-  familyIdeas, 
-  visionItems, 
-  wishListItems 
-} from "@shared/schema";
+import { storage } from "./storage";
+
+// Import everything needed for seeding
 
 export async function seedSampleData(userId: string) {
   console.log("Seeding sample data for user:", userId);
 
-  // Create grocery lists
-  const walmartList = await db.insert(groceryLists).values({
-    userId,
+  // Get user and ensure they have a family
+  const user = await storage.getUser(userId);
+  let familyId = user?.familyId;
+  
+  if (!familyId) {
+    // Create a family for the user
+    const inviteCode = storage.generateInviteCode();
+    const family = await storage.createFamily({
+      name: "My Family",
+      inviteCode,
+      createdBy: userId
+    });
+    
+    await storage.joinFamily(userId, family.id);
+    familyId = family.id;
+  }
+
+  // Check if family already has data
+  const existingMembers = await storage.getFamilyMembers(familyId);
+  if (existingMembers.length > 0) {
+    console.log("Family already has sample data");
+    return;
+  }
+
+  // Create grocery lists using storage interface
+  const walmartList = await storage.createGroceryList({
+    familyId,
     store: "Walmart",
     storeTip: "Good prices for frozen foods and bulk items"
-  }).returning();
+  });
 
-  const costcoList = await db.insert(groceryLists).values({
-    userId,
+  const costcoList = await storage.createGroceryList({
+    familyId,
     store: "Costco",
     storeTip: "Bulk buys for supplements and staples like paper towels"
-  }).returning();
+  });
 
-  const marianosList = await db.insert(groceryLists).values({
-    userId,
+  const marianosList = await storage.createGroceryList({
+    familyId,
     store: "Marianos",
     storeTip: "Best for fresh produce and premade meals"
-  }).returning();
+  });
 
-  // Add grocery items
-  await db.insert(groceryItems).values([
-    { listId: walmartList[0].id, name: "Frozen vegetables", completed: false },
-    { listId: walmartList[0].id, name: "Ice cream", completed: false },
-    { listId: walmartList[0].id, name: "Bread", completed: true },
-    { listId: costcoList[0].id, name: "Paper towels (bulk)", completed: false },
-    { listId: costcoList[0].id, name: "Vitamins", completed: false },
-    { listId: costcoList[0].id, name: "Protein powder", completed: false },
-    { listId: marianosList[0].id, name: "Fresh strawberries", completed: false },
-    { listId: marianosList[0].id, name: "Salad mix", completed: true },
-    { listId: marianosList[0].id, name: "Rotisserie chicken", completed: false }
-  ]);
+  // Add grocery items using storage interface
+  const groceryItems = [
+    { listId: walmartList.id, name: "Frozen vegetables", completed: false },
+    { listId: walmartList.id, name: "Ice cream", completed: false },
+    { listId: walmartList.id, name: "Bread", completed: true },
+    { listId: costcoList.id, name: "Paper towels (bulk)", completed: false },
+    { listId: costcoList.id, name: "Vitamins", completed: false },
+    { listId: costcoList.id, name: "Protein powder", completed: false },
+    { listId: marianosList.id, name: "Fresh strawberries", completed: false },
+    { listId: marianosList.id, name: "Salad mix", completed: true },
+    { listId: marianosList.id, name: "Rotisserie chicken", completed: false }
+  ];
+
+  for (const item of groceryItems) {
+    await storage.addGroceryItem(item);
+  }
 
   // Create calendar events
   const today = new Date();
@@ -50,63 +72,68 @@ export async function seedSampleData(userId: string) {
   const dayAfter = new Date(today);
   dayAfter.setDate(today.getDate() + 2);
 
-  await db.insert(calendarEvents).values([
+  // Create calendar events using storage interface
+  const calendarEventsData = [
     {
-      userId,
+      familyId,
       title: "Mom - Work Meeting",
       description: "Quarterly review with team",
       startTime: new Date(tomorrow.setHours(9, 0, 0, 0)),
       endTime: new Date(tomorrow.setHours(10, 0, 0, 0)),
-      eventType: "work",
+      eventType: "work" as const,
       attendees: ["Mom"],
       location: "Office"
     },
     {
-      userId,
+      familyId,
       title: "Church Service",
       description: "Sunday morning service",
       startTime: new Date(today.setHours(10, 0, 0, 0)),
       endTime: new Date(today.setHours(11, 30, 0, 0)),
-      eventType: "family",
+      eventType: "family" as const,
       attendees: ["Family"],
       location: "St. Mary's Church"
     },
     {
-      userId,
+      familyId,
       title: "Sarah - Soccer Practice",
       description: "Weekly soccer practice",
       startTime: new Date(tomorrow.setHours(18, 0, 0, 0)),
       endTime: new Date(tomorrow.setHours(19, 30, 0, 0)),
-      eventType: "sports",
+      eventType: "sports" as const,
       attendees: ["Sarah"],
       location: "Community Park"
     },
     {
-      userId,
+      familyId,
       title: "Asif - Client Call",
       description: "Project review call",
       startTime: new Date(dayAfter.setHours(14, 0, 0, 0)),
       endTime: new Date(dayAfter.setHours(15, 0, 0, 0)),
-      eventType: "work",
+      eventType: "work" as const,
       attendees: ["Asif"],
       location: "Home Office"
     },
     {
-      userId,
+      familyId,
       title: "Volunteering at Food Bank",
       description: "Monthly family volunteer activity",
       startTime: new Date(dayAfter.setHours(11, 0, 0, 0)),
       endTime: new Date(dayAfter.setHours(13, 0, 0, 0)),
-      eventType: "volunteer",
+      eventType: "volunteer" as const,
       attendees: ["Family"],
       location: "Downtown Food Bank"
     }
-  ]);
+  ];
 
-  // Create family ideas
-  await db.insert(familyIdeas).values([
+  for (const eventData of calendarEventsData) {
+    await storage.createCalendarEvent(eventData);
+  }
+
+  // Create family ideas using storage interface
+  const familyIdeasData = [
     {
-      userId,
+      familyId,
       title: "Family camping trip to Starved Rock",
       description: "Weekend camping with hiking and s'mores",
       author: "Asif",
@@ -114,7 +141,7 @@ export async function seedSampleData(userId: string) {
       tags: ["outdoor", "weekend", "adventure"]
     },
     {
-      userId,
+      familyId,
       title: "Visit the Chicago Zoo",
       description: "Educational family day out",
       author: "Sarah",
@@ -122,7 +149,7 @@ export async function seedSampleData(userId: string) {
       tags: ["educational", "animals", "day-trip"]
     },
     {
-      userId,
+      familyId,
       title: "Family game night every Friday",
       description: "Weekly board game and pizza night",
       author: "Mom",
@@ -130,19 +157,23 @@ export async function seedSampleData(userId: string) {
       tags: ["weekly", "games", "family-time"]
     },
     {
-      userId,
+      familyId,
       title: "Learn to cook pizza together",
       description: "Make homemade pizza from scratch",
       author: "Tommy",
       likes: 1,
       tags: ["cooking", "learning", "food"]
     }
-  ]);
+  ];
 
-  // Create vision items
-  await db.insert(visionItems).values([
+  for (const ideaData of familyIdeasData) {
+    await storage.createFamilyIdea(ideaData);
+  }
+
+  // Create vision items using storage interface
+  const visionItemsData = [
     {
-      userId,
+      familyId,
       title: "Travel to Europe as a family",
       description: "Visit Italy, France, and Spain together",
       author: "Mom",
@@ -151,7 +182,7 @@ export async function seedSampleData(userId: string) {
       progress: 25
     },
     {
-      userId,
+      familyId,
       title: "Build a treehouse in backyard",
       description: "A special place for kids to play and read",
       author: "Kids",
@@ -160,7 +191,7 @@ export async function seedSampleData(userId: string) {
       progress: 10
     },
     {
-      userId,
+      familyId,
       title: "Start a family garden",
       description: "Grow vegetables and herbs together",
       author: "Asif",
@@ -169,7 +200,7 @@ export async function seedSampleData(userId: string) {
       progress: 40
     },
     {
-      userId,
+      familyId,
       title: "Learn Spanish together",
       description: "Family language learning adventure",
       author: "Sarah",
@@ -177,12 +208,16 @@ export async function seedSampleData(userId: string) {
       targetDate: "Ongoing",
       progress: 60
     }
-  ]);
+  ];
 
-  // Create wish list items
-  await db.insert(wishListItems).values([
+  for (const visionData of visionItemsData) {
+    await storage.createVisionItem(visionData);
+  }
+
+  // Create wish list items using storage interface
+  const wishListItemsData = [
     {
-      userId,
+      familyId,
       item: "Nintendo Switch OLED",
       description: "Latest gaming console",
       store: "Amazon",
@@ -192,7 +227,7 @@ export async function seedSampleData(userId: string) {
       priority: 3
     },
     {
-      userId,
+      familyId,
       item: "Stand Mixer",
       description: "KitchenAid professional mixer",
       store: "Target",
@@ -202,7 +237,7 @@ export async function seedSampleData(userId: string) {
       priority: 2
     },
     {
-      userId,
+      familyId,
       item: "Wireless Headphones",
       description: "Noise-canceling headphones for studying",
       store: "Best Buy",
@@ -212,7 +247,7 @@ export async function seedSampleData(userId: string) {
       priority: 2
     },
     {
-      userId,
+      familyId,
       item: "Coffee Machine",
       description: "Automatic espresso maker",
       store: "Amazon",
@@ -221,7 +256,51 @@ export async function seedSampleData(userId: string) {
       occasion: "Christmas",
       priority: 1
     }
-  ]);
+  ];
 
-  console.log("Sample data seeded successfully!");
+  for (const wishListData of wishListItemsData) {
+    await storage.createWishListItem(wishListData);
+  }
+
+  // Create sample family members
+  const familyMembersData = [
+    {
+      familyId,
+      name: "Mom",
+      role: "Parent",
+      color: "pink",
+      birthday: "1985-03-15",
+      interests: ["cooking", "reading", "gardening"]
+    },
+    {
+      familyId,
+      name: "Asif",
+      role: "Parent",
+      color: "blue",
+      birthday: "1983-07-22",
+      interests: ["technology", "hiking", "photography"]
+    },
+    {
+      familyId,
+      name: "Sarah",
+      role: "Teen",
+      color: "purple",
+      birthday: "2008-11-10",
+      interests: ["soccer", "music", "art"]
+    },
+    {
+      familyId,
+      name: "Tommy",
+      role: "Kid",
+      color: "green",
+      birthday: "2012-05-03",
+      interests: ["video games", "legos", "dinosaurs"]
+    }
+  ];
+
+  for (const memberData of familyMembersData) {
+    await storage.createFamilyMember(memberData);
+  }
+
+  console.log("Sample data seeded successfully with family structure!");
 }

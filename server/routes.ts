@@ -206,8 +206,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Must be part of a family to create calendar events" });
       }
       
-      const eventData = insertCalendarEventSchema.parse({ ...req.body, familyId: user.familyId });
-      const event = await storage.createCalendarEvent(eventData);
+      // Convert datetime strings to Date objects
+      const eventData = {
+        ...req.body,
+        familyId: user.familyId,
+        startTime: new Date(req.body.startTime),
+        endTime: new Date(req.body.endTime)
+      };
+      
+      const validatedData = insertCalendarEventSchema.parse(eventData);
+      const event = await storage.createCalendarEvent(validatedData);
       res.json(event);
     } catch (error) {
       console.error("Error creating calendar event:", error);

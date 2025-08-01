@@ -51,6 +51,8 @@ export default function FamilyCommandCenter() {
   const [newItemInputs, setNewItemInputs] = useState<Record<string, string>>({});
   const [editingItem, setEditingItem] = useState<{ type: string; id: string; data: any } | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [drillDownOpen, setDrillDownOpen] = useState(false);
+  const [drillDownData, setDrillDownData] = useState<{ type: string; title: string; items: any[] } | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -366,6 +368,11 @@ export default function FamilyCommandCenter() {
     }));
   };
 
+  const handleDrillDown = (type: string, title: string, items: any[]) => {
+    setDrillDownData({ type, title, items });
+    setDrillDownOpen(true);
+  };
+
   const getColorClasses = (color: string) => {
     const colorMap: Record<string, string> = {
       pink: 'from-pink-100 to-pink-200 border-pink-300 text-pink-800',
@@ -472,7 +479,10 @@ export default function FamilyCommandCenter() {
 
               {/* Quick Stats */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+                <Card 
+                  className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 cursor-pointer hover:shadow-lg transition-shadow"
+                  onClick={() => handleDrillDown('calendar', 'Family Events', calendarEvents)}
+                >
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div>
@@ -485,7 +495,10 @@ export default function FamilyCommandCenter() {
                   </CardContent>
                 </Card>
                 
-                <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+                <Card 
+                  className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 cursor-pointer hover:shadow-lg transition-shadow"
+                  onClick={() => handleDrillDown('grocery', 'Grocery Lists', groceryLists)}
+                >
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div>
@@ -500,7 +513,10 @@ export default function FamilyCommandCenter() {
                   </CardContent>
                 </Card>
                 
-                <Card className="bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200">
+                <Card 
+                  className="bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200 cursor-pointer hover:shadow-lg transition-shadow"
+                  onClick={() => handleDrillDown('ideas', 'Family Ideas', familyIdeas)}
+                >
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div>
@@ -513,7 +529,10 @@ export default function FamilyCommandCenter() {
                   </CardContent>
                 </Card>
                 
-                <Card className="bg-gradient-to-br from-pink-50 to-pink-100 border-pink-200">
+                <Card 
+                  className="bg-gradient-to-br from-pink-50 to-pink-100 border-pink-200 cursor-pointer hover:shadow-lg transition-shadow"
+                  onClick={() => handleDrillDown('vision', 'Vision Board', visionItems)}
+                >
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div>
@@ -1505,6 +1524,189 @@ export default function FamilyCommandCenter() {
                     Save Changes
                   </Button>
                 </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Drill-down Dialog */}
+        <Dialog open={drillDownOpen} onOpenChange={setDrillDownOpen}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-bold">
+                {drillDownData?.title}
+              </DialogTitle>
+            </DialogHeader>
+            
+            {drillDownData && (
+              <div className="space-y-4">
+                {drillDownData.type === 'calendar' && drillDownData.items.length > 0 && (
+                  <div className="space-y-3">
+                    {drillDownData.items.map((event: any) => (
+                      <div key={event.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-3 h-3 bg-blue-600 rounded-full"></div>
+                          <div>
+                            <p className="font-medium text-gray-800">{event.title}</p>
+                            <p className="text-sm text-gray-600">{formatDate(event.startTime)}</p>
+                            {event.location && <p className="text-sm text-gray-500">📍 {event.location}</p>}
+                          </div>
+                        </div>
+                        <div className="flex space-x-2">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleEditItem('calendar', event.id, event)}
+                          >
+                            <Edit3 className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => deleteCalendarEventMutation.mutate(event.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {drillDownData.type === 'grocery' && drillDownData.items.length > 0 && (
+                  <div className="space-y-4">
+                    {drillDownData.items.map((list: any) => (
+                      <div key={list.id} className="p-4 bg-gray-50 rounded-lg border">
+                        <div className="flex items-center justify-between mb-3">
+                          <h3 className="font-medium text-gray-800">🏪 {list.store}</h3>
+                          <div className="flex space-x-2">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleEditItem('groceryList', list.id, list)}
+                            >
+                              <Edit3 className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => deleteGroceryListMutation.mutate(list.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        {list.storeTip && (
+                          <p className="text-sm text-gray-600 mb-2">💡 {list.storeTip}</p>
+                        )}
+                        <div className="space-y-2">
+                          {list.items.map((item: any) => (
+                            <div key={item.id} className="flex items-center justify-between">
+                              <div className="flex items-center space-x-2">
+                                <input
+                                  type="checkbox"
+                                  checked={item.completed}
+                                  onChange={() => updateGroceryItemMutation.mutate({ 
+                                    id: item.id, 
+                                    data: { completed: !item.completed } 
+                                  })}
+                                  className="rounded"
+                                />
+                                <span className={item.completed ? 'line-through text-gray-500' : ''}>{item.name}</span>
+                                {item.autoAdded && <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">AI</span>}
+                              </div>
+                              <div className="flex space-x-1">
+                                <Button 
+                                  size="sm" 
+                                  variant="ghost"
+                                  onClick={() => handleEditItem('grocery', item.id, item)}
+                                >
+                                  <Edit3 className="h-3 w-3" />
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="ghost"
+                                  onClick={() => deleteGroceryItemMutation.mutate(item.id)}
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {drillDownData.type === 'ideas' && drillDownData.items.length > 0 && (
+                  <div className="space-y-3">
+                    {drillDownData.items.map((idea: any) => (
+                      <div key={idea.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border">
+                        <div>
+                          <p className="font-medium text-gray-800">{idea.title}</p>
+                          <p className="text-sm text-gray-600">{idea.description}</p>
+                          <p className="text-xs text-gray-500">by {idea.author} • {idea.likes} likes</p>
+                        </div>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => likeIdeaMutation.mutate(idea.id)}
+                        >
+                          ❤️ {idea.likes}
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {drillDownData.type === 'vision' && drillDownData.items.length > 0 && (
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {drillDownData.items.map((item: any) => (
+                      <div key={item.id} className={`p-4 rounded-lg border bg-gradient-to-br ${getColorClasses(item.color)}`}>
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 className="font-medium">{item.title}</h3>
+                          <div className="flex space-x-1">
+                            <Button 
+                              size="sm" 
+                              variant="ghost"
+                              onClick={() => handleEditItem('vision', item.id, item)}
+                            >
+                              <Edit3 className="h-3 w-3" />
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="ghost"
+                              onClick={() => deleteVisionItemMutation.mutate(item.id)}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                        <p className="text-sm opacity-80 mb-2">{item.description}</p>
+                        <div className="flex items-center justify-between text-xs">
+                          <span>by {item.author}</span>
+                          {item.targetDate && <span>{item.targetDate}</span>}
+                        </div>
+                        <div className="mt-2">
+                          <div className="bg-white/30 rounded-full h-2">
+                            <div 
+                              className="bg-white/60 h-2 rounded-full transition-all duration-300"
+                              style={{ width: `${item.progress}%` }}
+                            ></div>
+                          </div>
+                          <p className="text-xs mt-1">{item.progress}% complete</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {drillDownData.items.length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    <p>No items yet. Start adding some!</p>
+                  </div>
+                )}
               </div>
             )}
           </DialogContent>

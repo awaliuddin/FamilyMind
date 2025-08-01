@@ -178,7 +178,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch('/api/grocery-items/:id', isAuthenticated, async (req, res) => {
     try {
       const { id } = req.params;
-      const item = await storage.updateGroceryItem(id, req.body);
+      // Filter out auto-generated fields that shouldn't be manually updated
+      const { id: _id, listId: _listId, createdAt, updatedAt, ...cleanData } = req.body;
+      const item = await storage.updateGroceryItem(id, cleanData);
       res.json(item);
     } catch (error) {
       console.error("Error updating grocery item:", error);

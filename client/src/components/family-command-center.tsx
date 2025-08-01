@@ -1533,49 +1533,84 @@ export default function FamilyCommandCenter() {
         <Dialog open={drillDownOpen} onOpenChange={setDrillDownOpen}>
           <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle className="text-xl font-bold">
-                {drillDownData?.title}
-              </DialogTitle>
+              <div className="flex items-center justify-between">
+                <DialogTitle className="text-xl font-bold">
+                  {drillDownData?.title}
+                </DialogTitle>
+                {drillDownData && (
+                  <Button
+                    size="sm"
+                    className="bg-blue-600 hover:bg-blue-700"
+                    onClick={() => {
+                      setDrillDownOpen(false);
+                      setActiveTab(drillDownData.type === 'calendar' ? 'calendar' : 
+                                   drillDownData.type === 'grocery' ? 'grocery' :
+                                   drillDownData.type === 'ideas' ? 'ideas' : 'vision');
+                    }}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add New
+                  </Button>
+                )}
+              </div>
             </DialogHeader>
             
             {drillDownData && (
               <div className="space-y-4">
-                {drillDownData.type === 'calendar' && drillDownData.items.length > 0 && (
+                {drillDownData.type === 'calendar' && (
                   <div className="space-y-3">
-                    {drillDownData.items.map((event: any) => (
-                      <div key={event.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-3 h-3 bg-blue-600 rounded-full"></div>
-                          <div>
-                            <p className="font-medium text-gray-800">{event.title}</p>
-                            <p className="text-sm text-gray-600">{formatDate(event.startTime)}</p>
-                            {event.location && <p className="text-sm text-gray-500">📍 {event.location}</p>}
+                    {drillDownData.items.length > 0 ? (
+                      drillDownData.items.map((event: any) => (
+                        <div key={event.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-3 h-3 bg-blue-600 rounded-full"></div>
+                            <div>
+                              <p className="font-medium text-gray-800">{event.title}</p>
+                              <p className="text-sm text-gray-600">{formatDate(event.startTime)}</p>
+                              {event.location && <p className="text-sm text-gray-500">📍 {event.location}</p>}
+                            </div>
+                          </div>
+                          <div className="flex space-x-2">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleEditItem('calendar', event.id, event)}
+                            >
+                              <Edit3 className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => deleteCalendarEventMutation.mutate(event.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           </div>
                         </div>
-                        <div className="flex space-x-2">
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => handleEditItem('calendar', event.id, event)}
-                          >
-                            <Edit3 className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => deleteCalendarEventMutation.mutate(event.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
+                        <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                        <p className="mb-4">No events scheduled yet</p>
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            setDrillDownOpen(false);
+                            setActiveTab('calendar');
+                          }}
+                          className="bg-blue-600 hover:bg-blue-700"
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add First Event
+                        </Button>
                       </div>
-                    ))}
+                    )}
                   </div>
                 )}
 
-                {drillDownData.type === 'grocery' && drillDownData.items.length > 0 && (
+                {drillDownData.type === 'grocery' && (
                   <div className="space-y-4">
-                    {drillDownData.items.map((list: any) => (
+                    {drillDownData.items.length > 0 ? drillDownData.items.map((list: any) => (
                       <div key={list.id} className="p-4 bg-gray-50 rounded-lg border">
                         <div className="flex items-center justify-between mb-3">
                           <h3 className="font-medium text-gray-800">🏪 {list.store}</h3>
@@ -1635,13 +1670,29 @@ export default function FamilyCommandCenter() {
                           ))}
                         </div>
                       </div>
-                    ))}
+                    )) : (
+                      <div className="text-center py-8 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
+                        <ShoppingCart className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                        <p className="mb-4">No grocery lists yet</p>
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            setDrillDownOpen(false);
+                            setActiveTab('grocery');
+                          }}
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add First Grocery List
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 )}
 
-                {drillDownData.type === 'ideas' && drillDownData.items.length > 0 && (
+                {drillDownData.type === 'ideas' && (
                   <div className="space-y-3">
-                    {drillDownData.items.map((idea: any) => (
+                    {drillDownData.items.length > 0 ? drillDownData.items.map((idea: any) => (
                       <div key={idea.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border">
                         <div>
                           <p className="font-medium text-gray-800">{idea.title}</p>
@@ -1656,13 +1707,29 @@ export default function FamilyCommandCenter() {
                           ❤️ {idea.likes}
                         </Button>
                       </div>
-                    ))}
+                    )) : (
+                      <div className="text-center py-8 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
+                        <Lightbulb className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                        <p className="mb-4">No family ideas yet</p>
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            setDrillDownOpen(false);
+                            setActiveTab('ideas');
+                          }}
+                          className="bg-amber-600 hover:bg-amber-700"
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add First Idea
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 )}
 
-                {drillDownData.type === 'vision' && drillDownData.items.length > 0 && (
+                {drillDownData.type === 'vision' && (
                   <div className="grid gap-4 md:grid-cols-2">
-                    {drillDownData.items.map((item: any) => (
+                    {drillDownData.items.length > 0 ? drillDownData.items.map((item: any) => (
                       <div key={item.id} className={`p-4 rounded-lg border bg-gradient-to-br ${getColorClasses(item.color)}`}>
                         <div className="flex items-start justify-between mb-2">
                           <h3 className="font-medium">{item.title}</h3>
@@ -1698,13 +1765,23 @@ export default function FamilyCommandCenter() {
                           <p className="text-xs mt-1">{item.progress}% complete</p>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
-
-                {drillDownData.items.length === 0 && (
-                  <div className="text-center py-8 text-gray-500">
-                    <p>No items yet. Start adding some!</p>
+                    )) : (
+                      <div className="text-center py-8 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
+                        <Heart className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                        <p className="mb-4">No vision items yet</p>
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            setDrillDownOpen(false);
+                            setActiveTab('vision');
+                          }}
+                          className="bg-pink-600 hover:bg-pink-700"
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add First Dream
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

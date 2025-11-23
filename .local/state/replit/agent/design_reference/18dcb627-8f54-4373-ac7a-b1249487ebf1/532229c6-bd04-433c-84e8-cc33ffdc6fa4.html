@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FamilyMind - AI-Powered Family Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif']
+                    },
+                    colors: {
+                        'family-blue': '#3B82F6',
+                        'family-amber': '#F59E0B',
+                        'family-pink': '#EC4899',
+                        'family-green': '#10B981'
+                    }
+                }
+            }
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .family-card {
+            transition: all 0.3s ease;
+        }
+        .family-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .ai-chat-bubble {
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .like-animation {
+            animation: heartBeat 0.6s ease;
+        }
+        @keyframes heartBeat {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="font-inter bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
+    <!-- @COMPONENT: MainLayout -->
+    <div class="min-h-screen">
+        <!-- Header -->
+        <!-- @COMPONENT: Header -->
+        <header class="bg-white/90 backdrop-blur-sm shadow-lg sticky top-0 z-50 border-b border-gray-200">
+            <div class="container mx-auto px-4 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-family-blue to-purple-600 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-home text-white text-lg"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-800">FamilyMind</h1>
+                            <p class="text-sm text-gray-600">AI-Powered Family Assistant</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Family Member Profiles -->
+                    <div class="flex items-center space-x-2">
+                        <!-- Sarah's avatar with green circle representing her healthy meals goal -->
+                        <div class="relative">
+                            <img src="https://pixabay.com/get/gd85900f17dace7f668662a36fa1c401584b8f577d1b22361d51662a58d98153bf987915462dc0cd89bd53c55db0b1445666e3e033908caf701c0f134b83aabf4_1280.jpg" alt="Sarah - Mom" class="w-10 h-10 rounded-full border-2 border-family-pink object-cover" data-mock="true">
+                            <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+                        </div>
+                        <!-- Mike's avatar with blue circle for work productivity -->
+                        <div class="relative">
+                            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150" alt="Mike - Dad" class="w-10 h-10 rounded-full border-2 border-family-blue object-cover" data-mock="true">
+                            <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-family-blue rounded-full border-2 border-white"></div>
+                        </div>
+                        <!-- Tommy's avatar with yellow circle for school activities -->
+                        <div class="relative">
+                            <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150" alt="Tommy - Son" class="w-8 h-8 rounded-full border-2 border-family-amber object-cover" data-mock="true">
+                            <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-family-amber rounded-full border-2 border-white"></div>
+                        </div>
+                        <!-- Emma's avatar with pink circle for creative activities -->
+                        <div class="relative">
+                            <img src="https://images.unsplash.com/photo-1547036967-23d11aacaee0?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150" alt="Emma - Daughter" class="w-8 h-8 rounded-full border-2 border-family-pink object-cover" data-mock="true">
+                            <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-family-pink rounded-full border-2 border-white"></div>
+                        </div>
+                        
+                        <!-- AI Assistant Toggle -->
+                        <button onclick="toggleAIChat()" class="ml-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-full text-sm font-medium hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-lg">
+                            <i class="fas fa-robot mr-2"></i>Ask AI
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <!-- @END_COMPONENT: Header -->
+
+        <!-- Main Content -->
+        <div class="container mx-auto px-4 py-6">
+            <!-- AI Chat Interface (Hidden by default) -->
+            <!-- @COMPONENT: AIChat -->
+            <div id="ai-chat" class="hidden mb-6">
+                <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                                <i class="fas fa-robot text-white text-sm"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-800">FamilyMind AI Assistant</h3>
+                        </div>
+                        <button onclick="toggleAIChat()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Chat Messages -->
+                    <div id="chat-messages" class="space-y-4 mb-4 max-h-64 overflow-y-auto">
+                        <div class="ai-chat-bubble bg-gray-100 rounded-lg p-3 max-w-sm">
+                            <p class="text-sm text-gray-700" data-mock="true">Hi! I'm your family assistant. I can help with scheduling, grocery planning, and family coordination. What would you like to know?</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Chat Input -->
+                    <div class="flex space-x-2">
+                        <input 
+                            type="text" 
+                            id="chat-input"
+                            placeholder="Ask me about your family schedule, groceries, or ideas..."
+                            class="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            onkeypress="handleChatKeyPress(event)"
+                        >
+                        <button onclick="sendMessage()" class="bg-purple-500 text-white px-6 py-2 rounded-full hover:bg-purple-600 transition-colors">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- @END_COMPONENT: AIChat -->
+
+            <!-- Navigation Tabs -->
+            <!-- @COMPONENT: NavigationTabs -->
+            <div class="bg-white rounded-2xl shadow-lg mb-6 overflow-hidden">
+                <div class="flex flex-wrap">
+                    <button onclick="setActiveTab('dashboard')" class="nav-tab flex-1 min-w-0 px-4 py-4 flex items-center justify-center gap-2 text-sm font-medium transition-all duration-200 bg-family-blue text-white">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span class="hidden sm:inline">Dashboard</span>
+                    </button>
+                    <button onclick="setActiveTab('grocery')" class="nav-tab flex-1 min-w-0 px-4 py-4 flex items-center justify-center gap-2 text-sm font-medium transition-all duration-200 text-gray-600 hover:bg-gray-50">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="hidden sm:inline">Grocery</span>
+                    </button>
+                    <button onclick="setActiveTab('calendar')" class="nav-tab flex-1 min-w-0 px-4 py-4 flex items-center justify-center gap-2 text-sm font-medium transition-all duration-200 text-gray-600 hover:bg-gray-50">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span class="hidden sm:inline">Calendar</span>
+                    </button>
+                    <button onclick="setActiveTab('ideas')" class="nav-tab flex-1 min-w-0 px-4 py-4 flex items-center justify-center gap-2 text-sm font-medium transition-all duration-200 text-gray-600 hover:bg-gray-50">
+                        <i class="fas fa-lightbulb"></i>
+                        <span class="hidden sm:inline">Ideas</span>
+                    </button>
+                    <button onclick="setActiveTab('vision')" class="nav-tab flex-1 min-w-0 px-4 py-4 flex items-center justify-center gap-2 text-sm font-medium transition-all duration-200 text-gray-600 hover:bg-gray-50">
+                        <i class="fas fa-heart"></i>
+                        <span class="hidden sm:inline">Vision</span>
+                    </button>
+                    <button onclick="setActiveTab('wishlist')" class="nav-tab flex-1 min-w-0 px-4 py-4 flex items-center justify-center gap-2 text-sm font-medium transition-all duration-200 text-gray-600 hover:bg-gray-50">
+                        <i class="fas fa-gift"></i>
+                        <span class="hidden sm:inline">Wishlist</span>
+                    </button>
+                </div>
+            </div>
+            <!-- @END_COMPONENT: NavigationTabs -->
+
+            <!-- Content Area -->
+            <div class="bg-white rounded-2xl shadow-lg p-6">
+                
+                <!-- Dashboard Tab -->
+                <!-- @COMPONENT: DashboardTab -->
+                <div id="dashboard-content" class="tab-content">
+                    <div class="mb-6">
+                        <h2 class="text-3xl font-bold text-gray-800 mb-2">Family Dashboard</h2>
+                        <p class="text-gray-600">Your family's intelligent command center</p>
+                    </div>
+
+                    <!-- AI Insights Banner -->
+                    <div class="bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl p-4 mb-6 border border-purple-200">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                <i class="fas fa-brain text-white text-sm"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-purple-800 mb-1">Today's AI Insights</h3>
+                                <p class="text-purple-700 text-sm" data-mock="true">Tommy's soccer practice ends at 6 PM today. I've adjusted dinner to 7 PM and ordered his favorite post-practice snack. Also, you're running low on milk - should I add it to tomorrow's grocery order?</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                        <div class="family-card bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-xl border border-blue-200">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-blue-600 text-sm font-medium">This Week</p>
+                                    <p class="text-2xl font-bold text-blue-800" data-mock="true">12</p>
+                                    <p class="text-blue-600 text-xs">Family Events</p>
+                                </div>
+                                <i class="fas fa-calendar-check text-blue-500 text-2xl"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="family-card bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-xl border border-green-200">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-green-600 text-sm font-medium">Grocery Items</p>
+                                    <p class="text-2xl font-bold text-green-800" data-mock="true">23</p>
+                                    <p class="text-green-600 text-xs">Auto-managed</p>
+                                </div>
+                                <i class="fas fa-shopping-basket text-green-500 text-2xl"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="family-card bg-gradient-to-br from-amber-50 to-amber-100 p-4 rounded-xl border border-amber-200">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-amber-600 text-sm font-medium">Active Ideas</p>
+                                    <p class="text-2xl font-bold text-amber-800" data-mock="true">8</p>
+                                    <p class="text-amber-600 text-xs">Family voted</p>
+                                </div>
+                                <i class="fas fa-lightbulb text-amber-500 text-2xl"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="family-card bg-gradient-to-br from-pink-50 to-pink-100 p-4 rounded-xl border border-pink-200">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-pink-600 text-sm font-medium">Goals Progress</p>
+                                    <p class="text-2xl font-bold text-pink-800" data-mock="true">75%</p>
+                                    <p class="text-pink-600 text-xs">Vision board</p>
+                                </div>
+                                <i class="fas fa-chart-line text-pink-500 text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Today's Highlights -->
+                    <div class="grid lg:grid-cols-2 gap-6">
+                        <div class="family-card bg-gray-50 rounded-xl p-6 border border-gray-200">
+                            <h3 class="font-bold text-lg mb-4 text-gray-800 flex items-center">
+                                <i class="fas fa-clock text-family-blue mr-2"></i>
+                                Today's Schedule
+                            </h3>
+                            <div class="space-y-3">
+                                <!-- @MAP: todayEvents.map(event => ( -->
+                                <div class="flex items-center space-x-3 p-3 bg-white rounded-lg border border-gray-100" data-mock="true">
+                                    <div class="w-3 h-3 bg-family-blue rounded-full"></div>
+                                    <div class="flex-1">
+                                        <p class="font-medium text-gray-800">Tommy - Soccer Practice</p>
+                                        <p class="text-sm text-gray-600">4:00 PM - 6:00 PM</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center space-x-3 p-3 bg-white rounded-lg border border-gray-100" data-mock="true">
+                                    <div class="w-3 h-3 bg-family-pink rounded-full"></div>
+                                    <div class="flex-1">
+                                        <p class="font-medium text-gray-800">Sarah - Work Meeting</p>
+                                        <p class="text-sm text-gray-600">2:00 PM - 3:30 PM</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center space-x-3 p-3 bg-white rounded-lg border border-gray-100" data-mock="true">
+                                    <div class="w-3 h-3 bg-family-green rounded-full"></div>
+                                    <div class="flex-1">
+                                        <p class="font-medium text-gray-800">Family - Dinner Together</p>
+                                        <p class="text-sm text-gray-600">7:00 PM - 8:00 PM</p>
+                                    </div>
+                                </div>
+                                <!-- @END_MAP )) -->
+                            </div>
+                        </div>
+
+                        <div class="family-card bg-gray-50 rounded-xl p-6 border border-gray-200">
+                            <h3 class="font-bold text-lg mb-4 text-gray-800 flex items-center">
+                                <i class="fas fa-star text-family-amber mr-2"></i>
+                                Top Family Ideas
+                            </h3>
+                            <div class="space-y-3">
+                                <!-- @MAP: topIdeas.map(idea => ( -->
+                                <div class="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100" data-mock="true">
+                                    <div class="flex-1">
+                                        <p class="font-medium text-gray-800">Weekend camping trip to Starved Rock</p>
+                                        <p class="text-sm text-gray-600">by Mike</p>
+                                    </div>
+                                    <div class="flex items-center space-x-1 text-red-500">
+                                        <i class="fas fa-heart text-sm"></i>
+                                        <span class="text-sm font-medium">8</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100" data-mock="true">
+                                    <div class="flex-1">
+                                        <p class="font-medium text-gray-800">Learn to cook pizza together</p>
+                                        <p class="text-sm text-gray-600">by Emma</p>
+                                    </div>
+                                    <div class="flex items-center space-x-1 text-red-500">
+                                        <i class="fas fa-heart text-sm"></i>
+                                        <span class="text-sm font-medium">6</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100" data-mock="true">
+                                    <div class="flex-1">
+                                        <p class="font-medium text-gray-800">Visit the Chicago Zoo</p>
+                                        <p class="text-sm text-gray-600">by Tommy</p>
+                                    </div>
+                                    <div class="flex items-center space-x-1 text-red-500">
+                                        <i class="fas fa-heart text-sm"></i>
+                                        <span class="text-sm font-medium">4</span>
+                                    </div>
+                                </div>
+                                <!-- @END_MAP )) -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: DashboardTab -->
+
+                <!-- Grocery Lists Tab -->
+                <!-- @COMPONENT: GroceryTab -->
+                <div id="grocery-content" class="tab-content hidden">
+                    <div class="mb-6">
+                        <h2 class="text-3xl font-bold text-gray-800 mb-2">Smart Grocery Lists</h2>
+                        <p class="text-gray-600">AI-powered shopping with store-specific optimization</p>
+                    </div>
+
+                    <!-- AI Suggestion Banner -->
+                    <div class="bg-gradient-to-r from-green-100 to-blue-100 rounded-xl p-4 mb-6 border border-green-200">
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-magic text-green-600 text-lg mt-1"></i>
+                            <div>
+                                <h3 class="font-semibold text-green-800 mb-1">AI Suggestion</h3>
+                                <p class="text-green-700 text-sm" data-mock="true">Based on your family's consumption patterns, you typically run out of milk every 6 days. I've automatically added it to your Walmart list for tomorrow's pickup.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        <!-- Walmart List -->
+                        <div class="family-card border rounded-xl p-6 bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+                            <div class="flex items-center space-x-3 mb-4">
+                                <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-shopping-cart text-white"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-lg text-blue-800">Walmart</h3>
+                                    <p class="text-blue-600 text-sm">💡 Best for bulk items & frozen foods</p>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-2 mb-4" data-mock="true">
+                                <div class="flex items-center justify-between bg-white p-3 rounded-lg border border-blue-200">
+                                    <div class="flex items-center space-x-2">
+                                        <input type="checkbox" class="rounded text-blue-600 focus:ring-blue-500">
+                                        <span class="text-gray-800">Milk (2 gallons)</span>
+                                    </div>
+                                    <span class="text-sm text-gray-500">Auto-added</span>
+                                </div>
+                                
+                                <div class="flex items-center justify-between bg-white p-3 rounded-lg border border-blue-200">
+                                    <div class="flex items-center space-x-2">
+                                        <input type="checkbox" class="rounded text-blue-600 focus:ring-blue-500">
+                                        <span class="text-gray-800">Frozen vegetables (5 bags)</span>
+                                    </div>
+                                    <button onclick="removeItem(this)" class="text-red-500 hover:text-red-700">
+                                        <i class="fas fa-trash text-sm"></i>
+                                    </button>
+                                </div>
+                                
+                                <div class="flex items-center justify-between bg-white p-3 rounded-lg border border-blue-200">
+                                    <div class="flex items-center space-x-2">
+                                        <input type="checkbox" class="rounded text-blue-600 focus:ring-blue-500">
+                                        <span class="text-gray-800">Paper towels (12 pack)</span>
+                                    </div>
+                                    <button onclick="removeItem(this)" class="text-red-500 hover:text-red-700">
+                                        <i class="fas fa-trash text-sm"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="flex space-x-2">
+                                <input type="text" placeholder="Add item..." class="flex-1 px-3 py-2 border border-blue-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onkeypress="handleAddItem(event, 'walmart')">
+                                <button onclick="addGroceryItem('walmart')" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Costco List -->
+                        <div class="family-card border rounded-xl p-6 bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200">
+                            <div class="flex items-center space-x-3 mb-4">
+                                <div class="w-12 h-12 bg-amber-600 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-warehouse text-white"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-lg text-amber-800">Costco</h3>
+                                    <p class="text-amber-600 text-sm">💡 Bulk supplements & household items</p>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-2 mb-4" data-mock="true">
+                                <div class="flex items-center justify-between bg-white p-3 rounded-lg border border-amber-200">
+                                    <div class="flex items-center space-x-2">
+                                        <input type="checkbox" class="rounded text-amber-600 focus:ring-amber-500">
+                                        <span class="text-gray-800">Protein powder</span>
+                                    </div>
+                                    <button onclick="removeItem(this)" class="text-red-500 hover:text-red-700">
+                                        <i class="fas fa-trash text-sm"></i>
+                                    </button>
+                                </div>
+                                
+                                <div class="flex items-center justify-between bg-white p-3 rounded-lg border border-amber-200">
+                                    <div class="flex items-center space-x-2">
+                                        <input type="checkbox" class="rounded text-amber-600 focus:ring-amber-500">
+                                        <span class="text-gray-800">Vitamins (family pack)</span>
+                                    </div>
+                                    <button onclick="removeItem(this)" class="text-red-500 hover:text-red-700">
+                                        <i class="fas fa-trash text-sm"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="flex space-x-2">
+                                <input type="text" placeholder="Add item..." class="flex-1 px-3 py-2 border border-amber-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" onkeypress="handleAddItem(event, 'costco')">
+                                <button onclick="addGroceryItem('costco')" class="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Mariano's List -->
+                        <div class="family-card border rounded-xl p-6 bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+                            <div class="flex items-center space-x-3 mb-4">
+                                <div class="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-leaf text-white"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-lg text-green-800">Mariano's</h3>
+                                    <p class="text-green-600 text-sm">💡 Fresh produce & prepared meals</p>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-2 mb-4" data-mock="true">
+                                <div class="flex items-center justify-between bg-white p-3 rounded-lg border border-green-200">
+                                    <div class="flex items-center space-x-2">
+                                        <input type="checkbox" class="rounded text-green-600 focus:ring-green-500">
+                                        <span class="text-gray-800">Fresh strawberries</span>
+                                    </div>
+                                    <button onclick="removeItem(this)" class="text-red-500 hover:text-red-700">
+                                        <i class="fas fa-trash text-sm"></i>
+                                    </button>
+                                </div>
+                                
+                                <div class="flex items-center justify-between bg-white p-3 rounded-lg border border-green-200">
+                                    <div class="flex items-center space-x-2">
+                                        <input type="checkbox" class="rounded text-green-600 focus:ring-green-500">
+                                        <span class="text-gray-800">Rotisserie chicken</span>
+                                    </div>
+                                    <button onclick="removeItem(this)" class="text-red-500 hover:text-red-700">
+                                        <i class="fas fa-trash text-sm"></i>
+                                    </button>
+                                </div>
+                                
+                                <div class="flex items-center justify-between bg-white p-3 rounded-lg border border-green-200">
+                                    <div class="flex items-center space-x-2">
+                                        <input type="checkbox" class="rounded text-green-600 focus:ring-green-500">
+                                        <span class="text-gray-800">Organic salad mix</span>
+                                    </div>
+                                    <button onclick="removeItem(this)" class="text-red-500 hover:text-red-700">
+                                        <i class="fas fa-trash text-sm"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="flex space-x-2">
+                                <input type="text" placeholder="Add item..." class="flex-1 px-3 py-2 border border-green-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500" onkeypress="handleAddItem(event, 'marianos')">
+                                <button onclick="addGroceryItem('marianos')" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: GroceryTab -->
+
+                <!-- Calendar Tab -->
+                <!-- @COMPONENT: CalendarTab -->
+                <div id="calendar-content" class="tab-content hidden">
+                    <div class="mb-6">
+                        <h2 class="text-3xl font-bold text-gray-800 mb-2">Family Calendar</h2>
+                        <p class="text-gray-600">Smart scheduling with conflict detection</p>
+                    </div>
+
+                    <!-- Conflict Alert -->
+                    <div class="bg-gradient-to-r from-red-100 to-orange-100 rounded-xl p-4 mb-6 border border-red-200">
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-exclamation-triangle text-red-600 text-lg mt-1"></i>
+                            <div>
+                                <h3 class="font-semibold text-red-800 mb-1">Schedule Conflict Detected</h3>
+                                <p class="text-red-700 text-sm" data-mock="true">Tommy's soccer practice (4-6 PM) overlaps with Emma's piano lesson (5-6 PM) on Saturday. Would you like me to suggest alternative times?</p>
+                                <div class="mt-2 space-x-2">
+                                    <button class="text-sm bg-red-600 text-white px-3 py-1 rounded-full hover:bg-red-700">Resolve</button>
+                                    <button class="text-sm border border-red-600 text-red-600 px-3 py-1 rounded-full hover:bg-red-50">Dismiss</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Calendar View -->
+                    <div class="space-y-4">
+                        <!-- @MAP: calendarEvents.map(event => ( -->
+                        <!-- Today's Events -->
+                        <div class="border rounded-xl p-4 hover:shadow-md transition-shadow bg-blue-50 border-blue-200" data-mock="true">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                    <div class="text-center">
+                                        <div class="text-2xl font-bold text-family-blue">28</div>
+                                        <div class="text-sm text-blue-600">JUL</div>
+                                    </div>
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-3 h-3 bg-family-blue rounded-full"></div>
+                                        <div>
+                                            <h3 class="font-semibold text-gray-800">Tommy - Soccer Practice</h3>
+                                            <p class="text-sm text-gray-600">4:00 PM - 6:00 PM</p>
+                                            <div class="flex items-center space-x-2 mt-1">
+                                                <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Sports</span>
+                                                <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Tommy</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <i class="fas fa-map-marker-alt text-gray-400"></i>
+                                    <span class="text-sm text-gray-600">Lincoln Park</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="border rounded-xl p-4 hover:shadow-md transition-shadow bg-pink-50 border-pink-200" data-mock="true">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                    <div class="text-center">
+                                        <div class="text-2xl font-bold text-family-pink">28</div>
+                                        <div class="text-sm text-pink-600">JUL</div>
+                                    </div>
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-3 h-3 bg-family-pink rounded-full"></div>
+                                        <div>
+                                            <h3 class="font-semibold text-gray-800">Sarah - Client Presentation</h3>
+                                            <p class="text-sm text-gray-600">2:00 PM - 3:30 PM</p>
+                                            <div class="flex items-center space-x-2 mt-1">
+                                                <span class="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">Work</span>
+                                                <span class="px-2 py-1 bg-pink-100 text-pink-800 text-xs rounded-full">Sarah</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <i class="fas fa-video text-gray-400"></i>
+                                    <span class="text-sm text-gray-600">Zoom</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="border rounded-xl p-4 hover:shadow-md transition-shadow bg-green-50 border-green-200" data-mock="true">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                    <div class="text-center">
+                                        <div class="text-2xl font-bold text-family-green">29</div>
+                                        <div class="text-sm text-green-600">JUL</div>
+                                    </div>
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-3 h-3 bg-family-green rounded-full"></div>
+                                        <div>
+                                            <h3 class="font-semibold text-gray-800">Family - Dinner at Grandma's</h3>
+                                            <p class="text-sm text-gray-600">6:00 PM - 9:00 PM</p>
+                                            <div class="flex items-center space-x-2 mt-1">
+                                                <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">Family</span>
+                                                <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">All</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <i class="fas fa-car text-gray-400"></i>
+                                    <span class="text-sm text-gray-600">30 min drive</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="border rounded-xl p-4 hover:shadow-md transition-shadow bg-amber-50 border-amber-200" data-mock="true">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                    <div class="text-center">
+                                        <div class="text-2xl font-bold text-family-amber">30</div>
+                                        <div class="text-sm text-amber-600">JUL</div>
+                                    </div>
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-3 h-3 bg-family-amber rounded-full"></div>
+                                        <div>
+                                            <h3 class="font-semibold text-gray-800">Emma - Piano Recital</h3>
+                                            <p class="text-sm text-gray-600">7:00 PM - 9:00 PM</p>
+                                            <div class="flex items-center space-x-2 mt-1">
+                                                <span class="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">Music</span>
+                                                <span class="px-2 py-1 bg-amber-100 text-amber-800 text-xs rounded-full">Emma</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <i class="fas fa-music text-gray-400"></i>
+                                    <span class="text-sm text-gray-600">Music Hall</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- @END_MAP )) -->
+                    </div>
+
+                    <!-- Add Event Button -->
+                    <div class="mt-6 text-center">
+                        <button onclick="openAddEventModal()" class="bg-family-blue text-white px-6 py-3 rounded-full hover:bg-blue-600 transition-colors shadow-lg">
+                            <i class="fas fa-plus mr-2"></i>Add Family Event
+                        </button>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: CalendarTab -->
+
+                <!-- Ideas Tab -->
+                <!-- @COMPONENT: IdeasTab -->
+                <div id="ideas-content" class="tab-content hidden">
+                    <div class="mb-6">
+                        <h2 class="text-3xl font-bold text-gray-800 mb-2">Family Idea Board</h2>
+                        <p class="text-gray-600">Share and vote on family activities and projects</p>
+                    </div>
+
+                    <!-- Add Idea Section -->
+                    <div class="bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl p-6 mb-6 border border-yellow-200">
+                        <h3 class="font-semibold text-amber-800 mb-3 flex items-center">
+                            <i class="fas fa-lightbulb text-amber-600 mr-2"></i>
+                            Share a New Idea
+                        </h3>
+                        <div class="flex space-x-3">
+                            <input 
+                                type="text" 
+                                id="new-idea-input"
+                                placeholder="What fun family activity should we try?"
+                                class="flex-1 px-4 py-3 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
+                                onkeypress="handleAddIdea(event)"
+                            >
+                            <button onclick="addIdea()" class="bg-amber-500 text-white px-6 py-3 rounded-lg hover:bg-amber-600 transition-colors shadow-lg">
+                                <i class="fas fa-plus mr-2"></i>Add Idea
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Ideas Grid -->
+                    <div class="grid gap-6 md:grid-cols-2">
+                        <!-- @MAP: ideas.map(idea => ( -->
+                        <div class="family-card border rounded-xl p-6 bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200 hover:shadow-lg transition-all duration-200" data-mock="true">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex-1">
+                                    <h3 class="font-semibold text-gray-800 mb-2">Weekend camping trip to Starved Rock State Park</h3>
+                                    <p class="text-sm text-gray-600 flex items-center">
+                                        <i class="fas fa-user text-family-blue mr-2"></i>
+                                        Suggested by Mike
+                                    </p>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <button onclick="likeIdea(this)" class="flex items-center space-x-1 text-red-500 hover:text-red-700 transition-colors like-btn">
+                                        <i class="fas fa-heart"></i>
+                                        <span class="like-count">8</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between mt-4">
+                                <div class="flex space-x-2">
+                                    <span class="px-3 py-1 bg-green-100 text-green-800 text-xs rounded-full">Outdoor</span>
+                                    <span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Weekend</span>
+                                </div>
+                                <span class="text-xs text-gray-500">2 days ago</span>
+                            </div>
+                        </div>
+
+                        <div class="family-card border rounded-xl p-6 bg-gradient-to-br from-pink-50 to-pink-100 border-pink-200 hover:shadow-lg transition-all duration-200" data-mock="true">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex-1">
+                                    <h3 class="font-semibold text-gray-800 mb-2">Learn to cook authentic Italian pizza together</h3>
+                                    <p class="text-sm text-gray-600 flex items-center">
+                                        <i class="fas fa-user text-family-pink mr-2"></i>
+                                        Suggested by Emma
+                                    </p>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <button onclick="likeIdea(this)" class="flex items-center space-x-1 text-red-500 hover:text-red-700 transition-colors like-btn">
+                                        <i class="fas fa-heart"></i>
+                                        <span class="like-count">6</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between mt-4">
+                                <div class="flex space-x-2">
+                                    <span class="px-3 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">Cooking</span>
+                                    <span class="px-3 py-1 bg-red-100 text-red-800 text-xs rounded-full">Learning</span>
+                                </div>
+                                <span class="text-xs text-gray-500">1 week ago</span>
+                            </div>
+                        </div>
+
+                        <div class="family-card border rounded-xl p-6 bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 hover:shadow-lg transition-all duration-200" data-mock="true">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex-1">
+                                    <h3 class="font-semibold text-gray-800 mb-2">Visit the Lincoln Park Zoo and Aquarium</h3>
+                                    <p class="text-sm text-gray-600 flex items-center">
+                                        <i class="fas fa-user text-family-amber mr-2"></i>
+                                        Suggested by Tommy
+                                    </p>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <button onclick="likeIdea(this)" class="flex items-center space-x-1 text-red-500 hover:text-red-700 transition-colors like-btn">
+                                        <i class="fas fa-heart"></i>
+                                        <span class="like-count">4</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between mt-4">
+                                <div class="flex space-x-2">
+                                    <span class="px-3 py-1 bg-green-100 text-green-800 text-xs rounded-full">Educational</span>
+                                    <span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Day trip</span>
+                                </div>
+                                <span class="text-xs text-gray-500">3 days ago</span>
+                            </div>
+                        </div>
+
+                        <div class="family-card border rounded-xl p-6 bg-gradient-to-br from-green-50 to-green-100 border-green-200 hover:shadow-lg transition-all duration-200" data-mock="true">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex-1">
+                                    <h3 class="font-semibold text-gray-800 mb-2">Start weekly family game nights every Friday</h3>
+                                    <p class="text-sm text-gray-600 flex items-center">
+                                        <i class="fas fa-user text-family-pink mr-2"></i>
+                                        Suggested by Sarah
+                                    </p>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <button onclick="likeIdea(this)" class="flex items-center space-x-1 text-red-500 hover:text-red-700 transition-colors like-btn">
+                                        <i class="fas fa-heart"></i>
+                                        <span class="like-count">9</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between mt-4">
+                                <div class="flex space-x-2">
+                                    <span class="px-3 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">Regular</span>
+                                    <span class="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">Games</span>
+                                </div>
+                                <span class="text-xs text-gray-500">1 day ago</span>
+                            </div>
+                        </div>
+                        <!-- @END_MAP )) -->
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: IdeasTab -->
+
+                <!-- Vision Board Tab -->
+                <!-- @COMPONENT: VisionTab -->
+                <div id="vision-content" class="tab-content hidden">
+                    <div class="mb-6">
+                        <h2 class="text-3xl font-bold text-gray-800 mb-2">Family Vision Board</h2>
+                        <p class="text-gray-600">Dream big together - your family's goals and aspirations</p>
+                    </div>
+
+                    <!-- Add Vision Item -->
+                    <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6 mb-6 border border-purple-200">
+                        <h3 class="font-semibold text-purple-800 mb-3 flex items-center">
+                            <i class="fas fa-heart text-purple-600 mr-2"></i>
+                            Add a Family Dream or Goal
+                        </h3>
+                        <div class="flex space-x-3">
+                            <input 
+                                type="text" 
+                                id="new-vision-input"
+                                placeholder="What does your family dream of achieving?"
+                                class="flex-1 px-4 py-3 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white"
+                                onkeypress="handleAddVision(event)"
+                            >
+                            <button onclick="addVisionItem()" class="bg-purple-500 text-white px-6 py-3 rounded-lg hover:bg-purple-600 transition-colors shadow-lg">
+                                <i class="fas fa-plus mr-2"></i>Add Dream
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Vision Items Grid -->
+                    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        <!-- @MAP: visionItems.map(item => ( -->
+                        <div class="family-card bg-gradient-to-br from-pink-100 to-pink-200 border-pink-300 rounded-xl p-6 text-center border-2 hover:shadow-lg transition-all duration-200" data-mock="true">
+                            <div class="mb-4">
+                                <i class="fas fa-plane text-pink-600 text-3xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-pink-800 mb-2">Travel to Europe as a family</h3>
+                            <p class="text-sm text-pink-700 mb-3">Explore different cultures together</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-pink-600 bg-pink-50 px-2 py-1 rounded-full">by Sarah</span>
+                                <div class="flex items-center space-x-1">
+                                    <i class="fas fa-calendar text-pink-500 text-xs"></i>
+                                    <span class="text-xs text-pink-600">2025 Goal</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="family-card bg-gradient-to-br from-green-100 to-green-200 border-green-300 rounded-xl p-6 text-center border-2 hover:shadow-lg transition-all duration-200" data-mock="true">
+                            <div class="mb-4">
+                                <i class="fas fa-hammer text-green-600 text-3xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-green-800 mb-2">Build a treehouse in the backyard</h3>
+                            <p class="text-sm text-green-700 mb-3">A special place for the kids to play</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">by Kids</span>
+                                <div class="flex items-center space-x-1">
+                                    <i class="fas fa-calendar text-green-500 text-xs"></i>
+                                    <span class="text-xs text-green-600">Summer</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="family-card bg-gradient-to-br from-blue-100 to-blue-200 border-blue-300 rounded-xl p-6 text-center border-2 hover:shadow-lg transition-all duration-200" data-mock="true">
+                            <div class="mb-4">
+                                <i class="fas fa-seedling text-blue-600 text-3xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-blue-800 mb-2">Start a family vegetable garden</h3>
+                            <p class="text-sm text-blue-700 mb-3">Grow our own fresh vegetables</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">by Mike</span>
+                                <div class="flex items-center space-x-1">
+                                    <i class="fas fa-calendar text-blue-500 text-xs"></i>
+                                    <span class="text-xs text-blue-600">Spring</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="family-card bg-gradient-to-br from-yellow-100 to-yellow-200 border-yellow-300 rounded-xl p-6 text-center border-2 hover:shadow-lg transition-all duration-200" data-mock="true">
+                            <div class="mb-4">
+                                <i class="fas fa-language text-yellow-600 text-3xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-yellow-800 mb-2">Learn Spanish together as a family</h3>
+                            <p class="text-sm text-yellow-700 mb-3">15 minutes of practice every day</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-yellow-600 bg-yellow-50 px-2 py-1 rounded-full">by Emma</span>
+                                <div class="flex items-center space-x-1">
+                                    <i class="fas fa-calendar text-yellow-500 text-xs"></i>
+                                    <span class="text-xs text-yellow-600">This Year</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="family-card bg-gradient-to-br from-purple-100 to-purple-200 border-purple-300 rounded-xl p-6 text-center border-2 hover:shadow-lg transition-all duration-200" data-mock="true">
+                            <div class="mb-4">
+                                <i class="fas fa-running text-purple-600 text-3xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-purple-800 mb-2">Run a 5K race together</h3>
+                            <p class="text-sm text-purple-700 mb-3">Train as a family for better health</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-purple-600 bg-purple-50 px-2 py-1 rounded-full">by All</span>
+                                <div class="flex items-center space-x-1">
+                                    <i class="fas fa-calendar text-purple-500 text-xs"></i>
+                                    <span class="text-xs text-purple-600">Fall</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="family-card bg-gradient-to-br from-indigo-100 to-indigo-200 border-indigo-300 rounded-xl p-6 text-center border-2 hover:shadow-lg transition-all duration-200" data-mock="true">
+                            <div class="mb-4">
+                                <i class="fas fa-book text-indigo-600 text-3xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-indigo-800 mb-2">Read 50 books together this year</h3>
+                            <p class="text-sm text-indigo-700 mb-3">Family reading challenge</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full">by Tommy</span>
+                                <div class="flex items-center space-x-1">
+                                    <i class="fas fa-calendar text-indigo-500 text-xs"></i>
+                                    <span class="text-xs text-indigo-600">2024 Goal</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- @END_MAP )) -->
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: VisionTab -->
+
+                <!-- Wishlist Tab -->
+                <!-- @COMPONENT: WishlistTab -->
+                <div id="wishlist-content" class="tab-content hidden">
+                    <div class="mb-6">
+                        <h2 class="text-3xl font-bold text-gray-800 mb-2">Family Wish Lists</h2>
+                        <p class="text-gray-600">Track gifts and purchases for special occasions</p>
+                    </div>
+
+                    <!-- Add Wishlist Item -->
+                    <div class="bg-gradient-to-r from-red-50 to-pink-50 rounded-xl p-6 mb-6 border border-red-200">
+                        <h3 class="font-semibold text-red-800 mb-3 flex items-center">
+                            <i class="fas fa-gift text-red-600 mr-2"></i>
+                            Add a Wish List Item
+                        </h3>
+                        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-3">
+                            <input 
+                                type="text" 
+                                id="wish-item-input"
+                                placeholder="Item name"
+                                class="px-4 py-3 border border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white"
+                            >
+                            <select id="wish-person-select" class="px-4 py-3 border border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white">
+                                <option value="">Select person</option>
+                                <option value="Sarah">Sarah</option>
+                                <option value="Mike">Mike</option>
+                                <option value="Tommy">Tommy</option>
+                                <option value="Emma">Emma</option>
+                            </select>
+                            <select id="wish-occasion-select" class="px-4 py-3 border border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white">
+                                <option value="">Select occasion</option>
+                                <option value="Birthday">Birthday</option>
+                                <option value="Christmas">Christmas</option>
+                                <option value="Anniversary">Anniversary</option>
+                                <option value="Just Because">Just Because</option>
+                            </select>
+                            <button onclick="addWishItem()" class="bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600 transition-colors shadow-lg">
+                                <i class="fas fa-plus mr-2"></i>Add
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Wishlist Items -->
+                    <div class="space-y-4">
+                        <!-- @MAP: wishlistItems.map(item => ( -->
+                        <div class="family-card border rounded-xl p-6 bg-white hover:shadow-md transition-shadow" data-mock="true">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                    <!-- Airpods Pro product image -->
+                                    <img src="https://images.unsplash.com/photo-1588423771073-b8903fbb85b5?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150" alt="AirPods Pro" class="w-16 h-16 rounded-lg object-cover border border-gray-200">
+                                    <div>
+                                        <h3 class="font-semibold text-gray-800 text-lg">AirPods Pro (2nd Generation)</h3>
+                                        <p class="text-sm text-gray-600 mb-1">for Tommy • Christmas 2024</p>
+                                        <div class="flex items-center space-x-3">
+                                            <span class="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">Apple Store</span>
+                                            <span class="font-semibold text-green-600 text-lg">$249</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <button class="text-blue-600 hover:text-blue-800 p-2">
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </button>
+                                    <button class="text-red-500 hover:text-red-700 p-2">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="family-card border rounded-xl p-6 bg-white hover:shadow-md transition-shadow" data-mock="true">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                    <!-- KitchenAid mixer image -->
+                                    <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150" alt="KitchenAid Stand Mixer" class="w-16 h-16 rounded-lg object-cover border border-gray-200">
+                                    <div>
+                                        <h3 class="font-semibold text-gray-800 text-lg">KitchenAid Stand Mixer</h3>
+                                        <p class="text-sm text-gray-600 mb-1">for Sarah • Anniversary</p>
+                                        <div class="flex items-center space-x-3">
+                                            <span class="px-3 py-1 bg-orange-100 text-orange-800 text-sm rounded-full">Williams Sonoma</span>
+                                            <span class="font-semibold text-green-600 text-lg">$399</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <button class="text-blue-600 hover:text-blue-800 p-2">
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </button>
+                                    <button class="text-red-500 hover:text-red-700 p-2">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="family-card border rounded-xl p-6 bg-white hover:shadow-md transition-shadow" data-mock="true">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                    <!-- Nintendo Switch OLED image -->
+                                    <img src="https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150" alt="Nintendo Switch OLED" class="w-16 h-16 rounded-lg object-cover border border-gray-200">
+                                    <div>
+                                        <h3 class="font-semibold text-gray-800 text-lg">Nintendo Switch OLED</h3>
+                                        <p class="text-sm text-gray-600 mb-1">for Emma • Birthday</p>
+                                        <div class="flex items-center space-x-3">
+                                            <span class="px-3 py-1 bg-red-100 text-red-800 text-sm rounded-full">Target</span>
+                                            <span class="font-semibold text-green-600 text-lg">$349</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <button class="text-blue-600 hover:text-blue-800 p-2">
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </button>
+                                    <button class="text-red-500 hover:text-red-700 p-2">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="family-card border rounded-xl p-6 bg-white hover:shadow-md transition-shadow" data-mock="true">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                    <!-- Coffee machine image -->
+                                    <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150" alt="Espresso Machine" class="w-16 h-16 rounded-lg object-cover border border-gray-200">
+                                    <div>
+                                        <h3 class="font-semibold text-gray-800 text-lg">Breville Espresso Machine</h3>
+                                        <p class="text-sm text-gray-600 mb-1">for Mike • Christmas</p>
+                                        <div class="flex items-center space-x-3">
+                                            <span class="px-3 py-1 bg-yellow-100 text-yellow-800 text-sm rounded-full">Amazon</span>
+                                            <span class="font-semibold text-green-600 text-lg">$299</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <button class="text-blue-600 hover:text-blue-800 p-2">
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </button>
+                                    <button class="text-red-500 hover:text-red-700 p-2">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- @END_MAP )) -->
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: WishlistTab -->
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-12 py-8 text-center text-gray-600 bg-white/50">
+            <p class="text-sm">&copy; 2024 FamilyMind AI. Bringing families closer through intelligent organization.</p>
+        </footer>
+    </div>
+    <!-- @END_COMPONENT: MainLayout -->
+
+    <script>
+        // TODO: Implement business logic, API calls, and state management
+        (function() {
+            let currentTab = 'dashboard';
+            let chatMessages = [];
+
+            // Tab Navigation
+            window.setActiveTab = function(tabId) {
+                // Hide all tab contents
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.add('hidden');
+                });
+                
+                // Remove active class from all nav tabs
+                document.querySelectorAll('.nav-tab').forEach(tab => {
+                    tab.classList.remove('bg-family-blue', 'text-white');
+                    tab.classList.add('text-gray-600', 'hover:bg-gray-50');
+                });
+                
+                // Show selected tab content
+                document.getElementById(tabId + '-content').classList.remove('hidden');
+                
+                // Add active class to selected nav tab
+                event.target.classList.add('bg-family-blue', 'text-white');
+                event.target.classList.remove('text-gray-600', 'hover:bg-gray-50');
+                
+                currentTab = tabId;
+            };
+
+            // AI Chat Functions
+            window.toggleAIChat = function() {
+                const chatDiv = document.getElementById('ai-chat');
+                chatDiv.classList.toggle('hidden');
+                if (!chatDiv.classList.contains('hidden')) {
+                    document.getElementById('chat-input').focus();
+                }
+            };
+
+            window.sendMessage = function() {
+                const input = document.getElementById('chat-input');
+                const message = input.value.trim();
+                if (!message) return;
+
+                // Add user message
+                addChatMessage('user', message);
+                input.value = '';
+
+                // Simulate AI response
+                setTimeout(() => {
+                    const responses = [
+                        "I can help you with that! Let me check your family schedule and preferences.",
+                        "Based on your family's patterns, I have some suggestions for you.",
+                        "I've analyzed your grocery consumption and can optimize your shopping lists.",
+                        "That's a great idea! I'll add it to your family board and notify everyone.",
+                        "I notice Tommy has soccer practice tomorrow. Should I prepare his gear reminder?"
+                    ];
+                    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                    addChatMessage('ai', randomResponse);
+                }, 1000);
+            };
+
+            window.handleChatKeyPress = function(event) {
+                if (event.key === 'Enter') {
+                    sendMessage();
+                }
+            };
+
+            function addChatMessage(sender, message) {
+                const messagesDiv = document.getElementById('chat-messages');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `ai-chat-bubble ${sender === 'user' ? 'ml-auto bg-family-blue text-white' : 'bg-gray-100'} rounded-lg p-3 max-w-sm`;
+                messageDiv.innerHTML = `<p class="text-sm ${sender === 'user' ? 'text-white' : 'text-gray-700'}">${message}</p>`;
+                messagesDiv.appendChild(messageDiv);
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }
+
+            // Grocery Functions
+            window.addGroceryItem = function(store) {
+                const input = document.querySelector(`input[onkeypress*="${store}"]`);
+                const item = input.value.trim();
+                if (!item) return;
+
+                const storeDiv = input.closest('.family-card');
+                const itemsList = storeDiv.querySelector('.space-y-2');
+                
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200';
+                itemDiv.innerHTML = `
+                    <div class="flex items-center space-x-2">
+                        <input type="checkbox" class="rounded text-${store === 'walmart' ? 'blue' : store === 'costco' ? 'amber' : 'green'}-600 focus:ring-${store === 'walmart' ? 'blue' : store === 'costco' ? 'amber' : 'green'}-500">
+                        <span class="text-gray-800">${item}</span>
+                    </div>
+                    <button onclick="removeItem(this)" class="text-red-500 hover:text-red-700">
+                        <i class="fas fa-trash text-sm"></i>
+                    </button>
+                `;
+                
+                itemsList.appendChild(itemDiv);
+                input.value = '';
+            };
+
+            window.handleAddItem = function(event, store) {
+                if (event.key === 'Enter') {
+                    addGroceryItem(store);
+                }
+            };
+
+            window.removeItem = function(button) {
+                button.closest('.flex').remove();
+            };
+
+            // Ideas Functions
+            window.addIdea = function() {
+                const input = document.getElementById('new-idea-input');
+                const idea = input.value.trim();
+                if (!idea) return;
+
+                const ideasGrid = document.querySelector('#ideas-content .grid');
+                const ideaDiv = document.createElement('div');
+                ideaDiv.className = 'family-card border rounded-xl p-6 bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200 hover:shadow-lg transition-all duration-200';
+                ideaDiv.innerHTML = `
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-gray-800 mb-2">${idea}</h3>
+                            <p class="text-sm text-gray-600 flex items-center">
+                                <i class="fas fa-user text-family-blue mr-2"></i>
+                                Suggested by You
+                            </p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="likeIdea(this)" class="flex items-center space-x-1 text-red-500 hover:text-red-700 transition-colors like-btn">
+                                <i class="fas fa-heart"></i>
+                                <span class="like-count">0</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between mt-4">
+                        <div class="flex space-x-2">
+                            <span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">New</span>
+                        </div>
+                        <span class="text-xs text-gray-500">Just now</span>
+                    </div>
+                `;
+                
+                ideasGrid.appendChild(ideaDiv);
+                input.value = '';
+            };
+
+            window.handleAddIdea = function(event) {
+                if (event.key === 'Enter') {
+                    addIdea();
+                }
+            };
+
+            window.likeIdea = function(button) {
+                const countSpan = button.querySelector('.like-count');
+                const currentCount = parseInt(countSpan.textContent);
+                countSpan.textContent = currentCount + 1;
+                
+                // Add animation
+                const heartIcon = button.querySelector('i');
+                heartIcon.classList.add('like-animation');
+                setTimeout(() => {
+                    heartIcon.classList.remove('like-animation');
+                }, 600);
+            };
+
+            // Vision Board Functions
+            window.addVisionItem = function() {
+                const input = document.getElementById('new-vision-input');
+                const vision = input.value.trim();
+                if (!vision) return;
+
+                const colors = ['pink', 'blue', 'green', 'yellow', 'purple', 'indigo'];
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                
+                const visionGrid = document.querySelector('#vision-content .grid');
+                const visionDiv = document.createElement('div');
+                visionDiv.className = `family-card bg-gradient-to-br from-${randomColor}-100 to-${randomColor}-200 border-${randomColor}-300 rounded-xl p-6 text-center border-2 hover:shadow-lg transition-all duration-200`;
+                visionDiv.innerHTML = `
+                    <div class="mb-4">
+                        <i class="fas fa-star text-${randomColor}-600 text-3xl"></i>
+                    </div>
+                    <h3 class="font-semibold text-${randomColor}-800 mb-2">${vision}</h3>
+                    <p class="text-sm text-${randomColor}-700 mb-3">New family goal</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-${randomColor}-600 bg-${randomColor}-50 px-2 py-1 rounded-full">by You</span>
+                        <div class="flex items-center space-x-1">
+                            <i class="fas fa-calendar text-${randomColor}-500 text-xs"></i>
+                            <span class="text-xs text-${randomColor}-600">New Goal</span>
+                        </div>
+                    </div>
+                `;
+                
+                visionGrid.appendChild(visionDiv);
+                input.value = '';
+            };
+
+            window.handleAddVision = function(event) {
+                if (event.key === 'Enter') {
+                    addVisionItem();
+                }
+            };
+
+            // Wishlist Functions
+            window.addWishItem = function() {
+                const itemInput = document.getElementById('wish-item-input');
+                const personSelect = document.getElementById('wish-person-select');
+                const occasionSelect = document.getElementById('wish-occasion-select');
+                
+                const item = itemInput.value.trim();
+                const person = personSelect.value;
+                const occasion = occasionSelect.value;
+                
+                if (!item || !person || !occasion) return;
+
+                const wishlistDiv = document.querySelector('#wishlist-content .space-y-4');
+                const wishDiv = document.createElement('div');
+                wishDiv.className = 'family-card border rounded-xl p-6 bg-white hover:shadow-md transition-shadow';
+                wishDiv.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-16 h-16 rounded-lg border border-gray-200 bg-gray-100 flex items-center justify-center">
+                                <i class="fas fa-gift text-gray-400 text-2xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-800 text-lg">${item}</h3>
+                                <p class="text-sm text-gray-600 mb-1">for ${person} • ${occasion}</p>
+                                <div class="flex items-center space-x-3">
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-800 text-sm rounded-full">Store TBD</span>
+                                    <span class="font-semibold text-green-600 text-lg">Price TBD</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button class="text-blue-600 hover:text-blue-800 p-2">
+                                <i class="fas fa-external-link-alt"></i>
+                            </button>
+                            <button onclick="this.closest('.family-card').remove()" class="text-red-500 hover:text-red-700 p-2">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                wishlistDiv.appendChild(wishDiv);
+                itemInput.value = '';
+                personSelect.value = '';
+                occasionSelect.value = '';
+            };
+
+            // Calendar Functions
+            window.openAddEventModal = function() {
+                // TODO: Implement modal for adding calendar events
+                alert('Add Event modal would open here. This would integrate with calendar APIs.');
+            };
+
+            // Initialize default tab
+            document.addEventListener('DOMContentLoaded', function() {
+                setActiveTab('dashboard');
+            });
+        })();
+    </script>
+</body>
+</html>

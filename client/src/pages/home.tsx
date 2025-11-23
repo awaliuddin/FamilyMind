@@ -48,7 +48,7 @@ export default function Home() {
   }
 
   // Show family invitation if user doesn't have a family
-  if (userData && !userData.familyId) {
+  if (userData && !(userData as any).familyId) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900 dark:to-indigo-900">
         <FamilyInvitation user={userData} />

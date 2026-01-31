@@ -313,6 +313,22 @@ npm run dev
 
 **🎉 Open http://localhost:5000 and see the magic!**
 
+### 📱 Mobile / LAN access (WSL2)
+If you’re running the dev server in **WSL2** and want to open it from your phone on the **same Wi‑Fi**, run this in **Windows PowerShell**:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\expose-mobile.ps1
+```
+
+It auto-elevates (UAC prompt) and prints a URL like `http://192.168.x.x:5000`.
+
+Remove later:
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\unexpose-mobile.ps1
+```
+
+(Details + troubleshooting in the [Quick Start guide](QUICK-START.md).)
+
 ---
 
 ## 🎯 Usage Guide

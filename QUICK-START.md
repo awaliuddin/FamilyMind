@@ -23,22 +23,42 @@ npm run dev
 
 ---
 
-## 📱 Mobile access (LAN)
-If you’re running FamilyMind in WSL2 and want to open it from your phone on the same Wi‑Fi, run this on **Windows**:
+## 📱 Mobile access (LAN / WSL2)
+If you’re running FamilyMind in **WSL2** and want to open it from your phone on the **same Wi‑Fi**, do this:
 
+1) Start the dev server in WSL2:
+```bash
+npm run dev
+```
+
+2) In **Windows PowerShell**, run:
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\expose-mobile.ps1
 ```
 
-It will request Administrator approval, then:
-- forwards **Windows:5000 → WSL2:5000**
-- opens Windows Firewall TCP 5000
-- prints the URL to open on your phone
+The script auto-elevates (UAC prompt), then:
+- forwards **Windows:<port> → WSL2:<port>** (default **5000**) using `netsh interface portproxy`
+- opens **Windows Firewall** inbound TCP for that port
+- prints the **URL to open on your phone** (e.g. `http://192.168.x.x:5000`)
 
-To remove the rule later:
+### Remove / undo
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\unexpose-mobile.ps1
+# (or) powershell -ExecutionPolicy Bypass -File .\scripts\expose-mobile.ps1 -Remove
 ```
+
+### Troubleshooting
+- **WSL2 IP changed** (after reboot / WSL restart): re-run `expose-mobile.ps1` (it re-detects the current WSL IP).
+- **Phone must be on the same Wi‑Fi** as your Windows machine (no cellular / guest Wi‑Fi / VPN).
+- **Firewall/AV blocks it**: the script adds a Windows Firewall rule; if you use third-party security software, allow inbound TCP on the port.
+- **Port conflict** (something else already using 5000 on Windows): pick another port and use it everywhere:
+  - set `PORT=5001` in `.env`
+  - restart `npm run dev`
+  - run `expose-mobile.ps1 -Port 5001`
+- **Multiple WSL distros**: pass `-WslDistro` (example: `expose-mobile.ps1 -WslDistro Ubuntu-22.04`).
+- **Sanity checks (Windows)**:
+  - `netsh interface portproxy show v4tov4`
+  - `Test-NetConnection -ComputerName localhost -Port 5000`
 
 ## 📋 Prerequisites Checklist
 

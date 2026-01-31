@@ -1,5 +1,5 @@
 #requires -Version 5.1
-<
+<#
 Expose FamilyMind dev server (WSL2) to your LAN so you can open it from your phone.
 
 - Forwards Windows :5000 -> WSL2 :5000 using netsh portproxy
@@ -8,7 +8,7 @@ Expose FamilyMind dev server (WSL2) to your LAN so you can open it from your pho
 
 Run:
   powershell -ExecutionPolicy Bypass -File .\scripts\expose-mobile.ps1
->
+#>
 
 param(
   [int]$Port = 5000,

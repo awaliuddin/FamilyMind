@@ -9,9 +9,21 @@ import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
 import { seedSampleData } from "./seed-data";
 
-if (!process.env.REPLIT_DOMAINS) {
-  throw new Error("Environment variable REPLIT_DOMAINS not provided");
-}
+const hasReplitEnv = Boolean(
+  process.env.REPLIT_DOMAINS && process.env.REPL_ID && process.env.SESSION_SECRET,
+);
+
+const devUserClaims = {
+  sub: process.env.DEV_USER_ID ?? "dev-user",
+  email: process.env.DEV_USER_EMAIL ?? "dev@familymind.test",
+  first_name: process.env.DEV_USER_FIRST_NAME ?? "Dev",
+  last_name: process.env.DEV_USER_LAST_NAME ?? "User",
+  profile_image_url:
+    process.env.DEV_USER_AVATAR_URL ??
+    "https://avatars.githubusercontent.com/u/0?v=4",
+};
+
+let devUserSeeded = false;
 
 const getOidcConfig = memoize(
   async () => {
@@ -79,7 +91,53 @@ async function upsertUser(
   }
 }
 
+async function ensureDevUserSeeded(userId: string) {
+  if (devUserSeeded) return;
+
+  await storage.upsertUser({
+    id: userId,
+    email: devUserClaims.email,
+    firstName: devUserClaims.first_name,
+    lastName: devUserClaims.last_name,
+    profileImageUrl: devUserClaims.profile_image_url,
+  });
+
+  try {
+    await seedSampleData(userId);
+  } catch (error) {
+    console.warn("Failed to seed sample data for local auth:", error);
+  }
+
+  devUserSeeded = true;
+}
+
+async function setupLocalAuth(app: Express) {
+  console.info("REPLIT_DOMAINS not set. Falling back to local development auth.");
+
+  await ensureDevUserSeeded(devUserClaims.sub);
+
+  app.use((req, _res, next) => {
+    const sessionUser = {
+      claims: devUserClaims,
+      expires_at: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365,
+    } as any;
+
+    (req as any).user = sessionUser;
+    (req as any).isAuthenticated = () => true;
+    next();
+  });
+
+  app.get("/api/login", (_req, res) => res.redirect("/"));
+  app.get("/api/callback", (_req, res) => res.redirect("/"));
+  app.get("/api/logout", (_req, res) => res.redirect("/"));
+}
+
 export async function setupAuth(app: Express) {
+  if (!hasReplitEnv) {
+    await setupLocalAuth(app);
+    return;
+  }
+
   app.set("trust proxy", 1);
   app.use(getSession());
   app.use(passport.initialize());
@@ -141,6 +199,10 @@ export async function setupAuth(app: Express) {
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
+  if (!hasReplitEnv) {
+    return next();
+  }
+
   const user = req.user as any;
 
   if (!req.isAuthenticated() || !user.expires_at) {

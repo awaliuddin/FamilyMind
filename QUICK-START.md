@@ -23,6 +23,23 @@ npm run dev
 
 ---
 
+## 📱 Mobile access (LAN)
+If you’re running FamilyMind in WSL2 and want to open it from your phone on the same Wi‑Fi, run this on **Windows**:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\expose-mobile.ps1
+```
+
+It will request Administrator approval, then:
+- forwards **Windows:5000 → WSL2:5000**
+- opens Windows Firewall TCP 5000
+- prints the URL to open on your phone
+
+To remove the rule later:
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\unexpose-mobile.ps1
+```
+
 ## 📋 Prerequisites Checklist
 
 Before starting, make sure you have:

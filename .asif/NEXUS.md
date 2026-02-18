@@ -1,0 +1,207 @@
+# NEXUS — FamilyMind Vision-to-Execution Dashboard
+
+> **Owner**: Asif Waliuddin
+> **Last Updated**: 2026-02-16
+> **North Star**: *"Reduce the mental load of family organization by 40%+. Families spend less time planning and more time together."*
+
+---
+
+## Executive Dashboard
+
+| ID | Initiative | Pillar | Status | Priority | Last Touched |
+|----|-----------|--------|--------|----------|-------------|
+| N-01 | [Smart Grocery Lists](#n-01-smart-grocery-lists) | ORGANIZE | SHIPPED | P0 | 2026-01-31 |
+| N-02 | [Intelligent Calendar](#n-02-intelligent-calendar) | ORGANIZE | SHIPPED | P0 | 2026-01-31 |
+| N-03 | [Family Ideas Board](#n-03-family-ideas-board) | CONNECT | SHIPPED | P0 | 2026-01-31 |
+| N-04 | [Vision Board](#n-04-vision-board) | INSPIRE | SHIPPED | P1 | 2026-01-31 |
+| N-05 | [Wish Lists](#n-05-wish-lists) | ORGANIZE | SHIPPED | P1 | 2026-01-31 |
+| N-06 | [AI Assistant](#n-06-ai-assistant) | INTELLIGENCE | SHIPPED | P1 | 2026-01-31 |
+| N-07 | [Command Palette](#n-07-command-palette) | EXPERIENCE | SHIPPED | P1 | 2025-11-23 |
+| N-08 | [Dark Mode + Theming](#n-08-dark-mode) | EXPERIENCE | SHIPPED | P2 | 2025-11-23 |
+| N-09 | [Mobile-First Responsive](#n-09-mobile-first) | EXPERIENCE | SHIPPED | P1 | 2026-01-31 |
+| N-10 | [Family Auth + Invite System](#n-10-family-auth) | TRUST | SHIPPED | P0 | 2025-11-23 |
+| N-11 | [v2.0 Architecture Rewrite](#n-11-v2-architecture) | TRUST | SHIPPED | P0 | 2025-11-23 |
+| N-12 | [Mobile Apps (Capacitor)](#n-12-mobile-apps) | EXPERIENCE | IDEA | P1 | -- |
+| N-13 | [Real-Time Collaboration (WebSocket)](#n-13-realtime) | CONNECT | IDEA | P2 | -- |
+| N-14 | [Voice Commands](#n-14-voice-commands) | INTELLIGENCE | IDEA | P2 | -- |
+| N-15 | [Recipe + Meal Planning](#n-15-recipes) | ORGANIZE | IDEA | P2 | -- |
+| N-16 | [Budget Tracking](#n-16-budget) | ORGANIZE | IDEA | P3 | -- |
+| N-17 | [Automated Test Suite](#n-17-test-suite) | TRUST | IDEA | P1 | -- |
+| N-18 | [Offline-First / PWA](#n-18-pwa) | EXPERIENCE | IDEA | P2 | -- |
+| N-19 | [Premium Tier](#n-19-premium) | MONETIZE | IDEA | P3 | -- |
+
+---
+
+## Vision Pillars
+
+*Derived from the project's north star. Every initiative must trace to at least one pillar.*
+
+### ORGANIZE — "One place for everything your family manages"
+- Grocery lists, calendars, wish lists, budget, recipes — the logistics layer.
+- **Shipped**: N-01 (Grocery), N-02 (Calendar), N-05 (Wish Lists)
+- **Ideas**: N-15 (Recipes), N-16 (Budget)
+
+### CONNECT — "Democracy for family decisions"
+- Ideas board with voting, real-time collaboration, shared context.
+- **Shipped**: N-03 (Ideas Board)
+- **Ideas**: N-13 (Real-Time Collaboration)
+
+### INSPIRE — "Dream big together"
+- Vision boards, goal tracking, milestone celebrations.
+- **Shipped**: N-04 (Vision Board)
+
+### INTELLIGENCE — "AI that knows your family"
+- Context-aware suggestions, proactive reminders, pattern learning.
+- **Shipped**: N-06 (AI Assistant)
+- **Ideas**: N-14 (Voice Commands)
+
+### EXPERIENCE — "Feels native, looks beautiful"
+- Command palette, dark mode, mobile-first, animations, accessibility.
+- **Shipped**: N-07 (Command Palette), N-08 (Dark Mode), N-09 (Mobile-First)
+- **Ideas**: N-12 (Mobile Apps), N-18 (PWA)
+
+### TRUST — "Reliable, secure, well-built"
+- Auth, architecture quality, testing, data safety.
+- **Shipped**: N-10 (Family Auth), N-11 (v2.0 Architecture)
+- **Ideas**: N-17 (Test Suite)
+
+### MONETIZE — "Sustainable product"
+- Premium features, enterprise licensing.
+- **Ideas**: N-19 (Premium Tier)
+
+---
+
+## Initiative Details
+
+### N-01: Smart Grocery Lists
+**Pillar**: ORGANIZE | **Status**: SHIPPED | **Priority**: P0
+**What**: Store-specific grocery lists with CRUD, item management, sharing. Optimistic updates for instant UI.
+**Key files**: `client/src/components/grocery/`, `client/src/hooks/useGroceryLists.ts`
+
+### N-02: Intelligent Calendar
+**Pillar**: ORGANIZE | **Status**: SHIPPED | **Priority**: P0
+**What**: Family calendar with event categorization (Family/Work/School/Sports/Medical/Social), conflict detection.
+**Key files**: `client/src/components/calendar/`, `client/src/hooks/useCalendarEvents.ts`
+
+### N-03: Family Ideas Board
+**Pillar**: CONNECT | **Status**: SHIPPED | **Priority**: P0
+**What**: Collaborative idea board with voting/hearts. Tag-based organization. Family democracy.
+**Key files**: `client/src/components/ideas/`, `client/src/hooks/useFamilyIdeas.ts`
+
+### N-04: Vision Board
+**Pillar**: INSPIRE | **Status**: SHIPPED | **Priority**: P1
+**What**: Long-term family goal tracking with visual progress, milestones, photo attachments.
+**Key files**: `client/src/components/vision/`, `client/src/hooks/useVisionBoard.ts`
+
+### N-05: Wish Lists
+**Pillar**: ORGANIZE | **Status**: SHIPPED | **Priority**: P1
+**What**: Gift tracking per family member. Occasion reminders, price tracking, store links, budget.
+**Key files**: `client/src/components/wishlist/`, `client/src/hooks/useWishlist.ts`
+
+### N-06: AI Assistant
+**Pillar**: INTELLIGENCE | **Status**: SHIPPED | **Priority**: P1
+**What**: OpenAI-powered assistant with NL interaction, context-aware suggestions, proactive reminders.
+**Key files**: `server/openai.ts`
+**Note**: Cloud dependency (OpenAI API). Core features work without it.
+
+### N-07: Command Palette
+**Pillar**: EXPERIENCE | **Status**: SHIPPED | **Priority**: P1
+**What**: `Cmd+K` navigation powered by cmdk. Navigate anywhere in 2 keystrokes.
+**Key files**: `client/src/components/shared/CommandPalette.tsx`
+
+### N-08: Dark Mode + Theming
+**Pillar**: EXPERIENCE | **Status**: SHIPPED | **Priority**: P2
+**What**: WCAG AAA contrast ratios. Persistent across sessions. Semantic color system.
+**Key files**: `client/src/index.css`, `client/src/components/shared/ThemeToggle.tsx`
+
+### N-09: Mobile-First Responsive
+**Pillar**: EXPERIENCE | **Status**: SHIPPED | **Priority**: P1
+**What**: Bottom navigation, swipe gestures, touch-optimized. WSL2 mobile dev access via PowerShell script.
+**Key files**: `client/src/components/shared/MobileBottomNav.tsx`, `scripts/expose-mobile.ps1`
+
+### N-10: Family Auth + Invite System
+**Pillar**: TRUST | **Status**: SHIPPED | **Priority**: P0
+**What**: OAuth via Passport.js. Family creation with invite codes. Member management.
+**Key files**: `server/replitAuth.ts`, `server/routes.ts`
+
+### N-11: v2.0 Architecture Rewrite
+**Pillar**: TRUST | **Status**: SHIPPED | **Priority**: P0
+**What**: From 1,800-line monolith to modular components (<200 lines each). Generic `useResourceMutation` hook. 90% size reduction per component.
+**Key files**: `client/src/hooks/useResourceMutation.ts`
+
+### N-12: Mobile Apps (Capacitor)
+**Pillar**: EXPERIENCE | **Status**: IDEA | **Priority**: P1
+**What**: Native iOS/Android via Capacitor. Native notifications, offline sync, camera (receipt scanning).
+
+### N-13: Real-Time Collaboration (WebSocket)
+**Pillar**: CONNECT | **Status**: IDEA | **Priority**: P2
+**What**: WebSocket sync, live cursors, collaborative editing. `ws` package already in dependencies.
+
+### N-14: Voice Commands
+**Pillar**: INTELLIGENCE | **Status**: IDEA | **Priority**: P2
+**What**: "Add milk to Costco list", "What's on the calendar tomorrow?" Hands-free operation.
+
+### N-15: Recipe + Meal Planning
+**Pillar**: ORGANIZE | **Status**: IDEA | **Priority**: P2
+**What**: Import recipes from websites, auto-generate grocery lists, meal calendar, nutrition.
+
+### N-16: Budget Tracking
+**Pillar**: ORGANIZE | **Status**: IDEA | **Priority**: P3
+**What**: Expense categorization, spending insights, budget goals, receipt OCR.
+
+### N-17: Automated Test Suite
+**Pillar**: TRUST | **Status**: IDEA | **Priority**: P1
+**What**: Vitest for unit tests, Playwright for E2E, accessibility testing. UAT guide exists (manual).
+
+### N-18: Offline-First / PWA
+**Pillar**: EXPERIENCE | **Status**: IDEA | **Priority**: P2
+**What**: Full offline support, install to home screen, push notifications. Service worker caching.
+
+### N-19: Premium Tier
+**Pillar**: MONETIZE | **Status**: IDEA | **Priority**: P3
+**What**: Advanced AI features, unlimited storage, priority support, custom branding.
+
+---
+
+## Status Lifecycle
+
+```
+IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
+  │          │              │           │
+  └──────────┴──────────────┴───────────┴──> ARCHIVED
+```
+
+---
+
+## CoS Directives
+
+### DIRECTIVE-CLX9-20260216-02 — Add automated test suite for critical paths
+**From**: CLX9 CoS | **Date**: 2026-02-16 | **Status**: PENDING
+**Priority**: P1
+
+**Context**: FamilyMind has 11 shipped features and 0 automated tests — the highest regression risk in the CLX9 portfolio. A manual UAT guide exists (45 min) but provides no CI protection. N-17 (Automated Test Suite) is already in the NEXUS as an IDEA.
+
+**Action Items**:
+1. [ ] Set up Vitest with the existing `vite.config.ts`
+2. [ ] Write unit tests for `useResourceMutation` hook (the most reused abstraction — tests here protect all CRUD operations)
+3. [ ] Write unit tests for at least 2 API routes in `server/routes.ts` (recommend: grocery list CRUD, calendar event CRUD)
+4. [ ] Update N-17 status from IDEA → BUILDING
+5. [ ] Target: 10+ test files covering the most-used paths
+
+**Constraints**:
+- Use Vitest (already in CLAUDE.md as planned tooling)
+- Test the hooks and API, not the UI components (higher ROI)
+- Do NOT change production code to make it testable — if it's hard to test, note it as tech debt
+
+**Response** (filled by project team):
+>
+
+---
+
+## Changelog
+
+| Date | Change |
+|------|--------|
+| 2026-02-16 | Created. Onboarded into ASIF as P-05 via inception review. |
+| 2026-02-16 | Renumbered to **P-12** after NXTG-AI portfolio merge. |
+| 2026-02-16 | CoS Directive DIRECTIVE-CLX9-20260216-02 issued: add automated test suite. |

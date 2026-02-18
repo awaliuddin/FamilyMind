@@ -173,6 +173,17 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 
 ---
 
+## Portfolio Intelligence
+
+*Injected by CLX9 CoS, Enrichment Cycle #3 (2026-02-18). Context from across the portfolio relevant to this project.*
+
+- **Shared patterns tracked**: FamilyMind's `useResourceMutation` hook and command palette (cmdk) pattern are listed in PORTFOLIO.md shared patterns. Other React projects in the portfolio may adopt them.
+- **First consumer vertical**: FamilyMind is the portfolio's only consumer-facing product. Its full-stack TypeScript exception (ADR-005, ADR-006) is approved and documented.
+- **Testing is the top priority**: With 11 shipped features and 0 automated tests, FamilyMind has the highest regression risk on CLX9. DIRECTIVE-CLX9-20260216-02 covers this.
+- **Mobile apps (N-12) alignment**: When evaluating Capacitor for mobile, note that DesktopAI uses Tauri for native desktop. Different tools for different platforms, both ASIF-approved.
+
+---
+
 ## CoS Directives
 
 ### DIRECTIVE-CLX9-20260216-02 — Add automated test suite for critical paths
@@ -205,3 +216,4 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 | 2026-02-16 | Created. Onboarded into ASIF as P-05 via inception review. |
 | 2026-02-16 | Renumbered to **P-12** after NXTG-AI portfolio merge. |
 | 2026-02-16 | CoS Directive DIRECTIVE-CLX9-20260216-02 issued: add automated test suite. |
+| 2026-02-18 | Portfolio Intelligence section added (Enrichment Cycle #3). |

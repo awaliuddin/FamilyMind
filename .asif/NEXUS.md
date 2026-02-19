@@ -1,7 +1,7 @@
 # NEXUS — FamilyMind Vision-to-Execution Dashboard
 
 > **Owner**: Asif Waliuddin
-> **Last Updated**: 2026-02-18
+> **Last Updated**: 2026-02-19
 > **North Star**: *"Reduce the mental load of family organization by 40%+. Families spend less time planning and more time together."*
 
 ---
@@ -26,7 +26,7 @@
 | N-14 | [Voice Commands](#n-14-voice-commands) | INTELLIGENCE | IDEA | P2 | -- |
 | N-15 | [Recipe + Meal Planning](#n-15-recipes) | ORGANIZE | IDEA | P2 | -- |
 | N-16 | [Budget Tracking](#n-16-budget) | ORGANIZE | IDEA | P3 | -- |
-| N-17 | [Automated Test Suite](#n-17-test-suite) | TRUST | BUILDING | P1 | 2026-02-18 |
+| N-17 | [Automated Test Suite](#n-17-test-suite) | TRUST | SHIPPED | P1 | 2026-02-19 |
 | N-18 | [Offline-First / PWA](#n-18-pwa) | EXPERIENCE | IDEA | P2 | -- |
 | N-19 | [Premium Tier](#n-19-premium) | MONETIZE | IDEA | P3 | -- |
 
@@ -62,8 +62,7 @@
 
 ### TRUST — "Reliable, secure, well-built"
 - Auth, architecture quality, testing, data safety.
-- **Shipped**: N-10 (Family Auth), N-11 (v2.0 Architecture)
-- **Building**: N-17 (Test Suite)
+- **Shipped**: N-10 (Family Auth), N-11 (v2.0 Architecture), N-17 (Test Suite)
 
 ### MONETIZE — "Sustainable product"
 - Premium features, enterprise licensing.
@@ -150,9 +149,9 @@
 **What**: Expense categorization, spending insights, budget goals, receipt OCR.
 
 ### N-17: Automated Test Suite
-**Pillar**: TRUST | **Status**: BUILDING | **Priority**: P1
+**Pillar**: TRUST | **Status**: SHIPPED | **Priority**: P1
 **What**: Vitest for unit tests, Playwright for E2E, accessibility testing. UAT guide exists (manual).
-**Progress (2026-02-18)**: 10 test files, 62 test cases. Covers schema validation, 4 API route groups, 5 client hooks. No production code changes.
+**Progress (2026-02-19)**: 13 test files, 69 test cases (62 unit + 7 E2E). Vitest covers schema validation, 4 API route groups, 5 client hooks. Playwright E2E covers auth flow, grocery CRUD, calendar event creation. Zero production code changes.
 
 ### N-18: Offline-First / PWA
 **Pillar**: EXPERIENCE | **Status**: IDEA | **Priority**: P2
@@ -209,21 +208,21 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 > Completed 2026-02-18. Vitest 4.x test suite with 10 files, 62 tests. Coverage: schema validation (11 tests), server routes — grocery/calendar/family/auth (24 tests), client hooks — queryClient/useResourceMutation/useGroceryLists/useCalendarEvents/useAuth (27 tests). All mocking at module boundaries; zero production code changes. Standalone `vitest.config.ts` avoids Replit plugin conflicts. `npm test` runs in ~1.2s. Next: E2E with Playwright (N-17 → SHIPPED).
 
 ### DIRECTIVE-CLX9-20260218-03 — Add Playwright E2E tests for critical user flows
-**From**: CLX9 CoS | **Date**: 2026-02-18 | **Status**: PENDING
+**From**: CLX9 CoS | **Date**: 2026-02-18 | **Status**: DONE
 **Priority**: P2
 
 **Context**: FamilyMind now has 62 unit tests (DIRECTIVE-02 completed). The team noted "Next: E2E with Playwright (N-17 → SHIPPED)" in their response. E2E tests are the final gate before N-17 can move from BUILDING to SHIPPED. FamilyMind is a consumer product with real users — the most user-facing project in the CLX9 portfolio.
 
 **Action Items**:
-1. [ ] Install Playwright and configure for the project (`npx playwright install --with-deps chromium`)
-2. [ ] Write E2E tests for 3 critical flows:
+1. [x] Install Playwright and configure for the project (`npx playwright install --with-deps chromium`)
+2. [x] Write E2E tests for 3 critical flows:
    - Login/auth flow (Passport.js + session)
    - Add a grocery item to a list (CRUD happy path)
    - Calendar event creation
-3. [ ] Ensure `npm test` still works (Vitest unit tests unaffected)
-4. [ ] Add a `npm run test:e2e` script to `package.json`
-5. [ ] Update N-17 status from BUILDING → SHIPPED once E2E tests pass
-6. [ ] Report total test count (unit + E2E)
+3. [x] Ensure `npm test` still works (Vitest unit tests unaffected)
+4. [x] Add a `npm run test:e2e` script to `package.json`
+5. [x] Update N-17 status from BUILDING → SHIPPED once E2E tests pass
+6. [x] Report total test count (unit + E2E)
 
 **Constraints**:
 - Playwright, not Cypress (ASIF preference for E2E)
@@ -232,7 +231,7 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 - Keep it minimal — 3 flows is enough to prove the pattern
 
 **Response** (filled by project team):
->
+> Completed 2026-02-19. Playwright E2E test suite with 3 files, 7 tests covering all 3 critical flows. Auth flow: 3 tests (auto-auth verification, API user endpoint, login redirect). Grocery CRUD: 2 tests (seeded list display, create list + add item). Calendar: 2 tests (form display, event creation). Config: `playwright.config.ts` with Chromium, auto-starts dev server, single worker. `npm run test:e2e` runs in ~8s. Vitest excluded via `e2e/**` in vitest.config.ts — `npm test` unaffected (62 unit tests, ~1.2s). Total: **69 tests** (62 unit + 7 E2E) across 13 files. N-17 BUILDING → SHIPPED.
 
 ---
 
@@ -246,3 +245,4 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 | 2026-02-18 | Portfolio Intelligence section added (Enrichment Cycle #3). |
 | 2026-02-18 | DIRECTIVE-CLX9-20260216-02 completed. N-17 IDEA→BUILDING. Vitest suite: 10 files, 62 tests. |
 | 2026-02-18 | CoS Directive DIRECTIVE-CLX9-20260218-03 issued: Playwright E2E tests for critical user flows. |
+| 2026-02-19 | DIRECTIVE-CLX9-20260218-03 completed. Playwright E2E: 3 files, 7 tests. N-17 BUILDING → SHIPPED. Total: 69 tests. |

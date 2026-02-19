@@ -13,5 +13,6 @@ export default defineConfig({
     globals: true,
     restoreMocks: true,
     setupFiles: ["./tests/setup.ts"],
+    exclude: ["e2e/**", "node_modules/**"],
   },
 });

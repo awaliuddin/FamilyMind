@@ -1,7 +1,7 @@
 # NEXUS — FamilyMind Vision-to-Execution Dashboard
 
 > **Owner**: Asif Waliuddin
-> **Last Updated**: 2026-02-16
+> **Last Updated**: 2026-02-18
 > **North Star**: *"Reduce the mental load of family organization by 40%+. Families spend less time planning and more time together."*
 
 ---
@@ -26,7 +26,7 @@
 | N-14 | [Voice Commands](#n-14-voice-commands) | INTELLIGENCE | IDEA | P2 | -- |
 | N-15 | [Recipe + Meal Planning](#n-15-recipes) | ORGANIZE | IDEA | P2 | -- |
 | N-16 | [Budget Tracking](#n-16-budget) | ORGANIZE | IDEA | P3 | -- |
-| N-17 | [Automated Test Suite](#n-17-test-suite) | TRUST | IDEA | P1 | -- |
+| N-17 | [Automated Test Suite](#n-17-test-suite) | TRUST | BUILDING | P1 | 2026-02-18 |
 | N-18 | [Offline-First / PWA](#n-18-pwa) | EXPERIENCE | IDEA | P2 | -- |
 | N-19 | [Premium Tier](#n-19-premium) | MONETIZE | IDEA | P3 | -- |
 
@@ -63,7 +63,7 @@
 ### TRUST — "Reliable, secure, well-built"
 - Auth, architecture quality, testing, data safety.
 - **Shipped**: N-10 (Family Auth), N-11 (v2.0 Architecture)
-- **Ideas**: N-17 (Test Suite)
+- **Building**: N-17 (Test Suite)
 
 ### MONETIZE — "Sustainable product"
 - Premium features, enterprise licensing.
@@ -150,8 +150,9 @@
 **What**: Expense categorization, spending insights, budget goals, receipt OCR.
 
 ### N-17: Automated Test Suite
-**Pillar**: TRUST | **Status**: IDEA | **Priority**: P1
+**Pillar**: TRUST | **Status**: BUILDING | **Priority**: P1
 **What**: Vitest for unit tests, Playwright for E2E, accessibility testing. UAT guide exists (manual).
+**Progress (2026-02-18)**: 10 test files, 62 test cases. Covers schema validation, 4 API route groups, 5 client hooks. No production code changes.
 
 ### N-18: Offline-First / PWA
 **Pillar**: EXPERIENCE | **Status**: IDEA | **Priority**: P2
@@ -187,17 +188,17 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 ## CoS Directives
 
 ### DIRECTIVE-CLX9-20260216-02 — Add automated test suite for critical paths
-**From**: CLX9 CoS | **Date**: 2026-02-16 | **Status**: PENDING
+**From**: CLX9 CoS | **Date**: 2026-02-16 | **Status**: DONE
 **Priority**: P1
 
 **Context**: FamilyMind has 11 shipped features and 0 automated tests — the highest regression risk in the CLX9 portfolio. A manual UAT guide exists (45 min) but provides no CI protection. N-17 (Automated Test Suite) is already in the NEXUS as an IDEA.
 
 **Action Items**:
-1. [ ] Set up Vitest with the existing `vite.config.ts`
-2. [ ] Write unit tests for `useResourceMutation` hook (the most reused abstraction — tests here protect all CRUD operations)
-3. [ ] Write unit tests for at least 2 API routes in `server/routes.ts` (recommend: grocery list CRUD, calendar event CRUD)
-4. [ ] Update N-17 status from IDEA → BUILDING
-5. [ ] Target: 10+ test files covering the most-used paths
+1. [x] Set up Vitest with standalone `vitest.config.ts` (Vitest 4.x, happy-dom for client, node for server)
+2. [x] Write unit tests for `useResourceMutation` hook (6 tests: create/update/remove, cache invalidation, callbacks, 401 redirect)
+3. [x] Write unit tests for 4 API route groups: grocery (9), calendar (6), family (6), auth (3)
+4. [x] Update N-17 status from IDEA → BUILDING
+5. [x] 10 test files, 62 test cases covering critical paths
 
 **Constraints**:
 - Use Vitest (already in CLAUDE.md as planned tooling)
@@ -205,7 +206,7 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 - Do NOT change production code to make it testable — if it's hard to test, note it as tech debt
 
 **Response** (filled by project team):
->
+> Completed 2026-02-18. Vitest 4.x test suite with 10 files, 62 tests. Coverage: schema validation (11 tests), server routes — grocery/calendar/family/auth (24 tests), client hooks — queryClient/useResourceMutation/useGroceryLists/useCalendarEvents/useAuth (27 tests). All mocking at module boundaries; zero production code changes. Standalone `vitest.config.ts` avoids Replit plugin conflicts. `npm test` runs in ~1.2s. Next: E2E with Playwright (N-17 → SHIPPED).
 
 ---
 
@@ -217,3 +218,4 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 | 2026-02-16 | Renumbered to **P-12** after NXTG-AI portfolio merge. |
 | 2026-02-16 | CoS Directive DIRECTIVE-CLX9-20260216-02 issued: add automated test suite. |
 | 2026-02-18 | Portfolio Intelligence section added (Enrichment Cycle #3). |
+| 2026-02-18 | DIRECTIVE-CLX9-20260216-02 completed. N-17 IDEA→BUILDING. Vitest suite: 10 files, 62 tests. |

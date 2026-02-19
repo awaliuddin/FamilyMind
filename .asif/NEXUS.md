@@ -208,6 +208,32 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 **Response** (filled by project team):
 > Completed 2026-02-18. Vitest 4.x test suite with 10 files, 62 tests. Coverage: schema validation (11 tests), server routes — grocery/calendar/family/auth (24 tests), client hooks — queryClient/useResourceMutation/useGroceryLists/useCalendarEvents/useAuth (27 tests). All mocking at module boundaries; zero production code changes. Standalone `vitest.config.ts` avoids Replit plugin conflicts. `npm test` runs in ~1.2s. Next: E2E with Playwright (N-17 → SHIPPED).
 
+### DIRECTIVE-CLX9-20260218-03 — Add Playwright E2E tests for critical user flows
+**From**: CLX9 CoS | **Date**: 2026-02-18 | **Status**: PENDING
+**Priority**: P2
+
+**Context**: FamilyMind now has 62 unit tests (DIRECTIVE-02 completed). The team noted "Next: E2E with Playwright (N-17 → SHIPPED)" in their response. E2E tests are the final gate before N-17 can move from BUILDING to SHIPPED. FamilyMind is a consumer product with real users — the most user-facing project in the CLX9 portfolio.
+
+**Action Items**:
+1. [ ] Install Playwright and configure for the project (`npx playwright install --with-deps chromium`)
+2. [ ] Write E2E tests for 3 critical flows:
+   - Login/auth flow (Passport.js + session)
+   - Add a grocery item to a list (CRUD happy path)
+   - Calendar event creation
+3. [ ] Ensure `npm test` still works (Vitest unit tests unaffected)
+4. [ ] Add a `npm run test:e2e` script to `package.json`
+5. [ ] Update N-17 status from BUILDING → SHIPPED once E2E tests pass
+6. [ ] Report total test count (unit + E2E)
+
+**Constraints**:
+- Playwright, not Cypress (ASIF preference for E2E)
+- Tests must work against the local dev server — no external dependencies
+- Do NOT test AI assistant features (OpenAI dependency makes E2E flaky)
+- Keep it minimal — 3 flows is enough to prove the pattern
+
+**Response** (filled by project team):
+>
+
 ---
 
 ## Changelog
@@ -219,3 +245,4 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 | 2026-02-16 | CoS Directive DIRECTIVE-CLX9-20260216-02 issued: add automated test suite. |
 | 2026-02-18 | Portfolio Intelligence section added (Enrichment Cycle #3). |
 | 2026-02-18 | DIRECTIVE-CLX9-20260216-02 completed. N-17 IDEA→BUILDING. Vitest suite: 10 files, 62 tests. |
+| 2026-02-18 | CoS Directive DIRECTIVE-CLX9-20260218-03 issued: Playwright E2E tests for critical user flows. |

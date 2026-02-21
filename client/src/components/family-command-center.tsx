@@ -9,6 +9,7 @@ import { useSwipeable } from "react-swipeable";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { CommandPalette } from "@/components/shared/CommandPalette";
 import { MobileBottomNav } from "@/components/shared/MobileBottomNav";
+import { VoiceButton } from "@/components/shared/VoiceButton";
 import AIChat from "./ai-chat";
 import { FamilyManagement } from "./family-management";
 import GroceryView from "./grocery/GroceryView";
@@ -112,6 +113,7 @@ export default function FamilyCommandCenter() {
 
               <div className="flex items-center space-x-2">
                 <ThemeToggle />
+                <VoiceButton onNavigate={setActiveTab} />
 
                 <Button
                   onClick={() => setChatOpen(true)}

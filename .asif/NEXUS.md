@@ -1,7 +1,7 @@
 # NEXUS — FamilyMind Vision-to-Execution Dashboard
 
 > **Owner**: Asif Waliuddin
-> **Last Updated**: 2026-02-20
+> **Last Updated**: 2026-02-21
 > **North Star**: *"Reduce the mental load of family organization by 40%+. Families spend less time planning and more time together."*
 
 ---
@@ -23,7 +23,7 @@
 | N-11 | [v2.0 Architecture Rewrite](#n-11-v2-architecture) | TRUST | SHIPPED | P0 | 2025-11-23 |
 | N-12 | [Mobile Apps (Capacitor)](#n-12-mobile-apps) | EXPERIENCE | IDEA | P1 | -- |
 | N-13 | [Real-Time Collaboration (WebSocket)](#n-13-realtime) | CONNECT | SHIPPED | P2 | 2026-02-20 |
-| N-14 | [Voice Commands](#n-14-voice-commands) | INTELLIGENCE | IDEA | P2 | -- |
+| N-14 | [Voice Commands](#n-14-voice-commands) | INTELLIGENCE | SHIPPED | P2 | 2026-02-21 |
 | N-15 | [Recipe + Meal Planning](#n-15-recipes) | ORGANIZE | SHIPPED | P2 | 2026-02-21 |
 | N-16 | [Budget Tracking](#n-16-budget) | ORGANIZE | IDEA | P3 | -- |
 | N-17 | [Automated Test Suite](#n-17-test-suite) | TRUST | SHIPPED | P1 | 2026-02-19 |
@@ -51,8 +51,7 @@
 
 ### INTELLIGENCE — "AI that knows your family"
 - Context-aware suggestions, proactive reminders, pattern learning.
-- **Shipped**: N-06 (AI Assistant)
-- **Ideas**: N-14 (Voice Commands)
+- **Shipped**: N-06 (AI Assistant), N-14 (Voice Commands)
 
 ### EXPERIENCE — "Feels native, looks beautiful"
 - Command palette, dark mode, mobile-first, animations, accessibility.
@@ -138,8 +137,10 @@
 **Scope note**: Phase 1 shipped — broadcast invalidation for all resource types. Live cursors and collaborative editing are future work.
 
 ### N-14: Voice Commands
-**Pillar**: INTELLIGENCE | **Status**: IDEA | **Priority**: P2
-**What**: "Add milk to Costco list", "What's on the calendar tomorrow?" Hands-free operation.
+**Pillar**: INTELLIGENCE | **Status**: SHIPPED | **Priority**: P2
+**What**: Browser-native voice commands via Web Speech API. Tab navigation ("go to calendar", "open recipes"), grocery item addition ("add milk to Costco list"), and fuzzy matching for tab aliases.
+**Key files**: `client/src/hooks/useVoiceCommands.ts`, `client/src/components/shared/VoiceButton.tsx`, `client/src/components/family-command-center.tsx`
+**Scope note**: Phase 1 shipped — navigation + grocery add commands. NL queries ("What's on the calendar tomorrow?"), continuous listening mode, and multi-language support are future work.
 
 ### N-15: Recipe + Meal Planning
 **Pillar**: ORGANIZE | **Status**: SHIPPED | **Priority**: P2
@@ -271,6 +272,7 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 
 | Date | Change |
 |------|--------|
+| 2026-02-21 | N-14 (Voice Commands) IDEA → SHIPPED. Web Speech API voice commands: tab navigation, grocery add, fuzzy aliases. Mic button in header. |
 | 2026-02-21 | N-15 (Recipe + Meal Planning) IDEA → SHIPPED. Recipe CRUD + "Add to Grocery List" integration. New recipes tab in app shell. |
 | 2026-02-20 | N-13 (Real-Time Collaboration) IDEA → SHIPPED. WebSocket broadcast invalidation for all resource types. |
 | 2026-02-20 | N-18 (PWA) IDEA → SHIPPED. Installable PWA: manifest, service worker, SVG icon, meta tags. |

@@ -22,7 +22,7 @@
 | N-10 | [Family Auth + Invite System](#n-10-family-auth) | TRUST | SHIPPED | P0 | 2025-11-23 |
 | N-11 | [v2.0 Architecture Rewrite](#n-11-v2-architecture) | TRUST | SHIPPED | P0 | 2025-11-23 |
 | N-12 | [Mobile Apps (Capacitor)](#n-12-mobile-apps) | EXPERIENCE | IDEA | P1 | -- |
-| N-13 | [Real-Time Collaboration (WebSocket)](#n-13-realtime) | CONNECT | IDEA | P2 | -- |
+| N-13 | [Real-Time Collaboration (WebSocket)](#n-13-realtime) | CONNECT | SHIPPED | P2 | 2026-02-20 |
 | N-14 | [Voice Commands](#n-14-voice-commands) | INTELLIGENCE | IDEA | P2 | -- |
 | N-15 | [Recipe + Meal Planning](#n-15-recipes) | ORGANIZE | IDEA | P2 | -- |
 | N-16 | [Budget Tracking](#n-16-budget) | ORGANIZE | IDEA | P3 | -- |
@@ -43,8 +43,7 @@
 
 ### CONNECT — "Democracy for family decisions"
 - Ideas board with voting, real-time collaboration, shared context.
-- **Shipped**: N-03 (Ideas Board)
-- **Ideas**: N-13 (Real-Time Collaboration)
+- **Shipped**: N-03 (Ideas Board), N-13 (Real-Time Collaboration)
 
 ### INSPIRE — "Dream big together"
 - Vision boards, goal tracking, milestone celebrations.
@@ -133,8 +132,10 @@
 **What**: Native iOS/Android via Capacitor. Native notifications, offline sync, camera (receipt scanning).
 
 ### N-13: Real-Time Collaboration (WebSocket)
-**Pillar**: CONNECT | **Status**: IDEA | **Priority**: P2
-**What**: WebSocket sync, live cursors, collaborative editing. `ws` package already in dependencies.
+**Pillar**: CONNECT | **Status**: SHIPPED | **Priority**: P2
+**What**: WebSocket-based real-time query invalidation. When any family member mutates data (grocery, calendar, ideas, etc.), all connected clients instantly refetch fresh data via TanStack Query cache invalidation.
+**Key files**: `server/ws.ts`, `client/src/hooks/useRealtimeSync.ts`, `server/index.ts` (broadcast middleware)
+**Scope note**: Phase 1 shipped — broadcast invalidation for all resource types. Live cursors and collaborative editing are future work.
 
 ### N-14: Voice Commands
 **Pillar**: INTELLIGENCE | **Status**: IDEA | **Priority**: P2
@@ -268,6 +269,7 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 
 | Date | Change |
 |------|--------|
+| 2026-02-20 | N-13 (Real-Time Collaboration) IDEA → SHIPPED. WebSocket broadcast invalidation for all resource types. |
 | 2026-02-20 | N-18 (PWA) IDEA → SHIPPED. Installable PWA: manifest, service worker, SVG icon, meta tags. |
 | 2026-02-20 | DIRECTIVE-CLX9-20260220-01d completed. CI workflow created (ADR-008). Unit tests = hard gate, E2E = optional. |
 | 2026-02-20 | CoS Directive DIRECTIVE-CLX9-20260220-01d issued: create CI (ADR-008). |

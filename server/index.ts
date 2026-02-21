@@ -3,6 +3,7 @@ import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { setupWebSocket, broadcast } from "./ws";
 
 const app = express();
 app.use(express.json());
@@ -38,8 +39,41 @@ app.use((req, res, next) => {
   next();
 });
 
+function getInvalidationKeys(path: string): string[] {
+  if (path.startsWith('/api/grocery-items') || path.startsWith('/api/grocery-lists')) {
+    return ['/api/grocery-lists'];
+  }
+  if (path.startsWith('/api/calendar-events')) return ['/api/calendar-events'];
+  if (path.startsWith('/api/family-ideas')) return ['/api/family-ideas'];
+  if (path.startsWith('/api/vision-items')) return ['/api/vision-items'];
+  if (path.startsWith('/api/wishlist-items')) return ['/api/wishlist-items'];
+  if (path.startsWith('/api/family-members')) return ['/api/family-members'];
+  if (path.startsWith('/api/family/')) return ['/api/family', '/api/auth/user'];
+  if (path === '/api/chat') return ['/api/chat-messages'];
+  return [];
+}
+
 (async () => {
+  // Realtime broadcast: after successful mutations, notify all WS clients
+  app.use((req, res, next) => {
+    if (req.method === 'GET' || !req.path.startsWith('/api/')) return next();
+
+    const originalJson = res.json;
+    res.json = function (body: any) {
+      const result = originalJson.apply(this, [body] as any);
+      if (res.statusCode < 400) {
+        const keys = getInvalidationKeys(req.path);
+        for (const key of keys) {
+          broadcast(key);
+        }
+      }
+      return result;
+    };
+    next();
+  });
+
   const server = await registerRoutes(app);
+  setupWebSocket(server);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

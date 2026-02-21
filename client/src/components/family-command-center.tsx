@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Bot, Home } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useRealtimeSync } from "@/hooks/useRealtimeSync";
 import { useSwipeable } from "react-swipeable";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { CommandPalette } from "@/components/shared/CommandPalette";
@@ -32,6 +33,7 @@ export default function FamilyCommandCenter() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [chatOpen, setChatOpen] = useState(false);
   const { user } = useAuth();
+  useRealtimeSync();
 
   const tabs = ['dashboard', 'grocery', 'calendar', 'ideas', 'vision', 'wishlist'];
 

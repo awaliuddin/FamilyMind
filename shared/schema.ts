@@ -156,6 +156,22 @@ export const wishListItems = pgTable("wish_list_items", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Recipes table
+export const recipes = pgTable("recipes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  familyId: varchar("family_id").references(() => families.id).notNull(),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  ingredients: jsonb("ingredients").notNull().default([]),
+  instructions: text("instructions"),
+  prepTime: integer("prep_time"),
+  cookTime: integer("cook_time"),
+  servings: integer("servings"),
+  category: varchar("category").default("dinner"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // AI chat messages table
 export const chatMessages = pgTable("chat_messages", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -202,6 +218,9 @@ export type VisionItem = typeof visionItems.$inferSelect;
 export type InsertWishListItem = typeof wishListItems.$inferInsert;
 export type WishListItem = typeof wishListItems.$inferSelect;
 
+export type InsertRecipe = typeof recipes.$inferInsert;
+export type Recipe = typeof recipes.$inferSelect;
+
 export type InsertChatMessage = typeof chatMessages.$inferInsert;
 export type ChatMessage = typeof chatMessages.$inferSelect;
 
@@ -241,6 +260,12 @@ export const insertVisionItemSchema = createInsertSchema(visionItems).omit({
 export const insertWishListItemSchema = createInsertSchema(wishListItems).omit({
   id: true,
   createdAt: true,
+});
+
+export const insertRecipeSchema = createInsertSchema(recipes).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({

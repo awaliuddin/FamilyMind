@@ -47,6 +47,11 @@ function getInvalidationKeys(path: string): string[] {
   if (path.startsWith('/api/family-ideas')) return ['/api/family-ideas'];
   if (path.startsWith('/api/vision-items')) return ['/api/vision-items'];
   if (path.startsWith('/api/wishlist-items')) return ['/api/wishlist-items'];
+  if (path.startsWith('/api/recipes')) {
+    // to-grocery-list endpoint also invalidates grocery lists
+    if (path.endsWith('/to-grocery-list')) return ['/api/recipes', '/api/grocery-lists'];
+    return ['/api/recipes'];
+  }
   if (path.startsWith('/api/family-members')) return ['/api/family-members'];
   if (path.startsWith('/api/family/')) return ['/api/family', '/api/auth/user'];
   if (path === '/api/chat') return ['/api/chat-messages'];

@@ -72,6 +72,10 @@ export function createMockStorage(): IStorage & {
     createWishListItem: vi.fn(),
     updateWishListItem: vi.fn(),
     deleteWishListItem: vi.fn(),
+    getRecipes: vi.fn(),
+    createRecipe: vi.fn(),
+    updateRecipe: vi.fn(),
+    deleteRecipe: vi.fn(),
     getChatMessages: vi.fn(),
     createChatMessage: vi.fn(),
   };

@@ -24,7 +24,7 @@
 | N-12 | [Mobile Apps (Capacitor)](#n-12-mobile-apps) | EXPERIENCE | IDEA | P1 | -- |
 | N-13 | [Real-Time Collaboration (WebSocket)](#n-13-realtime) | CONNECT | SHIPPED | P2 | 2026-02-20 |
 | N-14 | [Voice Commands](#n-14-voice-commands) | INTELLIGENCE | IDEA | P2 | -- |
-| N-15 | [Recipe + Meal Planning](#n-15-recipes) | ORGANIZE | IDEA | P2 | -- |
+| N-15 | [Recipe + Meal Planning](#n-15-recipes) | ORGANIZE | SHIPPED | P2 | 2026-02-21 |
 | N-16 | [Budget Tracking](#n-16-budget) | ORGANIZE | IDEA | P3 | -- |
 | N-17 | [Automated Test Suite](#n-17-test-suite) | TRUST | SHIPPED | P1 | 2026-02-19 |
 | N-18 | [Offline-First / PWA](#n-18-pwa) | EXPERIENCE | SHIPPED | P2 | 2026-02-20 |
@@ -38,8 +38,8 @@
 
 ### ORGANIZE — "One place for everything your family manages"
 - Grocery lists, calendars, wish lists, budget, recipes — the logistics layer.
-- **Shipped**: N-01 (Grocery), N-02 (Calendar), N-05 (Wish Lists)
-- **Ideas**: N-15 (Recipes), N-16 (Budget)
+- **Shipped**: N-01 (Grocery), N-02 (Calendar), N-05 (Wish Lists), N-15 (Recipes)
+- **Ideas**: N-16 (Budget)
 
 ### CONNECT — "Democracy for family decisions"
 - Ideas board with voting, real-time collaboration, shared context.
@@ -142,8 +142,10 @@
 **What**: "Add milk to Costco list", "What's on the calendar tomorrow?" Hands-free operation.
 
 ### N-15: Recipe + Meal Planning
-**Pillar**: ORGANIZE | **Status**: IDEA | **Priority**: P2
-**What**: Import recipes from websites, auto-generate grocery lists, meal calendar, nutrition.
+**Pillar**: ORGANIZE | **Status**: SHIPPED | **Priority**: P2
+**What**: Family recipe book with CRUD, ingredient management, and "Add to Grocery List" integration. Ingredients stored as JSONB, batch-added to any grocery list as auto-tagged items.
+**Key files**: `client/src/components/recipes/RecipesView.tsx`, `client/src/hooks/useRecipes.ts`, `server/routes.ts` (recipe routes + `/to-grocery-list`), `shared/schema.ts` (recipes table)
+**Scope note**: Phase 1 shipped — recipe CRUD + grocery list integration. Web scraping, meal calendar, and nutrition tracking are future work.
 
 ### N-16: Budget Tracking
 **Pillar**: ORGANIZE | **Status**: IDEA | **Priority**: P3
@@ -269,6 +271,7 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 
 | Date | Change |
 |------|--------|
+| 2026-02-21 | N-15 (Recipe + Meal Planning) IDEA → SHIPPED. Recipe CRUD + "Add to Grocery List" integration. New recipes tab in app shell. |
 | 2026-02-20 | N-13 (Real-Time Collaboration) IDEA → SHIPPED. WebSocket broadcast invalidation for all resource types. |
 | 2026-02-20 | N-18 (PWA) IDEA → SHIPPED. Installable PWA: manifest, service worker, SVG icon, meta tags. |
 | 2026-02-20 | DIRECTIVE-CLX9-20260220-01d completed. CI workflow created (ADR-008). Unit tests = hard gate, E2E = optional. |

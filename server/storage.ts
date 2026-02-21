@@ -10,6 +10,7 @@ import {
   ideaLikes,
   visionItems,
   wishListItems,
+  recipes,
   chatMessages,
   type User,
   type UpsertUser,
@@ -33,6 +34,8 @@ import {
   type InsertVisionItem,
   type WishListItem,
   type InsertWishListItem,
+  type Recipe,
+  type InsertRecipe,
   type ChatMessage,
   type InsertChatMessage,
 } from "@shared/schema";
@@ -87,6 +90,12 @@ export interface IStorage {
   createWishListItem(item: InsertWishListItem): Promise<WishListItem>;
   updateWishListItem(id: string, updates: Partial<WishListItem>): Promise<WishListItem>;
   deleteWishListItem(id: string): Promise<void>;
+
+  // Recipes
+  getRecipes(familyId: string): Promise<Recipe[]>;
+  createRecipe(recipe: InsertRecipe): Promise<Recipe>;
+  updateRecipe(id: string, updates: Partial<Recipe>): Promise<Recipe>;
+  deleteRecipe(id: string): Promise<void>;
 
   // AI Chat
   getChatMessages(userId: string): Promise<ChatMessage[]>;
@@ -354,6 +363,33 @@ export class DatabaseStorage implements IStorage {
 
   async deleteWishListItem(id: string): Promise<void> {
     await db.delete(wishListItems).where(eq(wishListItems.id, id));
+  }
+
+  // Recipes
+  async getRecipes(familyId: string): Promise<Recipe[]> {
+    return await db
+      .select()
+      .from(recipes)
+      .where(eq(recipes.familyId, familyId))
+      .orderBy(desc(recipes.createdAt));
+  }
+
+  async createRecipe(recipe: InsertRecipe): Promise<Recipe> {
+    const [newRecipe] = await db.insert(recipes).values(recipe).returning();
+    return newRecipe;
+  }
+
+  async updateRecipe(id: string, updates: Partial<Recipe>): Promise<Recipe> {
+    const [updatedRecipe] = await db
+      .update(recipes)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(recipes.id, id))
+      .returning();
+    return updatedRecipe;
+  }
+
+  async deleteRecipe(id: string): Promise<void> {
+    await db.delete(recipes).where(eq(recipes.id, id));
   }
 
   // AI Chat

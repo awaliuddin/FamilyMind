@@ -1,7 +1,7 @@
 # NEXUS — FamilyMind Vision-to-Execution Dashboard
 
 > **Owner**: Asif Waliuddin
-> **Last Updated**: 2026-02-19
+> **Last Updated**: 2026-02-20
 > **North Star**: *"Reduce the mental load of family organization by 40%+. Families spend less time planning and more time together."*
 
 ---
@@ -27,7 +27,7 @@
 | N-15 | [Recipe + Meal Planning](#n-15-recipes) | ORGANIZE | IDEA | P2 | -- |
 | N-16 | [Budget Tracking](#n-16-budget) | ORGANIZE | IDEA | P3 | -- |
 | N-17 | [Automated Test Suite](#n-17-test-suite) | TRUST | SHIPPED | P1 | 2026-02-19 |
-| N-18 | [Offline-First / PWA](#n-18-pwa) | EXPERIENCE | IDEA | P2 | -- |
+| N-18 | [Offline-First / PWA](#n-18-pwa) | EXPERIENCE | SHIPPED | P2 | 2026-02-20 |
 | N-19 | [Premium Tier](#n-19-premium) | MONETIZE | IDEA | P3 | -- |
 
 ---
@@ -57,8 +57,8 @@
 
 ### EXPERIENCE — "Feels native, looks beautiful"
 - Command palette, dark mode, mobile-first, animations, accessibility.
-- **Shipped**: N-07 (Command Palette), N-08 (Dark Mode), N-09 (Mobile-First)
-- **Ideas**: N-12 (Mobile Apps), N-18 (PWA)
+- **Shipped**: N-07 (Command Palette), N-08 (Dark Mode), N-09 (Mobile-First), N-18 (PWA)
+- **Ideas**: N-12 (Mobile Apps)
 
 ### TRUST — "Reliable, secure, well-built"
 - Auth, architecture quality, testing, data safety.
@@ -154,8 +154,10 @@
 **Progress (2026-02-19)**: 13 test files, 69 test cases (62 unit + 7 E2E). Vitest covers schema validation, 4 API route groups, 5 client hooks. Playwright E2E covers auth flow, grocery CRUD, calendar event creation. Zero production code changes.
 
 ### N-18: Offline-First / PWA
-**Pillar**: EXPERIENCE | **Status**: IDEA | **Priority**: P2
-**What**: Full offline support, install to home screen, push notifications. Service worker caching.
+**Pillar**: EXPERIENCE | **Status**: SHIPPED | **Priority**: P2
+**What**: Installable PWA with service worker caching. Add-to-homescreen, app-like standalone display, static asset caching, SPA offline fallback.
+**Key files**: `client/public/manifest.json`, `client/public/sw.js`, `client/public/icon.svg`, `client/index.html`
+**Scope note**: Phase 1 shipped — installability + shell caching. Full offline-first (IndexedDB sync, background sync, push notifications) is future work if N-12 (Capacitor) doesn't supersede it.
 
 ### N-19: Premium Tier
 **Pillar**: MONETIZE | **Status**: IDEA | **Priority**: P3
@@ -266,6 +268,7 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 
 | Date | Change |
 |------|--------|
+| 2026-02-20 | N-18 (PWA) IDEA → SHIPPED. Installable PWA: manifest, service worker, SVG icon, meta tags. |
 | 2026-02-20 | DIRECTIVE-CLX9-20260220-01d completed. CI workflow created (ADR-008). Unit tests = hard gate, E2E = optional. |
 | 2026-02-20 | CoS Directive DIRECTIVE-CLX9-20260220-01d issued: create CI (ADR-008). |
 | 2026-02-16 | Created. Onboarded into ASIF as P-05 via inception review. |

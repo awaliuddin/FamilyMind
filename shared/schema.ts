@@ -172,6 +172,16 @@ export const recipes = pgTable("recipes", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Meal plans table (schema only — N-15 phase 2 foundation)
+export const mealPlans = pgTable("meal_plans", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  familyId: varchar("family_id").references(() => families.id).notNull(),
+  recipeId: varchar("recipe_id").references(() => recipes.id).notNull(),
+  date: varchar("date").notNull(), // ISO date string, e.g. "2026-03-01"
+  mealType: varchar("meal_type").notNull(), // 'breakfast', 'lunch', 'dinner', 'snack'
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // AI chat messages table
 export const chatMessages = pgTable("chat_messages", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -221,6 +231,9 @@ export type WishListItem = typeof wishListItems.$inferSelect;
 export type InsertRecipe = typeof recipes.$inferInsert;
 export type Recipe = typeof recipes.$inferSelect;
 
+export type InsertMealPlan = typeof mealPlans.$inferInsert;
+export type MealPlan = typeof mealPlans.$inferSelect;
+
 export type InsertChatMessage = typeof chatMessages.$inferInsert;
 export type ChatMessage = typeof chatMessages.$inferSelect;
 
@@ -266,6 +279,11 @@ export const insertRecipeSchema = createInsertSchema(recipes).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+});
+
+export const insertMealPlanSchema = createInsertSchema(mealPlans).omit({
+  id: true,
+  createdAt: true,
 });
 
 export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({

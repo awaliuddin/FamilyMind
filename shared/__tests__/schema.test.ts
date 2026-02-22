@@ -4,6 +4,8 @@ import {
   insertGroceryItemSchema,
   insertCalendarEventSchema,
   insertFamilyMemberSchema,
+  insertRecipeSchema,
+  insertMealPlanSchema,
 } from "../schema";
 
 describe("insertGroceryListSchema", () => {
@@ -118,6 +120,66 @@ describe("insertFamilyMemberSchema", () => {
       familyId: "fam-1",
       name: "Emma",
       color: "#ff6b6b",
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("insertRecipeSchema", () => {
+  it("accepts valid recipe data", () => {
+    const result = insertRecipeSchema.safeParse({
+      familyId: "fam-1",
+      title: "Spaghetti Bolognese",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing required title", () => {
+    const result = insertRecipeSchema.safeParse({
+      familyId: "fam-1",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts optional fields", () => {
+    const result = insertRecipeSchema.safeParse({
+      familyId: "fam-1",
+      title: "Tacos",
+      description: "Family favorite",
+      ingredients: [{ name: "tortillas", quantity: "8", unit: "pcs" }],
+      instructions: "Fill and fold",
+      prepTime: 10,
+      cookTime: 15,
+      servings: 4,
+      category: "dinner",
+    });
+    expect(result.success).toBe(true);
+  });
+});
+
+describe("insertMealPlanSchema", () => {
+  it("accepts valid meal plan data", () => {
+    const result = insertMealPlanSchema.safeParse({
+      familyId: "fam-1",
+      recipeId: "r-1",
+      date: "2026-03-01",
+      mealType: "dinner",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing required fields", () => {
+    const result = insertMealPlanSchema.safeParse({
+      familyId: "fam-1",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing date", () => {
+    const result = insertMealPlanSchema.safeParse({
+      familyId: "fam-1",
+      recipeId: "r-1",
+      mealType: "lunch",
     });
     expect(result.success).toBe(false);
   });

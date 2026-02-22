@@ -8,6 +8,7 @@ import {
   Heart,
   Gift,
   UtensilsCrossed,
+  Wallet,
 } from "lucide-react";
 
 interface MobileBottomNavProps {
@@ -23,6 +24,7 @@ const tabs = [
   { id: 'vision', label: 'Vision', icon: Heart },
   { id: 'wishlist', label: 'Wishlist', icon: Gift },
   { id: 'recipes', label: 'Recipes', icon: UtensilsCrossed },
+  { id: 'budget', label: 'Budget', icon: Wallet },
 ];
 
 export function MobileBottomNav({ activeTab, onTabChange }: MobileBottomNavProps) {
@@ -36,7 +38,7 @@ export function MobileBottomNav({ activeTab, onTabChange }: MobileBottomNavProps
       role="navigation"
       aria-label="Mobile navigation"
     >
-      <div className="grid grid-cols-7 h-16">
+      <div className="grid grid-cols-8 h-16">
         {tabs.map(({ id, label, icon: Icon }) => {
           const isActive = activeTab === id;
           return (

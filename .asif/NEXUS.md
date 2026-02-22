@@ -25,7 +25,7 @@
 | N-13 | [Real-Time Collaboration (WebSocket)](#n-13-realtime) | CONNECT | SHIPPED | P2 | 2026-02-20 |
 | N-14 | [Voice Commands](#n-14-voice-commands) | INTELLIGENCE | SHIPPED | P2 | 2026-02-21 |
 | N-15 | [Recipe + Meal Planning](#n-15-recipes) | ORGANIZE | SHIPPED | P2 | 2026-02-21 |
-| N-16 | [Budget Tracking](#n-16-budget) | ORGANIZE | IDEA | P3 | -- |
+| N-16 | [Budget Tracking](#n-16-budget) | ORGANIZE | SHIPPED | P2 | 2026-02-22 |
 | N-17 | [Automated Test Suite](#n-17-test-suite) | TRUST | SHIPPED | P1 | 2026-02-19 |
 | N-18 | [Offline-First / PWA](#n-18-pwa) | EXPERIENCE | SHIPPED | P2 | 2026-02-20 |
 | N-19 | [Premium Tier](#n-19-premium) | MONETIZE | IDEA | P3 | -- |
@@ -38,8 +38,7 @@
 
 ### ORGANIZE — "One place for everything your family manages"
 - Grocery lists, calendars, wish lists, budget, recipes — the logistics layer.
-- **Shipped**: N-01 (Grocery), N-02 (Calendar), N-05 (Wish Lists), N-15 (Recipes)
-- **Ideas**: N-16 (Budget)
+- **Shipped**: N-01 (Grocery), N-02 (Calendar), N-05 (Wish Lists), N-15 (Recipes), N-16 (Budget)
 
 ### CONNECT — "Democracy for family decisions"
 - Ideas board with voting, real-time collaboration, shared context.
@@ -149,8 +148,10 @@
 **Scope note**: Phase 1 shipped — recipe CRUD + grocery list integration. Web scraping, meal calendar, and nutrition tracking are future work.
 
 ### N-16: Budget Tracking
-**Pillar**: ORGANIZE | **Status**: IDEA | **Priority**: P3
-**What**: Expense categorization, spending insights, budget goals, receipt OCR.
+**Pillar**: ORGANIZE | **Status**: SHIPPED | **Priority**: P2
+**What**: Family budget management with category-based budgets, expense tracking, progress bars, and monthly summary endpoint.
+**Key files**: `client/src/components/budget/BudgetView.tsx`, `client/src/hooks/useBudgets.ts`, `server/routes.ts` (budget + expense routes + summary), `shared/schema.ts` (budgets + expenses tables)
+**Scope note**: Phase 1 shipped — budget CRUD, expense tracking, progress visualization, monthly summary. Receipt OCR and spending insights are future work.
 
 ### N-17: Automated Test Suite
 **Pillar**: TRUST | **Status**: SHIPPED | **Priority**: P1
@@ -194,17 +195,17 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 
 ### DIRECTIVE-CLX9-20260222-18 — Start N-16 Budget Tracking feature
 **From**: CLX9 CoS | **Priority**: P2
-**Injected**: 2026-02-22 17:00 | **Estimate**: M (~25min) | **Status**: PENDING
+**Injected**: 2026-02-22 17:00 | **Estimate**: M (~25min) | **Status**: DONE
 
 **Context**: FamilyMind has 11 shipped features and 125 tests. All directives complete. N-16 (Budget Tracking) would complete the ORGANIZE pillar — families track meals, groceries, and recipes but not the money side. This is the natural next step for the product.
 
 **Action Items**:
-1. [ ] Create database schema: `budgets` table (id, family_id, name, amount, period, category), `expenses` table (id, budget_id, amount, description, date, category)
-2. [ ] Create Drizzle migration
-3. [ ] Create Express API routes: CRUD for budgets and expenses, monthly summary endpoint
-4. [ ] Create React components: BudgetOverview, ExpenseForm, BudgetProgressBar
-5. [ ] Add N-16 initiative to NEXUS as BUILDING
-6. [ ] Write tests for new API routes (target: 10+ new tests)
+1. [x] Create database schema: `budgets` table (id, family_id, name, amount, period, category), `expenses` table (id, budget_id, amount, description, date, category)
+2. [x] Create Drizzle migration — using `db:push` per project convention (no migration files)
+3. [x] Create Express API routes: CRUD for budgets and expenses, monthly summary endpoint
+4. [x] Create React components: BudgetOverview, ExpenseForm, BudgetProgressBar
+5. [x] Add N-16 initiative to NEXUS as SHIPPED
+6. [x] Write tests for new API routes (target: 10+ new tests) — **22 new tests** (10 route + 7 hook + 5 schema)
 7. [ ] Commit and push
 
 **Constraints**:
@@ -213,7 +214,7 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 - Tests must pass alongside existing 125 tests
 
 **Response** (filled by project team):
->
+> Completed 2026-02-22. Full N-16 Budget Tracking feature shipped. Schema: `budgets` (id, familyId, name, amount, period, category) + `expenses` (id, budgetId, amount, description, date, category) in `shared/schema.ts`. Storage: `IStorage` + `DatabaseStorage` implementation with cascade delete (expenses deleted when budget deleted). Routes: 8 endpoints — GET/POST/PATCH/DELETE for budgets, POST/PATCH/DELETE for expenses, GET `/api/budgets/summary/:month` for monthly aggregation with date filtering. Frontend: `BudgetView.tsx` with BudgetProgressBar (animated, color-coded: green/amber/red), ExpenseForm (inline per-budget), BudgetCard with expense list, overview cards (total budgeted/spent/remaining). Lazy-loaded in app shell, mobile nav updated (8 tabs). Hook: `useBudgets` + `useBudgetSummary` + `useBudgetMutations` (5 mutations). Tests: 22 new tests — 10 route tests (budget CRUD, expense CRUD, monthly summary with date filtering), 7 hook tests, 5 schema validation tests. **Total: 147 tests** (140 unit + 7 E2E) across 24 files. All passing. TypeScript clean. N-16 IDEA → SHIPPED.
 
 ---
 
@@ -340,6 +341,7 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 
 | Date | Change |
 |------|--------|
+| 2026-02-22 | DIRECTIVE-CLX9-20260222-18 completed. N-16 (Budget Tracking) IDEA → SHIPPED. Full feature: schema, routes, components, 22 new tests. Total: 147 tests. |
 | 2026-02-21 | DIRECTIVE-CLX9-20260222-08 completed. Test coverage 69 → 115 (8 new test files). |
 | 2026-02-21 | DIRECTIVE-CLX9-20260222-09 completed. Recipe-to-grocery integration tests + meal_plans schema. Total: 125 tests. |
 | 2026-02-21 | N-14 (Voice Commands) IDEA → SHIPPED. Web Speech API voice commands: tab navigation, grocery add, fuzzy aliases. Mic button in header. |

@@ -11,6 +11,8 @@ import {
   visionItems,
   wishListItems,
   recipes,
+  budgets,
+  expenses,
   chatMessages,
   type User,
   type UpsertUser,
@@ -36,6 +38,10 @@ import {
   type InsertWishListItem,
   type Recipe,
   type InsertRecipe,
+  type Budget,
+  type InsertBudget,
+  type Expense,
+  type InsertExpense,
   type ChatMessage,
   type InsertChatMessage,
 } from "@shared/schema";
@@ -96,6 +102,18 @@ export interface IStorage {
   createRecipe(recipe: InsertRecipe): Promise<Recipe>;
   updateRecipe(id: string, updates: Partial<Recipe>): Promise<Recipe>;
   deleteRecipe(id: string): Promise<void>;
+
+  // Budgets
+  getBudgets(familyId: string): Promise<(Budget & { expenses: Expense[] })[]>;
+  createBudget(budget: InsertBudget): Promise<Budget>;
+  updateBudget(id: string, updates: Partial<Budget>): Promise<Budget>;
+  deleteBudget(id: string): Promise<void>;
+
+  // Expenses
+  getExpenses(budgetId: string): Promise<Expense[]>;
+  createExpense(expense: InsertExpense): Promise<Expense>;
+  updateExpense(id: string, updates: Partial<Expense>): Promise<Expense>;
+  deleteExpense(id: string): Promise<void>;
 
   // AI Chat
   getChatMessages(userId: string): Promise<ChatMessage[]>;
@@ -390,6 +408,75 @@ export class DatabaseStorage implements IStorage {
 
   async deleteRecipe(id: string): Promise<void> {
     await db.delete(recipes).where(eq(recipes.id, id));
+  }
+
+  // Budgets
+  async getBudgets(familyId: string): Promise<(Budget & { expenses: Expense[] })[]> {
+    const budgetList = await db
+      .select()
+      .from(budgets)
+      .where(eq(budgets.familyId, familyId))
+      .orderBy(desc(budgets.createdAt));
+
+    const budgetsWithExpenses = await Promise.all(
+      budgetList.map(async (budget) => {
+        const expenseList = await db
+          .select()
+          .from(expenses)
+          .where(eq(expenses.budgetId, budget.id))
+          .orderBy(desc(expenses.createdAt));
+        return { ...budget, expenses: expenseList };
+      })
+    );
+
+    return budgetsWithExpenses;
+  }
+
+  async createBudget(budget: InsertBudget): Promise<Budget> {
+    const [newBudget] = await db.insert(budgets).values(budget).returning();
+    return newBudget;
+  }
+
+  async updateBudget(id: string, updates: Partial<Budget>): Promise<Budget> {
+    const [updatedBudget] = await db
+      .update(budgets)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(budgets.id, id))
+      .returning();
+    return updatedBudget;
+  }
+
+  async deleteBudget(id: string): Promise<void> {
+    // Delete all expenses in the budget first
+    await db.delete(expenses).where(eq(expenses.budgetId, id));
+    await db.delete(budgets).where(eq(budgets.id, id));
+  }
+
+  // Expenses
+  async getExpenses(budgetId: string): Promise<Expense[]> {
+    return await db
+      .select()
+      .from(expenses)
+      .where(eq(expenses.budgetId, budgetId))
+      .orderBy(desc(expenses.createdAt));
+  }
+
+  async createExpense(expense: InsertExpense): Promise<Expense> {
+    const [newExpense] = await db.insert(expenses).values(expense).returning();
+    return newExpense;
+  }
+
+  async updateExpense(id: string, updates: Partial<Expense>): Promise<Expense> {
+    const [updatedExpense] = await db
+      .update(expenses)
+      .set(updates)
+      .where(eq(expenses.id, id))
+      .returning();
+    return updatedExpense;
+  }
+
+  async deleteExpense(id: string): Promise<void> {
+    await db.delete(expenses).where(eq(expenses.id, id));
   }
 
   // AI Chat

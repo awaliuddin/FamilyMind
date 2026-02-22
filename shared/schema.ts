@@ -172,6 +172,28 @@ export const recipes = pgTable("recipes", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Budget tracking tables
+export const budgets = pgTable("budgets", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  familyId: varchar("family_id").references(() => families.id).notNull(),
+  name: varchar("name").notNull(),
+  amount: varchar("amount").notNull(), // stored as string to avoid float issues
+  period: varchar("period").notNull().default("monthly"), // 'weekly', 'monthly', 'yearly'
+  category: varchar("category").notNull().default("general"), // 'groceries', 'dining', 'transport', 'utilities', 'entertainment', 'general'
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const expenses = pgTable("expenses", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  budgetId: varchar("budget_id").references(() => budgets.id).notNull(),
+  amount: varchar("amount").notNull(),
+  description: varchar("description").notNull(),
+  date: varchar("date").notNull(), // ISO date string, e.g. "2026-03-01"
+  category: varchar("category").default("general"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Meal plans table (schema only — N-15 phase 2 foundation)
 export const mealPlans = pgTable("meal_plans", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -231,6 +253,12 @@ export type WishListItem = typeof wishListItems.$inferSelect;
 export type InsertRecipe = typeof recipes.$inferInsert;
 export type Recipe = typeof recipes.$inferSelect;
 
+export type InsertBudget = typeof budgets.$inferInsert;
+export type Budget = typeof budgets.$inferSelect;
+
+export type InsertExpense = typeof expenses.$inferInsert;
+export type Expense = typeof expenses.$inferSelect;
+
 export type InsertMealPlan = typeof mealPlans.$inferInsert;
 export type MealPlan = typeof mealPlans.$inferSelect;
 
@@ -279,6 +307,17 @@ export const insertRecipeSchema = createInsertSchema(recipes).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+});
+
+export const insertBudgetSchema = createInsertSchema(budgets).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertExpenseSchema = createInsertSchema(expenses).omit({
+  id: true,
+  createdAt: true,
 });
 
 export const insertMealPlanSchema = createInsertSchema(mealPlans).omit({

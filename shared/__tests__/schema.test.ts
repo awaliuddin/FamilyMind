@@ -6,6 +6,8 @@ import {
   insertFamilyMemberSchema,
   insertRecipeSchema,
   insertMealPlanSchema,
+  insertBudgetSchema,
+  insertExpenseSchema,
 } from "../schema";
 
 describe("insertGroceryListSchema", () => {
@@ -180,6 +182,61 @@ describe("insertMealPlanSchema", () => {
       familyId: "fam-1",
       recipeId: "r-1",
       mealType: "lunch",
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("insertBudgetSchema", () => {
+  it("accepts valid budget data", () => {
+    const result = insertBudgetSchema.safeParse({
+      familyId: "fam-1",
+      name: "Groceries",
+      amount: "500",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing required name", () => {
+    const result = insertBudgetSchema.safeParse({
+      familyId: "fam-1",
+      amount: "500",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts optional period and category", () => {
+    const result = insertBudgetSchema.safeParse({
+      familyId: "fam-1",
+      name: "Dining",
+      amount: "200",
+      period: "weekly",
+      category: "dining",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.period).toBe("weekly");
+      expect(result.data.category).toBe("dining");
+    }
+  });
+});
+
+describe("insertExpenseSchema", () => {
+  it("accepts valid expense data", () => {
+    const result = insertExpenseSchema.safeParse({
+      budgetId: "b-1",
+      amount: "45.50",
+      description: "Costco trip",
+      date: "2026-03-01",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing required description", () => {
+    const result = insertExpenseSchema.safeParse({
+      budgetId: "b-1",
+      amount: "45.50",
+      date: "2026-03-01",
     });
     expect(result.success).toBe(false);
   });

@@ -24,6 +24,7 @@ const VisionView = lazy(() => import("./vision/VisionView").catch(() => import("
 const WishlistView = lazy(() => import("./wishlist/WishlistView").catch(() => import("./grocery/GroceryView")));
 const DashboardView = lazy(() => import("./dashboard/DashboardView").catch(() => import("./grocery/GroceryView")));
 const RecipesView = lazy(() => import("./recipes/RecipesView").catch(() => import("./grocery/GroceryView")));
+const BudgetView = lazy(() => import("./budget/BudgetView").catch(() => import("./grocery/GroceryView")));
 
 const LoadingFallback = () => (
   <div className="flex items-center justify-center h-64">
@@ -37,13 +38,13 @@ export default function FamilyCommandCenter() {
   const { user } = useAuth();
   useRealtimeSync();
 
-  const tabs = ['dashboard', 'grocery', 'calendar', 'ideas', 'vision', 'wishlist', 'recipes'];
+  const tabs = ['dashboard', 'grocery', 'calendar', 'ideas', 'vision', 'wishlist', 'recipes', 'budget'];
 
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       // Alt+Number for tab navigation
-      if (e.altKey && e.key >= '1' && e.key <= '7') {
+      if (e.altKey && e.key >= '1' && e.key <= '8') {
         e.preventDefault();
         setActiveTab(tabs[parseInt(e.key) - 1]);
       }
@@ -142,7 +143,7 @@ export default function FamilyCommandCenter() {
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <Card className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg overflow-hidden">
               {/* Desktop Tabs - Hidden on Mobile */}
-              <TabsList className="hidden md:grid grid-cols-7 bg-gray-50 dark:bg-gray-800/50 w-full">
+              <TabsList className="hidden md:grid grid-cols-8 bg-gray-50 dark:bg-gray-800/50 w-full">
                 <TabsTrigger value="dashboard" className="data-[state=active]:bg-blue-500 data-[state=active]:text-white">
                   Dashboard
                 </TabsTrigger>
@@ -163,6 +164,9 @@ export default function FamilyCommandCenter() {
                 </TabsTrigger>
                 <TabsTrigger value="recipes" className="data-[state=active]:bg-blue-500 data-[state=active]:text-white">
                   Recipes
+                </TabsTrigger>
+                <TabsTrigger value="budget" className="data-[state=active]:bg-blue-500 data-[state=active]:text-white">
+                  Budget
                 </TabsTrigger>
               </TabsList>
 
@@ -210,6 +214,13 @@ export default function FamilyCommandCenter() {
               <TabsContent value="recipes" className="m-0">
                 <Suspense fallback={<LoadingFallback />}>
                   <RecipesView />
+                </Suspense>
+              </TabsContent>
+
+              {/* Budget Tab */}
+              <TabsContent value="budget" className="m-0">
+                <Suspense fallback={<LoadingFallback />}>
+                  <BudgetView />
                 </Suspense>
               </TabsContent>
             </Card>

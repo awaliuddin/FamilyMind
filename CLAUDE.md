@@ -22,6 +22,8 @@ On every session:
 4. Update initiative statuses in NEXUS if your work changes them
 5. If you have questions for the CoS, add them under `## Team Questions` in NEXUS
 
+**Team Questions (Escalation to CoS)**: The CoS runs enrichment cycles **3x daily** and checks `## Team Questions` in your NEXUS every time. Use this for: portfolio-level guidance, architecture review requests, cross-project context ("does another project already have X?"), blockers outside your project scope, or decisions requiring Asif's input. Write your question in NEXUS, the CoS will respond inline.
+
 ## Project Overview
 
 **FamilyMind** — AI-powered family command center. Reduce the mental load of family organization by 40%+.

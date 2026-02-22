@@ -266,6 +266,43 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 **Response** (filled by project team):
 > Completed 2026-02-20. Created `.github/workflows/ci.yml` per ADR-008 template. Triggers on push/PR to main. Node.js 20 with npm cache. Unit tests (`npm test`) are the hard gate — workflow fails if Vitest fails. E2E tests (`npm run test:e2e`) run with `continue-on-error: true` because the dev server requires DATABASE_URL (Neon PostgreSQL) which is unavailable in CI. Playwright's `webServer` config handles server startup; `reuseExistingServer: !process.env.CI` already set. 10-minute timeout. Workflow URL: see GitHub Actions tab after push.
 
+### DIRECTIVE-CLX9-20260222-08 — Expand test coverage: 69 → 100+ tests
+**From**: CLX9 CoS | **Priority**: P2
+**Injected**: 2026-02-22 00:30 | **Estimate**: S | **Status**: PENDING
+
+**Context**: FamilyMind has 69 tests (62 unit + 7 E2E) across 13 files. 4 new features shipped since the test suite was created (N-13 Real-Time, N-14 Voice, N-15 Recipes, N-18 PWA) — none have test coverage. Target: 100+ total tests.
+
+**Action Items**:
+1. [ ] Add unit tests for `useRecipes` hook and recipe API routes (target: 8-10 tests)
+2. [ ] Add unit tests for `useVoiceCommands` hook (target: 5-6 tests — command parsing, fuzzy match, tab aliases)
+3. [ ] Add unit tests for `useRealtimeSync` hook (target: 4-5 tests — WebSocket connection, reconnect, broadcast handling)
+4. [ ] Add unit tests for wish list API routes and `useWishlist` hook (target: 6-8 tests)
+5. [ ] Add unit tests for vision board API routes and `useVisionBoard` hook (target: 5-6 tests)
+6. [ ] Run `npm test` and report total count — must exceed 100
+7. [ ] Commit and push
+
+**Constraints**:
+- Vitest only — do NOT add new E2E tests (existing 7 E2E are sufficient)
+- Mock at module boundaries, zero production code changes
+- Focus on hooks and API routes (same pattern as existing tests)
+
+### DIRECTIVE-CLX9-20260222-09 — Add recipe-to-grocery integration tests + meal planning schema
+**From**: CLX9 CoS | **Priority**: P2
+**Injected**: 2026-02-22 00:30 | **Estimate**: S | **Status**: PENDING
+
+**Context**: N-15 (Recipes) shipped with "Add to Grocery List" integration — ingredients from a recipe are batch-added to any grocery list. This cross-feature integration is untested and is the highest-value functional test in the app. Also: meal planning (N-15 phase 2) needs a schema foundation.
+
+**Action Items**:
+1. [ ] Add integration tests for the recipe-to-grocery flow: create recipe with ingredients → call `/to-grocery-list` → verify items appear in target grocery list (target: 3-4 tests)
+2. [ ] Add schema definition for a `meal_plans` table (date, recipe_id, meal_type, family_id) in `shared/schema.ts` — schema only, no UI
+3. [ ] Add Vitest tests for the new schema validation (target: 2-3 tests)
+4. [ ] Commit and push
+
+**Constraints**:
+- Schema definition only for meal_plans — do NOT build UI or API routes for it yet
+- The recipe-to-grocery test must test the actual endpoint, not just the hook
+- Do NOT modify existing recipe or grocery production code
+
 ---
 
 ## Changelog

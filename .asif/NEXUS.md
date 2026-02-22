@@ -192,6 +192,31 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 
 ## CoS Directives
 
+### DIRECTIVE-CLX9-20260222-18 — Start N-16 Budget Tracking feature
+**From**: CLX9 CoS | **Priority**: P2
+**Injected**: 2026-02-22 17:00 | **Estimate**: M (~25min) | **Status**: PENDING
+
+**Context**: FamilyMind has 11 shipped features and 125 tests. All directives complete. N-16 (Budget Tracking) would complete the ORGANIZE pillar — families track meals, groceries, and recipes but not the money side. This is the natural next step for the product.
+
+**Action Items**:
+1. [ ] Create database schema: `budgets` table (id, family_id, name, amount, period, category), `expenses` table (id, budget_id, amount, description, date, category)
+2. [ ] Create Drizzle migration
+3. [ ] Create Express API routes: CRUD for budgets and expenses, monthly summary endpoint
+4. [ ] Create React components: BudgetOverview, ExpenseForm, BudgetProgressBar
+5. [ ] Add N-16 initiative to NEXUS as BUILDING
+6. [ ] Write tests for new API routes (target: 10+ new tests)
+7. [ ] Commit and push
+
+**Constraints**:
+- Follow existing patterns (Drizzle ORM, Express routes, React components)
+- Match existing UI style (Tailwind)
+- Tests must pass alongside existing 125 tests
+
+**Response** (filled by project team):
+>
+
+---
+
 ### DIRECTIVE-CLX9-20260216-02 — Add automated test suite for critical paths
 **From**: CLX9 CoS | **Date**: 2026-02-16 | **Status**: DONE
 **Priority**: P1

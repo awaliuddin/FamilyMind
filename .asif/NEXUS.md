@@ -193,6 +193,30 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 
 ## CoS Directives
 
+### DIRECTIVE-CLX9-20260222-23 — Start N-17 Automated Test Suite: cover all 11 shipped features
+**From**: CLX9 CoS | **Priority**: P1
+**Injected**: 2026-02-22 19:40 | **Estimate**: M (~25min) | **Status**: PENDING
+
+**Context**: FamilyMind has 11 shipped features and 147 tests. But coverage is uneven — N-16 (Budget Tracking) alone has 22 tests while older features have fewer. N-17 (Automated Test Suite) is an IDEA. Time to build systematic coverage across all features for CI protection.
+
+**Action Items**:
+1. [ ] Audit current test coverage: which features have tests, which don't
+2. [ ] Add tests for the 3 least-covered shipped features (identify gaps, write 5+ tests each)
+3. [ ] Ensure all route handlers have at least 1 happy-path + 1 error test
+4. [ ] Target: 170+ total tests (23+ new)
+5. [ ] Update N-17 status to BUILDING in this NEXUS
+6. [ ] Commit and push
+
+**Constraints**:
+- Follow existing test patterns (Vitest + supertest)
+- Do NOT modify production code — tests only
+- All 147 existing tests must still pass
+
+**Response** (filled by project team):
+>
+
+---
+
 ### DIRECTIVE-CLX9-20260222-18 — Start N-16 Budget Tracking feature
 **From**: CLX9 CoS | **Priority**: P2
 **Injected**: 2026-02-22 17:00 | **Estimate**: M (~25min) | **Status**: DONE

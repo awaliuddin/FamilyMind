@@ -28,7 +28,7 @@
 | N-16 | [Budget Tracking](#n-16-budget) | ORGANIZE | SHIPPED | P2 | 2026-02-22 |
 | N-17 | [Automated Test Suite](#n-17-test-suite) | TRUST | SHIPPED | P1 | 2026-02-19 |
 | N-18 | [Offline-First / PWA](#n-18-pwa) | EXPERIENCE | SHIPPED | P2 | 2026-02-20 |
-| N-19 | [Premium Tier](#n-19-premium) | MONETIZE | IDEA | P3 | -- |
+| N-19 | [Premium Tier](#n-19-premium) | MONETIZE | BUILDING | P2 | 2026-02-23 |
 
 ---
 
@@ -63,7 +63,7 @@
 
 ### MONETIZE — "Sustainable product"
 - Premium features, enterprise licensing.
-- **Ideas**: N-19 (Premium Tier)
+- **Building**: N-19 (Premium Tier)
 
 ---
 
@@ -156,7 +156,7 @@
 ### N-17: Automated Test Suite
 **Pillar**: TRUST | **Status**: SHIPPED | **Priority**: P1
 **What**: Vitest for unit tests, Playwright for E2E, accessibility testing. UAT guide exists (manual).
-**Progress (2026-02-22)**: 28 test files, 193 test cases (186 unit + 7 E2E). Vitest covers schema validation (13 tables), 12 API route groups, 11 client hooks, plus 3 integration test suites (family lifecycle, budget flow, cross-feature interactions). Playwright E2E covers auth flow, grocery CRUD, calendar event creation. Zero production code changes.
+**Progress (2026-02-23)**: 31 test files, 222 test cases (215 unit + 7 E2E). Vitest covers schema validation (13 tables), 12 API route groups, 11 client hooks, plus 3 integration test suites (family lifecycle, budget flow, cross-feature interactions). Playwright E2E covers auth flow, grocery CRUD, calendar event creation. Zero production code changes.
 
 ### N-18: Offline-First / PWA
 **Pillar**: EXPERIENCE | **Status**: SHIPPED | **Priority**: P2
@@ -165,8 +165,10 @@
 **Scope note**: Phase 1 shipped — installability + shell caching. Full offline-first (IndexedDB sync, background sync, push notifications) is future work if N-12 (Capacitor) doesn't supersede it.
 
 ### N-19: Premium Tier
-**Pillar**: MONETIZE | **Status**: IDEA | **Priority**: P3
-**What**: Advanced AI features, unlimited storage, priority support, custom branding.
+**Pillar**: MONETIZE | **Status**: BUILDING | **Priority**: P2
+**What**: Stripe-powered premium subscription system. Checkout sessions, webhook handling, subscription status tracking, and paywall middleware for premium route gating.
+**Key files**: `server/stripe.ts`, `server/routes.ts` (billing routes + `requirePremium` middleware), `server/storage.ts` (subscription CRUD), `shared/schema.ts` (subscriptions table)
+**Scope note**: Phase 1 shipped — Stripe SDK initialization (graceful degradation), subscriptions schema, checkout/webhook/status routes, `requirePremium` middleware. UI, actual Stripe keys, and premium feature gating are future work.
 
 ---
 
@@ -195,25 +197,28 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 
 ### DIRECTIVE-CLX9-20260223-56 — N-19 Premium Tier: Stripe integration foundation + paywall middleware
 **From**: CLX9 CoS | **Priority**: P2
-**Injected**: 2026-02-23 02:20 | **Estimate**: M (~20min) | **Status**: PENDING
+**Injected**: 2026-02-23 02:20 | **Estimate**: M (~20min) | **Status**: DONE
 
 **Context**: FamilyMind has 16 shipped features and 193 tests — it's the most consumer-ready product in the portfolio. N-19 (Premium Tier) is an IDEA but Asif's strategic directive emphasizes monetization. Building the Stripe integration foundation now (without going live) creates the infrastructure for premium features. This is a revenue-enabling initiative.
 
 **Action Items**:
-1. [ ] Create `server/stripe.ts` — Stripe SDK initialization with `STRIPE_SECRET_KEY` env var, graceful degradation when not configured
-2. [ ] Create `shared/schema.ts` additions: `subscriptions` table (familyId, stripeCustomerId, stripePriceId, status: active/canceled/past_due, currentPeriodEnd)
-3. [ ] Implement `POST /api/billing/create-checkout` — creates a Stripe Checkout session for premium upgrade
-4. [ ] Implement `POST /api/billing/webhook` — handles Stripe webhook events (checkout.session.completed, customer.subscription.updated, customer.subscription.deleted)
-5. [ ] Implement `GET /api/billing/status` — returns subscription status for current family
-6. [ ] Create paywall middleware: `requirePremium()` Express middleware that checks subscription status before allowing access to premium routes
-7. [ ] Write tests — minimum 20 new tests: Stripe mock (checkout creation, webhook handling, subscription status), paywall middleware (active/expired/no subscription), schema validation
-8. [ ] Update NEXUS: N-19 → BUILDING
+1. [x] Create `server/stripe.ts` — Stripe SDK initialization with `STRIPE_SECRET_KEY` env var, graceful degradation when not configured
+2. [x] Create `shared/schema.ts` additions: `subscriptions` table (familyId, stripeCustomerId, stripePriceId, status: active/canceled/past_due, currentPeriodEnd)
+3. [x] Implement `POST /api/billing/create-checkout` — creates a Stripe Checkout session for premium upgrade
+4. [x] Implement `POST /api/billing/webhook` — handles Stripe webhook events (checkout.session.completed, customer.subscription.updated, customer.subscription.deleted)
+5. [x] Implement `GET /api/billing/status` — returns subscription status for current family
+6. [x] Create paywall middleware: `requirePremium()` Express middleware that checks subscription status before allowing access to premium routes
+7. [x] Write tests — minimum 20 new tests: Stripe mock (checkout creation, webhook handling, subscription status), paywall middleware (active/expired/no subscription), schema validation — **29 new tests**
+8. [x] Update NEXUS: N-19 → BUILDING
 
 **Constraints**:
 - Do NOT require real Stripe credentials — everything must work with mocked responses in tests
 - Paywall middleware must be additive — existing routes stay free
 - Use `stripe` npm package (MIT license)
 - Webhook verification must use `stripe.webhooks.constructEvent()` for security
+
+**Response** (filled by project team):
+> Completed 2026-02-23. Full N-19 Premium Tier foundation shipped. **server/stripe.ts**: Stripe SDK init with `STRIPE_SECRET_KEY`, graceful null when unconfigured, `isStripeConfigured()` guard. **shared/schema.ts**: `subscriptions` table (id, familyId unique, stripeCustomerId, stripePriceId, stripeSubscriptionId, status, currentPeriodEnd, timestamps) + types + Zod schema. **server/storage.ts**: `IStorage` + `DatabaseStorage` with getSubscription, upsertSubscription (on-conflict update), updateSubscription. **server/routes.ts**: `POST /api/billing/create-checkout` (Stripe Checkout session with familyId metadata), `POST /api/billing/webhook` (raw body + signature verification via `constructEvent`, handles checkout.session.completed → upsertSubscription, customer.subscription.updated → status sync, customer.subscription.deleted → cancel), `GET /api/billing/status` (isPremium = active + future periodEnd), `requirePremium()` exported middleware (checks user → family → subscription status + period). **server/index.ts**: raw body parser for webhook path before express.json(). **Tests**: 29 new tests across 4 files — billing-routes (9: status 6 + checkout 2 + webhook 1), billing-middleware (7: all requirePremium scenarios), billing-stripe-mock (8: checkout 3 + webhook events 5), schema (5: subscription validation). All 193 existing tests still pass. Zero production code changes to existing features. `stripe` npm package (MIT). **Total: 222 tests** (215 unit + 7 E2E) across 31 files. All passing in ~10.5s. N-19 IDEA → BUILDING.
 
 ### DIRECTIVE-CLX9-20260222-38 — Add E2E integration tests for critical user flows
 **From**: CLX9 CoS | **Priority**: P1
@@ -411,6 +416,7 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 
 | Date | Change |
 |------|--------|
+| 2026-02-23 | DIRECTIVE-CLX9-20260223-56 completed. N-19 (Premium Tier) IDEA → BUILDING. Stripe foundation: SDK init, subscriptions schema, checkout/webhook/status routes, requirePremium middleware. 29 new tests. Total: 222 tests across 31 files. |
 | 2026-02-22 | DIRECTIVE-CLX9-20260222-38 completed. Integration tests 177 → 193 (16 new tests, 3 new files). Flows: family lifecycle, budget tracking, cross-feature interactions. |
 | 2026-02-22 | DIRECTIVE-CLX9-20260222-23 completed. Test coverage 147 → 177 (30 new tests, 4 new test files). Gaps filled: ideas routes, family members routes, chat routes, useFamilyIdeas hook, 4 schema validations, expense PATCH. |
 | 2026-02-22 | DIRECTIVE-CLX9-20260222-18 completed. N-16 (Budget Tracking) IDEA → SHIPPED. Full feature: schema, routes, components, 22 new tests. Total: 147 tests. |

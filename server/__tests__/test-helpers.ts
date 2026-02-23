@@ -84,6 +84,9 @@ export function createMockStorage(): IStorage & {
     createExpense: vi.fn(),
     updateExpense: vi.fn(),
     deleteExpense: vi.fn(),
+    getSubscription: vi.fn(),
+    upsertSubscription: vi.fn(),
+    updateSubscription: vi.fn(),
     getChatMessages: vi.fn(),
     createChatMessage: vi.fn(),
   };
@@ -107,6 +110,12 @@ export async function createTestApp() {
       });
     }),
     isAuthenticated: (_req: any, _res: any, next: any) => next(),
+  }));
+
+  vi.doMock("../stripe", () => ({
+    stripe: null,
+    isStripeConfigured: vi.fn().mockReturnValue(false),
+    STRIPE_WEBHOOK_SECRET: "",
   }));
 
   vi.doMock("../openai", () => ({

@@ -4,10 +4,15 @@ import {
   insertGroceryItemSchema,
   insertCalendarEventSchema,
   insertFamilyMemberSchema,
+  insertFamilyIdeaSchema,
+  insertVisionItemSchema,
+  insertWishListItemSchema,
   insertRecipeSchema,
   insertMealPlanSchema,
   insertBudgetSchema,
   insertExpenseSchema,
+  insertSubscriptionSchema,
+  insertChatMessageSchema,
 } from "../schema";
 
 describe("insertGroceryListSchema", () => {
@@ -237,6 +242,168 @@ describe("insertExpenseSchema", () => {
       budgetId: "b-1",
       amount: "45.50",
       date: "2026-03-01",
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("insertFamilyIdeaSchema", () => {
+  it("accepts valid idea data", () => {
+    const result = insertFamilyIdeaSchema.safeParse({
+      familyId: "fam-1",
+      title: "Disney trip",
+      author: "Mom",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing required title", () => {
+    const result = insertFamilyIdeaSchema.safeParse({
+      familyId: "fam-1",
+      author: "Mom",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts optional description and tags", () => {
+    const result = insertFamilyIdeaSchema.safeParse({
+      familyId: "fam-1",
+      title: "Game night",
+      author: "Dad",
+      description: "Every Friday",
+      tags: ["fun", "weekly"],
+    });
+    expect(result.success).toBe(true);
+  });
+});
+
+describe("insertVisionItemSchema", () => {
+  it("accepts valid vision item data", () => {
+    const result = insertVisionItemSchema.safeParse({
+      familyId: "fam-1",
+      title: "Save for vacation",
+      author: "Mom",
+      color: "#4ecdc4",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing required color", () => {
+    const result = insertVisionItemSchema.safeParse({
+      familyId: "fam-1",
+      title: "Save for vacation",
+      author: "Mom",
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("insertWishListItemSchema", () => {
+  it("accepts valid wishlist item data", () => {
+    const result = insertWishListItemSchema.safeParse({
+      familyId: "fam-1",
+      item: "LEGO Star Wars",
+      person: "Emma",
+      occasion: "birthday",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing required person", () => {
+    const result = insertWishListItemSchema.safeParse({
+      familyId: "fam-1",
+      item: "LEGO Star Wars",
+      occasion: "birthday",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts optional price, store, and url", () => {
+    const result = insertWishListItemSchema.safeParse({
+      familyId: "fam-1",
+      item: "Headphones",
+      person: "Dad",
+      occasion: "christmas",
+      price: "79.99",
+      store: "Amazon",
+      url: "https://amazon.com/headphones",
+    });
+    expect(result.success).toBe(true);
+  });
+});
+
+describe("insertSubscriptionSchema", () => {
+  it("accepts valid subscription data", () => {
+    const result = insertSubscriptionSchema.safeParse({
+      familyId: "fam-1",
+      stripeCustomerId: "cus_123",
+      stripePriceId: "price_123",
+      stripeSubscriptionId: "sub_123",
+      status: "active",
+      currentPeriodEnd: new Date("2026-04-01"),
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing required stripeCustomerId", () => {
+    const result = insertSubscriptionSchema.safeParse({
+      familyId: "fam-1",
+      stripePriceId: "price_123",
+      stripeSubscriptionId: "sub_123",
+      status: "active",
+      currentPeriodEnd: new Date("2026-04-01"),
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing required familyId", () => {
+    const result = insertSubscriptionSchema.safeParse({
+      stripeCustomerId: "cus_123",
+      stripePriceId: "price_123",
+      stripeSubscriptionId: "sub_123",
+      status: "active",
+      currentPeriodEnd: new Date("2026-04-01"),
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing required currentPeriodEnd", () => {
+    const result = insertSubscriptionSchema.safeParse({
+      familyId: "fam-1",
+      stripeCustomerId: "cus_123",
+      stripePriceId: "price_123",
+      stripeSubscriptionId: "sub_123",
+      status: "active",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing required stripeSubscriptionId", () => {
+    const result = insertSubscriptionSchema.safeParse({
+      familyId: "fam-1",
+      stripeCustomerId: "cus_123",
+      stripePriceId: "price_123",
+      status: "active",
+      currentPeriodEnd: new Date("2026-04-01"),
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("insertChatMessageSchema", () => {
+  it("accepts valid chat message data", () => {
+    const result = insertChatMessageSchema.safeParse({
+      userId: "u-1",
+      message: "What's for dinner?",
+      messageType: "user",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects missing required message", () => {
+    const result = insertChatMessageSchema.safeParse({
+      userId: "u-1",
+      messageType: "user",
     });
     expect(result.success).toBe(false);
   });

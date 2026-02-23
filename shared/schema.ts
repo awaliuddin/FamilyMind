@@ -204,6 +204,19 @@ export const mealPlans = pgTable("meal_plans", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Subscriptions table (premium tier / Stripe billing)
+export const subscriptions = pgTable("subscriptions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  familyId: varchar("family_id").references(() => families.id).notNull().unique(),
+  stripeCustomerId: varchar("stripe_customer_id").notNull(),
+  stripePriceId: varchar("stripe_price_id").notNull(),
+  stripeSubscriptionId: varchar("stripe_subscription_id").notNull(),
+  status: varchar("status").notNull().default("active"), // 'active', 'canceled', 'past_due'
+  currentPeriodEnd: timestamp("current_period_end").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // AI chat messages table
 export const chatMessages = pgTable("chat_messages", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -261,6 +274,9 @@ export type Expense = typeof expenses.$inferSelect;
 
 export type InsertMealPlan = typeof mealPlans.$inferInsert;
 export type MealPlan = typeof mealPlans.$inferSelect;
+
+export type InsertSubscription = typeof subscriptions.$inferInsert;
+export type Subscription = typeof subscriptions.$inferSelect;
 
 export type InsertChatMessage = typeof chatMessages.$inferInsert;
 export type ChatMessage = typeof chatMessages.$inferSelect;
@@ -323,6 +339,12 @@ export const insertExpenseSchema = createInsertSchema(expenses).omit({
 export const insertMealPlanSchema = createInsertSchema(mealPlans).omit({
   id: true,
   createdAt: true,
+});
+
+export const insertSubscriptionSchema = createInsertSchema(subscriptions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({

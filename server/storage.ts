@@ -13,6 +13,7 @@ import {
   recipes,
   budgets,
   expenses,
+  subscriptions,
   chatMessages,
   type User,
   type UpsertUser,
@@ -42,6 +43,8 @@ import {
   type InsertBudget,
   type Expense,
   type InsertExpense,
+  type Subscription,
+  type InsertSubscription,
   type ChatMessage,
   type InsertChatMessage,
 } from "@shared/schema";
@@ -114,6 +117,11 @@ export interface IStorage {
   createExpense(expense: InsertExpense): Promise<Expense>;
   updateExpense(id: string, updates: Partial<Expense>): Promise<Expense>;
   deleteExpense(id: string): Promise<void>;
+
+  // Subscriptions
+  getSubscription(familyId: string): Promise<Subscription | undefined>;
+  upsertSubscription(subscription: InsertSubscription): Promise<Subscription>;
+  updateSubscription(familyId: string, updates: Partial<Subscription>): Promise<Subscription>;
 
   // AI Chat
   getChatMessages(userId: string): Promise<ChatMessage[]>;
@@ -477,6 +485,39 @@ export class DatabaseStorage implements IStorage {
 
   async deleteExpense(id: string): Promise<void> {
     await db.delete(expenses).where(eq(expenses.id, id));
+  }
+
+  // Subscriptions
+  async getSubscription(familyId: string): Promise<Subscription | undefined> {
+    const [sub] = await db
+      .select()
+      .from(subscriptions)
+      .where(eq(subscriptions.familyId, familyId));
+    return sub;
+  }
+
+  async upsertSubscription(subscription: InsertSubscription): Promise<Subscription> {
+    const [sub] = await db
+      .insert(subscriptions)
+      .values(subscription)
+      .onConflictDoUpdate({
+        target: subscriptions.familyId,
+        set: {
+          ...subscription,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return sub;
+  }
+
+  async updateSubscription(familyId: string, updates: Partial<Subscription>): Promise<Subscription> {
+    const [sub] = await db
+      .update(subscriptions)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(subscriptions.familyId, familyId))
+      .returning();
+    return sub;
   }
 
   // AI Chat

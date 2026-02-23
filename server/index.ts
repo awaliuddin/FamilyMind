@@ -6,6 +6,8 @@ import { setupVite, serveStatic, log } from "./vite";
 import { setupWebSocket, broadcast } from "./ws";
 
 const app = express();
+// Stripe webhook needs raw body for signature verification — must come before express.json()
+app.use('/api/billing/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 

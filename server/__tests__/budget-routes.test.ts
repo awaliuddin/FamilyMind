@@ -114,6 +114,20 @@ describe("POST /api/expenses", () => {
   });
 });
 
+describe("PATCH /api/expenses/:id", () => {
+  it("updates an expense and strips auto-generated fields", async () => {
+    const updated = { id: "e1", budgetId: "b1", amount: "55.00", description: "Updated Costco trip" };
+    mockStorage.updateExpense.mockResolvedValue(updated);
+
+    const res = await request(app)
+      .patch("/api/expenses/e1")
+      .send({ amount: "55.00", description: "Updated Costco trip", id: "ignored", budgetId: "ignored", createdAt: "ignored" });
+
+    expect(res.status).toBe(200);
+    expect(mockStorage.updateExpense).toHaveBeenCalledWith("e1", { amount: "55.00", description: "Updated Costco trip" });
+  });
+});
+
 describe("DELETE /api/expenses/:id", () => {
   it("deletes an expense", async () => {
     mockStorage.deleteExpense.mockResolvedValue(undefined);

@@ -156,7 +156,7 @@
 ### N-17: Automated Test Suite
 **Pillar**: TRUST | **Status**: SHIPPED | **Priority**: P1
 **What**: Vitest for unit tests, Playwright for E2E, accessibility testing. UAT guide exists (manual).
-**Progress (2026-02-21)**: 22 test files, 125 test cases (118 unit + 7 E2E). Vitest covers schema validation (incl. recipes + meal plans), 8 API route groups (grocery, calendar, family, auth, recipes, recipe-grocery integration, wishlist, vision), 10 client hooks (queryClient, useResourceMutation, useGroceryLists, useCalendarEvents, useAuth, useRecipes, useVoiceCommands, useRealtimeSync, useWishlist, useVisionBoard). Playwright E2E covers auth flow, grocery CRUD, calendar event creation. Zero production code changes (except meal_plans schema addition).
+**Progress (2026-02-22)**: 25 test files, 177 test cases (170 unit + 7 E2E). Vitest covers schema validation (13 tables: grocery, calendar, familyMember, recipe, mealPlan, budget, expense, familyIdea, visionItem, wishListItem, chatMessage), 12 API route groups (grocery, calendar, family, auth, recipes, recipe-grocery integration, wishlist, vision, budget, ideas, chat, family-members), 11 client hooks (queryClient, useResourceMutation, useGroceryLists, useCalendarEvents, useAuth, useRecipes, useVoiceCommands, useRealtimeSync, useWishlist, useVisionBoard, useBudgets, useFamilyIdeas). Playwright E2E covers auth flow, grocery CRUD, calendar event creation. Zero production code changes.
 
 ### N-18: Offline-First / PWA
 **Pillar**: EXPERIENCE | **Status**: SHIPPED | **Priority**: P2
@@ -193,18 +193,39 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 
 ## CoS Directives
 
+### DIRECTIVE-CLX9-20260222-38 — Add E2E integration tests for critical user flows
+**From**: CLX9 CoS | **Priority**: P1
+**Injected**: 2026-02-22 23:45 | **Estimate**: M (~25min) | **Status**: PENDING
+
+**Context**: FamilyMind hit 177 tests (target was 170+). These are mostly unit tests. The app has 16 SHIPPED features but no end-to-end integration tests. Critical user flows need validation: family creation → member invite → task assignment → completion → activity feed.
+
+**Action Items**:
+1. [ ] Add 5+ E2E integration tests covering: create family, add member, create task, assign to member, mark complete
+2. [ ] Add 5+ E2E tests for: budget tracking (create budget → add expense → check balance), meal planning flow, shopping list flow
+3. [ ] Add 3+ tests for cross-feature interactions (task completion → activity feed, expense → budget update)
+4. [ ] Target: 190+ total tests
+5. [ ] Commit and push
+
+**Constraints**:
+- Use existing test helpers and mock patterns
+- Mock external services (database, auth) — test the integration logic, not infrastructure
+- Keep all 177 existing tests passing
+- Follow existing test file naming conventions
+
+---
+
 ### DIRECTIVE-CLX9-20260222-23 — Start N-17 Automated Test Suite: cover all 11 shipped features
 **From**: CLX9 CoS | **Priority**: P1
-**Injected**: 2026-02-22 19:40 | **Estimate**: M (~25min) | **Status**: PENDING
+**Injected**: 2026-02-22 19:40 | **Estimate**: M (~25min) | **Status**: DONE
 
 **Context**: FamilyMind has 11 shipped features and 147 tests. But coverage is uneven — N-16 (Budget Tracking) alone has 22 tests while older features have fewer. N-17 (Automated Test Suite) is an IDEA. Time to build systematic coverage across all features for CI protection.
 
 **Action Items**:
-1. [ ] Audit current test coverage: which features have tests, which don't
-2. [ ] Add tests for the 3 least-covered shipped features (identify gaps, write 5+ tests each)
-3. [ ] Ensure all route handlers have at least 1 happy-path + 1 error test
-4. [ ] Target: 170+ total tests (23+ new)
-5. [ ] Update N-17 status to BUILDING in this NEXUS
+1. [x] Audit current test coverage: which features have tests, which don't
+2. [x] Add tests for the 3 least-covered shipped features (identify gaps, write 5+ tests each)
+3. [x] Ensure all route handlers have at least 1 happy-path + 1 error test
+4. [x] Target: 170+ total tests (23+ new) — **30 new tests, 177 total**
+5. [x] Update N-17 status to BUILDING in this NEXUS
 6. [ ] Commit and push
 
 **Constraints**:
@@ -213,7 +234,7 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 - All 147 existing tests must still pass
 
 **Response** (filled by project team):
->
+> Completed 2026-02-22. Audited all 11 shipped features for test coverage gaps. Three features had zero route tests: N-03 (Family Ideas Board), family members API, and N-06 (AI Chat). Added 30 new tests across 4 new files + 2 updated files: ideas routes (6 tests — GET/POST ideas, POST/DELETE like), family members routes (4 tests — GET/POST members), chat routes (4 tests — GET messages, POST chat with no-family guidance, message save verification), `useFamilyIdeas` hook (5 tests — fetch, default, createIdea, likeIdea with optimistic update, isPending state), schema validation for 4 untested schemas (8 tests — familyIdea 3, visionItem 2, wishListItem 3, chatMessage 2), expense PATCH route (1 test), budget summary no-family test (2 existing tests verified). All 147 existing tests still pass. Zero production code changes. **Total: 177 tests** (170 unit + 7 E2E) across 25 files. All passing in ~4s.
 
 ---
 
@@ -365,6 +386,7 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 
 | Date | Change |
 |------|--------|
+| 2026-02-22 | DIRECTIVE-CLX9-20260222-23 completed. Test coverage 147 → 177 (30 new tests, 4 new test files). Gaps filled: ideas routes, family members routes, chat routes, useFamilyIdeas hook, 4 schema validations, expense PATCH. |
 | 2026-02-22 | DIRECTIVE-CLX9-20260222-18 completed. N-16 (Budget Tracking) IDEA → SHIPPED. Full feature: schema, routes, components, 22 new tests. Total: 147 tests. |
 | 2026-02-21 | DIRECTIVE-CLX9-20260222-08 completed. Test coverage 69 → 115 (8 new test files). |
 | 2026-02-21 | DIRECTIVE-CLX9-20260222-09 completed. Recipe-to-grocery integration tests + meal_plans schema. Total: 125 tests. |

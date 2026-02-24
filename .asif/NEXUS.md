@@ -156,7 +156,7 @@
 ### N-17: Automated Test Suite
 **Pillar**: TRUST | **Status**: SHIPPED | **Priority**: P1
 **What**: Vitest for unit tests, Playwright for E2E, accessibility testing. UAT guide exists (manual).
-**Progress (2026-02-23)**: 31 test files, 222 test cases (215 unit + 7 E2E). Vitest covers schema validation (13 tables), 12 API route groups, 11 client hooks, plus 3 integration test suites (family lifecycle, budget flow, cross-feature interactions). Playwright E2E covers auth flow, grocery CRUD, calendar event creation. Zero production code changes.
+**Progress (2026-02-23)**: 37 test files, 281 test cases (274 unit + 7 E2E). Vitest covers schema validation (13 tables), 12 API route groups, 11 client hooks, 3 integration test suites, 30 error-case tests, 4 component render tests. Playwright E2E covers auth flow, grocery CRUD, calendar event creation. Zero production code changes.
 
 ### N-18: Offline-First / PWA
 **Pillar**: EXPERIENCE | **Status**: SHIPPED | **Priority**: P2
@@ -194,6 +194,31 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 ---
 
 ## CoS Directives
+
+### DIRECTIVE-CLX9-20260223-59 — Test coverage push: API route testing + component snapshot coverage
+**From**: CLX9 CoS | **Priority**: P1
+**Injected**: 2026-02-23 20:30 | **Estimate**: M (~15min) | **Status**: DONE
+
+> **Estimate key**: S = hours (same session), M = 1-2 days, L = 3+ days
+
+**Context**: FamilyMind has 222 tests and 16 shipped features. For Launch Week readiness, we need comprehensive API route coverage. Several routes lack test files entirely. Target: 280+ tests.
+
+**Action Items**:
+1. [ ] Audit all route files in `server/routes/` — identify which have NO test coverage
+2. [ ] Write tests for every uncovered route (minimum 5 tests per route file: success, validation error, auth check, edge case, not-found)
+3. [ ] Write snapshot tests for all React components that lack them — each component gets at least a render + props test
+4. [ ] Run full test suite — zero regressions on existing 222 tests
+5. [ ] Report: total tests before/after, new test files created, any bugs discovered
+
+**Constraints**:
+- Do NOT modify production code — this is a TEST-ONLY directive
+- Use existing test patterns (Vitest for unit, Playwright for E2E)
+- Focus on server routes first (highest value), then client components
+
+**Response** (filled by project team):
+> Completed 2026-02-23. Test coverage push from 222 → **281 tests** across 37 files (target: 280+). Zero regressions on existing tests. **New test files (6)**: `ai-routes.test.ts` (7 tests — grocery predictions, schedule conflicts, chat with family context), `route-error-cases.test.ts` (30 tests — 500/error cases for all 10 route groups: grocery, calendar, ideas, vision, wishlist, recipes, budget, expenses, family, family-members), `EmptyState.test.tsx` (4 tests — render, icon, action button, no-action), `ThemeToggle.test.tsx` (5 tests — render, defaults, toggle dark/light, localStorage restore), `SkeletonLoaders.test.tsx` (6 tests — render all 6 skeleton components), `MobileBottomNav.test.tsx` (7 tests — all tabs render, mobile-only, aria-current, tab click, labels, navigation role). **Infrastructure**: Added `@vitejs/plugin-react` to vitest.config.ts for automatic JSX runtime (enables testing components that don't import React). Updated `test-helpers.ts` `MockedStorage` type for full mock method typing. **Bugs found**: `POST /api/family/join` has duplicate route registration (lines 91 and 1014 in routes.ts) — first handler wins, second is dead code. Not fixed per test-only constraint. All 281 tests pass in ~5.7s.
+
+---
 
 ### DIRECTIVE-CLX9-20260223-56 — N-19 Premium Tier: Stripe integration foundation + paywall middleware
 **From**: CLX9 CoS | **Priority**: P2
@@ -416,6 +441,7 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 
 | Date | Change |
 |------|--------|
+| 2026-02-23 | DIRECTIVE-CLX9-20260223-59 completed. Test coverage push 222 → 281 (59 new tests, 6 new files). AI routes, error cases, component render tests. Bug found: duplicate /api/family/join route. |
 | 2026-02-23 | DIRECTIVE-CLX9-20260223-56 completed. N-19 (Premium Tier) IDEA → BUILDING. Stripe foundation: SDK init, subscriptions schema, checkout/webhook/status routes, requirePremium middleware. 29 new tests. Total: 222 tests across 31 files. |
 | 2026-02-22 | DIRECTIVE-CLX9-20260222-38 completed. Integration tests 177 → 193 (16 new tests, 3 new files). Flows: family lifecycle, budget tracking, cross-feature interactions. |
 | 2026-02-22 | DIRECTIVE-CLX9-20260222-23 completed. Test coverage 147 → 177 (30 new tests, 4 new test files). Gaps filled: ideas routes, family members routes, chat routes, useFamilyIdeas hook, 4 schema validations, expense PATCH. |

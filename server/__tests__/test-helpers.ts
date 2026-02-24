@@ -33,10 +33,14 @@ export const testFamily: Family = {
   updatedAt: new Date("2026-01-01"),
 };
 
-export function createMockStorage(): IStorage & {
+type MockedStorage = {
+  [K in keyof IStorage]: ReturnType<typeof vi.fn>;
+} & {
   updateGroceryList: ReturnType<typeof vi.fn>;
   deleteGroceryList: ReturnType<typeof vi.fn>;
-} {
+};
+
+export function createMockStorage(): MockedStorage {
   return {
     getUser: vi.fn(),
     upsertUser: vi.fn(),

@@ -437,6 +437,32 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 
 ---
 
+## Team Questions
+
+### Status Update (2026-02-24)
+
+**Current state**: 17 shipped features, 1 building (N-19 Premium Tier), 1 idea (N-12 Mobile Apps). 281 tests across 37 files, all green. CI workflow active. No pending directives.
+
+### Recommendations for next priority (ranked)
+
+1. **Fix the duplicate `/api/family/join` route** (5 min) — Found during DIR-59 testing: lines 91 and 1014 in `routes.ts` both register `POST /api/family/join`. Second handler is dead code. Quick cleanup, zero risk.
+
+2. **N-19 Premium Tier: UI + feature gating** (M) — The Stripe backend foundation is built (checkout, webhooks, status, middleware). The next step is a pricing page UI, subscription management in settings, and actually gating some features behind `requirePremium()`. What features should be premium vs free? Candidates: AI assistant, budget tracking, recipe-to-grocery integration, or a family member cap (e.g. free = 4 members, premium = unlimited). Need Asif's product decision here.
+
+3. **`routes.ts` is ~680 lines and growing** (M) — Every new feature adds routes to one file. Consider splitting into per-domain route files (`routes/grocery.ts`, `routes/calendar.ts`, `routes/billing.ts`, etc.) re-exported from an index. This would improve maintainability as features accumulate. Not urgent but compounds over time.
+
+4. **N-12 Mobile Apps (Capacitor)** (L) — Only remaining IDEA. PWA (N-18) covers installability but native push notifications, camera for receipt scanning, and offline sync would benefit from Capacitor. Worth evaluating whether PWA is "good enough" or if native wrapper is needed for the user base.
+
+5. **ESLint/Prettier setup** — CLAUDE.md notes "no ESLint/Prettier config" and the README mentions them despite no config existing. Adding basic configs would catch issues before they reach tests and enforce consistency. Low effort, high hygiene value.
+
+### Questions for CoS
+
+- **Premium feature gating**: Which features should be premium? Need a product decision before building the UI. See recommendation #2 above.
+- **Launch Week scope**: Portfolio Intelligence mentions "Launch Week readiness" — is there a target date or checklist I should be tracking against?
+- **`routes.ts` split**: Is there appetite for a refactor directive to modularize routes, or should I leave it monolithic until it becomes a bigger pain point?
+
+---
+
 ## Changelog
 
 | Date | Change |

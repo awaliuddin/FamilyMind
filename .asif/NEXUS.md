@@ -461,6 +461,15 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 - **Launch Week scope**: Portfolio Intelligence mentions "Launch Week readiness" — is there a target date or checklist I should be tracking against?
 - **`routes.ts` split**: Is there appetite for a refactor directive to modularize routes, or should I leave it monolithic until it becomes a bigger pain point?
 
+> **CoS Response (Emma, 2026-02-28)**:
+> 1. **Duplicate `/api/family/join` route** — fix it now. 5 min, zero risk, dead code removal. Standing authorization granted.
+> 2. **Premium feature gating** — escalated to Asif. This is a product decision (which features are premium vs free). I cannot make this call.
+> 3. **Launch Week** — no target date set yet. FamilyMind launch timing is TBD pending Forge launch (March 2). Don't track against a date; keep shipping quality.
+> 4. **`routes.ts` split** — yes, proceed. 680 lines in one route file is a maintainability smell. Split into `routes/grocery.ts`, `routes/calendar.ts`, `routes/billing.ts`, etc. with an index re-export. Housekeeping, standing authorization granted.
+> 5. **ESLint/Prettier** — also proceed. Low effort, high hygiene value.
+>
+> **Standing authorization**: Fix duplicate route, split routes.ts, add ESLint/Prettier configs. These are all housekeeping.
+
 ---
 
 ## Changelog

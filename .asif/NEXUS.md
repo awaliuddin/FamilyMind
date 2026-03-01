@@ -1,7 +1,7 @@
 # NEXUS — FamilyMind Vision-to-Execution Dashboard
 
 > **Owner**: Asif Waliuddin
-> **Last Updated**: 2026-02-21
+> **Last Updated**: 2026-02-28
 > **North Star**: *"Reduce the mental load of family organization by 40%+. Families spend less time planning and more time together."*
 
 ---
@@ -437,13 +437,49 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 
 ---
 
-## Team Questions
+## Team Feedback
 
-### Status Update (2026-02-24)
+### Reflection (2026-02-28)
+
+**1. What shipped since last check-in (2026-02-24)?**
+
+No new directives were issued since 2026-02-24, so no new feature commits. The CoS responded to our team questions on 2026-02-28 with standing authorization for three housekeeping items (duplicate route fix, routes.ts split, ESLint/Prettier). Those haven't been executed yet — this reflection is the first touch since the CoS response arrived.
+
+**Current snapshot**: 17 shipped features, 1 building (N-19), 1 idea (N-12). 281 tests across 37 files, all passing in ~12s. 20 commits on main. CI workflow active.
+
+**2. What surprised us?**
+
+- **The velocity of the test sprint was remarkable.** From 0 to 281 tests in 7 days (Feb 16-23) across 9 directives. The test infrastructure paid for itself immediately — DIR-59 testing uncovered the duplicate `/api/family/join` route (dead code on line 1014) that had been invisible since the auth system was built. Tests as bug-finders, not just regression guards.
+- **`routes.ts` monolith at ~680 lines is the clearest tech debt.** Every feature adds ~40-80 lines of route code to a single file. The CoS authorized the split — this should be the next action.
+- **Stripe integration (N-19) was cleaner than expected.** The graceful degradation pattern (null SDK when no key) means zero impact on the free tier. But the premium feature *gating decision* is blocked on Asif — which features go behind the paywall is a product call, not engineering.
+
+**3. Cross-project signals**
+
+- **`useResourceMutation` hook** — already tracked in PORTFOLIO.md shared patterns. Still the cleanest generic CRUD pattern across the portfolio. Any new React project could drop it in.
+- **Vitest + supertest mock pattern** — the test helper approach (mock storage interface, no DB needed) could be templated for other projects. 281 tests run in ~12s with zero infrastructure dependencies.
+- **Stripe graceful degradation pattern** (`server/stripe.ts`) — initialize SDK or return null, with `isStripeConfigured()` guard. Any project adding optional paid features could reuse this pattern.
+
+**4. What would we prioritize with fresh directives?**
+
+1. **Fix duplicate `/api/family/join` route** (5 min, standing auth granted) — dead code cleanup
+2. **Split `routes.ts` into domain modules** (M, standing auth granted) — `routes/grocery.ts`, `routes/calendar.ts`, `routes/billing.ts`, etc. 680 lines is a maintainability smell
+3. **ESLint + Prettier configs** (S, standing auth granted) — no config files exist despite README mentions
+4. **N-19 Premium UI** (M, blocked on Asif's product decision) — pricing page, subscription management, feature gating
+5. **N-12 Mobile Apps evaluation** (L) — PWA covers basics; evaluate if Capacitor adds enough value for the user base
+
+**5. Blockers / questions for CoS**
+
+- **No blockers.** Standing authorization for items 1-3 above is clear.
+- **Premium gating decision** remains escalated to Asif. We'll proceed with housekeeping (items 1-3) while waiting.
+- **Shall we execute all three standing-auth items in the next session?** Or does the CoS want to sequence them differently?
+
+---
+
+### Previous: Status Update (2026-02-24)
 
 **Current state**: 17 shipped features, 1 building (N-19 Premium Tier), 1 idea (N-12 Mobile Apps). 281 tests across 37 files, all green. CI workflow active. No pending directives.
 
-### Recommendations for next priority (ranked)
+### Previous: Recommendations for next priority (ranked)
 
 1. **Fix the duplicate `/api/family/join` route** (5 min) — Found during DIR-59 testing: lines 91 and 1014 in `routes.ts` both register `POST /api/family/join`. Second handler is dead code. Quick cleanup, zero risk.
 
@@ -455,7 +491,7 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 
 5. **ESLint/Prettier setup** — CLAUDE.md notes "no ESLint/Prettier config" and the README mentions them despite no config existing. Adding basic configs would catch issues before they reach tests and enforce consistency. Low effort, high hygiene value.
 
-### Questions for CoS
+### Previous: Questions for CoS
 
 - **Premium feature gating**: Which features should be premium? Need a product decision before building the UI. See recommendation #2 above.
 - **Launch Week scope**: Portfolio Intelligence mentions "Launch Week readiness" — is there a target date or checklist I should be tracking against?
@@ -476,6 +512,7 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 
 | Date | Change |
 |------|--------|
+| 2026-02-28 | Team Feedback reflection filed. No new commits since 2026-02-24. CoS granted standing auth for 3 housekeeping items: duplicate route fix, routes.ts split, ESLint/Prettier. Premium gating escalated to Asif. |
 | 2026-02-23 | DIRECTIVE-CLX9-20260223-59 completed. Test coverage push 222 → 281 (59 new tests, 6 new files). AI routes, error cases, component render tests. Bug found: duplicate /api/family/join route. |
 | 2026-02-23 | DIRECTIVE-CLX9-20260223-56 completed. N-19 (Premium Tier) IDEA → BUILDING. Stripe foundation: SDK init, subscriptions schema, checkout/webhook/status routes, requirePremium middleware. 29 new tests. Total: 222 tests across 31 files. |
 | 2026-02-22 | DIRECTIVE-CLX9-20260222-38 completed. Integration tests 177 → 193 (16 new tests, 3 new files). Flows: family lifecycle, budget tracking, cross-feature interactions. |

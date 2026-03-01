@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, Plus, Trash2, Edit3, Check, Loader2 } from "lucide-react";
+import { ShoppingCart, Plus, Trash2, Check, Loader2 } from "lucide-react";
 import { useGroceryLists, useGroceryMutations } from "@/hooks/useGroceryLists";
 import { GroceryListSkeleton } from "@/components/shared/SkeletonLoaders";
 import { EmptyState } from "@/components/shared/EmptyState";

@@ -49,7 +49,7 @@ export function registerCalendarRoutes(app: Express, isAuthenticated: RequestHan
     try {
       const { id } = req.params;
 
-      const { id: _id, userId: _userId, createdAt, updatedAt, ...cleanData } = req.body;
+      const { id: _id, userId: _userId, createdAt: _createdAt, updatedAt: _updatedAt, ...cleanData } = req.body;
 
       if (cleanData.startTime && typeof cleanData.startTime === 'string') {
         cleanData.startTime = new Date(cleanData.startTime);

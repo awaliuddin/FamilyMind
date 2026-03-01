@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Plus, Trash2, Edit3, Loader2 } from "lucide-react";
+import { Calendar, Plus, Trash2, Loader2 } from "lucide-react";
 import { useCalendarEvents, useCalendarMutations } from "@/hooks/useCalendarEvents";
 import { CalendarEventSkeleton } from "@/components/shared/SkeletonLoaders";
 import { EmptyState } from "@/components/shared/EmptyState";

@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, ShoppingCart, Lightbulb, Heart, Gift, Brain, Users, Clock, Zap } from "lucide-react";
 
 export default function Landing() {

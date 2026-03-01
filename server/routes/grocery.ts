@@ -52,7 +52,7 @@ export function registerGroceryRoutes(app: Express, isAuthenticated: RequestHand
   app.patch('/api/grocery-items/:id', isAuthenticated, async (req, res) => {
     try {
       const { id } = req.params;
-      const { id: _id, listId: _listId, createdAt, updatedAt, ...cleanData } = req.body;
+      const { id: _id, listId: _listId, createdAt: _createdAt, updatedAt: _updatedAt, ...cleanData } = req.body;
       const item = await storage.updateGroceryItem(id, cleanData);
       res.json(item);
     } catch (error) {
@@ -75,7 +75,7 @@ export function registerGroceryRoutes(app: Express, isAuthenticated: RequestHand
   app.patch('/api/grocery-lists/:id', isAuthenticated, async (req, res) => {
     try {
       const { id } = req.params;
-      const { id: _id, familyId: _familyId, createdAt, updatedAt, ...cleanData } = req.body;
+      const { id: _id, familyId: _familyId, createdAt: _createdAt, updatedAt: _updatedAt, ...cleanData } = req.body;
       const list = await storage.updateGroceryList(id, cleanData);
       res.json(list);
     } catch (error) {

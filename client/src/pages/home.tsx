@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 
 export default function Home() {
   const { toast } = useToast();
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   
   // Get user data to check if they have a family
   const { data: userData } = useQuery({

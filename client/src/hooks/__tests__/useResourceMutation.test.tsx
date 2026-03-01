@@ -113,7 +113,6 @@ describe("useResourceMutation", () => {
   it("redirects to /api/login on 401 error", async () => {
     mockApiRequest.mockRejectedValue(new Error("401: Unauthorized"));
 
-    const originalLocation = window.location.href;
     const { result } = renderHook(() => useResourceMutation(defaultOptions), {
       wrapper: createWrapper(),
     });

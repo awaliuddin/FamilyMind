@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Bot, Home } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -11,7 +11,6 @@ import { CommandPalette } from "@/components/shared/CommandPalette";
 import { MobileBottomNav } from "@/components/shared/MobileBottomNav";
 import { VoiceButton } from "@/components/shared/VoiceButton";
 import AIChat from "./ai-chat";
-import { FamilyManagement } from "./family-management";
 import GroceryView from "./grocery/GroceryView";
 
 // Lazy load other views for better performance

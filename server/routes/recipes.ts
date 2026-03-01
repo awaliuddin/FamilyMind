@@ -35,7 +35,7 @@ export function registerRecipeRoutes(app: Express, isAuthenticated: RequestHandl
   app.patch('/api/recipes/:id', isAuthenticated, async (req, res) => {
     try {
       const { id } = req.params;
-      const { id: _id, familyId: _familyId, createdAt, updatedAt, ...cleanData } = req.body;
+      const { id: _id, familyId: _familyId, createdAt: _createdAt, updatedAt: _updatedAt, ...cleanData } = req.body;
       const recipe = await storage.updateRecipe(id, cleanData);
       res.json(recipe);
     } catch (error) {

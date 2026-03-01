@@ -31,8 +31,6 @@ import {
   type InsertCalendarEvent,
   type FamilyIdea,
   type InsertFamilyIdea,
-  type IdeaLike,
-  type InsertIdeaLike,
   type VisionItem,
   type InsertVisionItem,
   type WishListItem,

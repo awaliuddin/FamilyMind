@@ -35,7 +35,7 @@ export function registerBudgetRoutes(app: Express, isAuthenticated: RequestHandl
   app.patch('/api/budgets/:id', isAuthenticated, async (req, res) => {
     try {
       const { id } = req.params;
-      const { id: _id, familyId: _familyId, createdAt, updatedAt, ...cleanData } = req.body;
+      const { id: _id, familyId: _familyId, createdAt: _createdAt, updatedAt: _updatedAt, ...cleanData } = req.body;
       const budget = await storage.updateBudget(id, cleanData);
       res.json(budget);
     } catch (error) {
@@ -70,7 +70,7 @@ export function registerBudgetRoutes(app: Express, isAuthenticated: RequestHandl
   app.patch('/api/expenses/:id', isAuthenticated, async (req, res) => {
     try {
       const { id } = req.params;
-      const { id: _id, budgetId: _budgetId, createdAt, ...cleanData } = req.body;
+      const { id: _id, budgetId: _budgetId, createdAt: _createdAt, ...cleanData } = req.body;
       const expense = await storage.updateExpense(id, cleanData);
       res.json(expense);
     } catch (error) {

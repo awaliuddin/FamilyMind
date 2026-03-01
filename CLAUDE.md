@@ -38,9 +38,12 @@ npm run dev              # Dev server: tsx runs Express on port 5000, Vite HMR v
 npm run build            # Vite builds client → dist/public, esbuild bundles server → dist/index.js
 npm run start            # Production: NODE_ENV=production node dist/index.js
 npm run check            # TypeScript type-check only (tsc --noEmit)
+npm run lint             # ESLint (flat config, typescript-eslint)
+npm run format           # Prettier — format all files
+npm run format:check     # Prettier — check without writing
 ```
 
-No linter or formatter is configured. No automated tests exist yet (manual UAT guide: `UAT-TEST-GUIDE.md`).
+281 tests (274 unit + 7 E2E) across 37 files. Manual UAT guide: `UAT-TEST-GUIDE.md`.
 
 ## Architecture
 
@@ -49,7 +52,7 @@ Full-stack TypeScript monorepo — single `package.json`, ESM (`"type": "module"
 ### Request flow
 
 1. **Single server on port 5000** — Express serves both API and client. In dev, Vite runs as Express middleware (`server/vite.ts`) with HMR over the same HTTP server. In production, `dist/public` is served as static files with SPA fallback.
-2. **API routes** (`server/routes.ts`, ~680 lines) — All endpoints under `/api/*`. Every mutating route validates with Zod insert schemas from `shared/schema.ts`. Auth check via `isAuthenticated` middleware.
+2. **API routes** (`server/routes/`) — Domain-split route modules: `auth`, `family`, `grocery`, `calendar`, `ideas`, `vision`, `wishlist`, `recipes`, `budget`, `billing`, `ai`. Index re-exports `registerRoutes` and `requirePremium`. Every mutating route validates with Zod insert schemas from `shared/schema.ts`. Auth check via `isAuthenticated` middleware.
 3. **Storage layer** (`server/storage.ts`) — `IStorage` interface with `DatabaseStorage` implementation using Drizzle ORM. All DB access goes through the exported `storage` singleton.
 4. **Database** — Neon PostgreSQL via `@neondatabase/serverless` with WebSocket transport (`server/db.ts`). Schema managed by `drizzle-kit push` (no migration files in normal workflow).
 
@@ -101,5 +104,4 @@ Configured in both `tsconfig.json` (paths) and `vite.config.ts` (resolve.alias).
 - **`staleTime: Infinity`** — TanStack Query never auto-refetches; data updates only via mutation cache invalidation.
 - **`queryKey` = URL** — Adding a query like `["/api/foo"]` will auto-fetch that URL. Don't use arbitrary keys.
 - **WSL2 mobile dev**: `powershell -ExecutionPolicy Bypass -File .\scripts\expose-mobile.ps1` to expose to LAN.
-- **No ESLint/Prettier config** — despite README mentions, no config files exist in the repo.
 - **Tailwind v3** with v4's `@tailwindcss/vite` plugin in devDeps — config is in `tailwind.config.ts`.

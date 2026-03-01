@@ -75,6 +75,8 @@ export interface IStorage {
   addGroceryItem(item: InsertGroceryItem): Promise<GroceryItem>;
   updateGroceryItem(id: string, updates: Partial<GroceryItem>): Promise<GroceryItem>;
   deleteGroceryItem(id: string): Promise<void>;
+  updateGroceryList(id: string, updates: Partial<GroceryList>): Promise<GroceryList>;
+  deleteGroceryList(id: string): Promise<void>;
 
   // Calendar events
   getCalendarEvents(familyId: string): Promise<CalendarEvent[]>;

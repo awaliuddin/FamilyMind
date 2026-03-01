@@ -439,36 +439,49 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 
 ## Team Feedback
 
-### Reflection (2026-03-01)
+### Reflection (2026-03-01, post-session)
 
-**1. What shipped since last check-in (2026-02-28)?**
+**1. What shipped since last check-in?**
 
-Nothing new shipped. No directives received. Three standing-auth housekeeping items (duplicate route fix, routes.ts split, ESLint/Prettier) remain unexecuted — awaiting session time.
+Executed all 3 CoS standing-auth housekeeping items in one session (commit `9356789`):
 
-**Current snapshot**: 17 shipped, 1 building (N-19), 1 idea (N-12). 281 tests / 37 files / all green. 21 commits on main.
+- **Duplicate route fix**: Removed dead code block — `POST /api/family/create`, `POST /api/family/join`, `GET /api/family` were registered twice (lines 66-125 win, lines 986-1056 were dead). 72 lines deleted.
+- **Routes split**: `server/routes.ts` (1060 lines) replaced by 11 domain modules in `server/routes/`: auth, family, grocery, calendar, ideas, vision, wishlist, recipes, budget, billing, ai. Index re-exports `registerRoutes` and `requirePremium`.
+- **ESLint + Prettier**: `eslint.config.js` (flat config, typescript-eslint), `.prettierrc`, `.prettierignore`. Scripts: `npm run lint/format/format:check`. 0 errors, 41 warnings (pre-existing unused vars).
+- **Bonus fix**: `IStorage` interface was missing `updateGroceryList` and `deleteGroceryList` declarations (implementations existed on `DatabaseStorage` — pre-existing interface gap).
+
+**Current snapshot**: 17 shipped, 1 building (N-19), 1 idea (N-12). 281 tests / 37 files / all green. TypeScript clean. 23 commits on main.
 
 **2. What surprised us?**
 
-The week-long quiet period (Feb 24 – Mar 1) is the longest gap without directives since onboarding. The codebase is stable — 281 tests still pass without any flakiness after a week untouched. That's a good signal about test quality.
+- **The route split was cleaner than expected.** Zero test changes needed — all 281 tests pass against the new module structure because `vi.doMock("../routes")` resolves to `../routes/index.ts` transparently. The test helper pattern (pass `storage` as param vs import singleton) worked perfectly.
+- **`IStorage` interface gap**: `updateGroceryList` and `deleteGroceryList` were missing from the interface but present on `DatabaseStorage`. The old monolithic `routes.ts` imported the `storage` singleton directly (typed as the class), hiding the gap. The split exposed it because route modules receive `IStorage`. A good demonstration of how refactoring surfaces hidden type safety issues.
+- **ESLint found 41 unused-var warnings** across the codebase — no errors. These are all pre-existing (unused imports in components, unused destructured vars in tests). Worth cleaning up in a future pass but not blocking.
 
 **3. Cross-project signals**
 
-No new signals. Previous flags (useResourceMutation, Vitest mock-storage pattern, Stripe graceful degradation) still stand.
+- **Route module pattern**: The `register*Routes(app, isAuthenticated, storage)` pattern is clean and testable. Each module is self-contained with its own schema imports. Other Express projects in the portfolio could adopt this structure.
+- **ESLint flat config**: Used the new flat config format (`eslint.config.js` with `typescript-eslint`). This is the modern approach — other projects still on `.eslintrc` could migrate.
 
 **4. Priorities if given fresh directives**
 
-Same as 2026-02-28, with one timing note:
-1. Execute the 3 standing-auth items (duplicate route, routes.ts split, ESLint/Prettier) — CoS authorized, ready to go
-2. N-19 Premium UI — still blocked on Asif's feature gating decision
-3. N-12 Mobile Apps evaluation — only remaining IDEA
-
-CoS mentioned Forge launch is March 2. If FamilyMind launch timing follows, we should prioritize polish over new features.
+All housekeeping is done. Remaining work is feature-level:
+1. **N-19 Premium UI** (M, blocked on Asif's gating decision) — pricing page, subscription management, feature gating
+2. **Clean up 41 ESLint warnings** (S) — unused imports/vars across the codebase. Quick hygiene pass.
+3. **N-12 Mobile Apps evaluation** (L) — PWA vs Capacitor trade-off analysis
+4. **Polish pass** — if Forge launches March 2 and FamilyMind follows, focus on UX polish, loading states, error boundaries
 
 **5. Blockers / questions for CoS**
 
-- **No blockers.** Ready to execute standing-auth items.
-- **Forge launch (March 2) proximity**: Should FamilyMind enter a freeze/polish mode, or keep shipping? What's the relationship between Forge launch and FamilyMind launch timing?
-- **Premium gating decision**: Still waiting on Asif. No urgency — backend foundation is built and idle.
+- **No blockers.** All standing-auth items executed and pushed.
+- **Premium gating decision**: Still waiting on Asif. Backend foundation is idle and ready.
+- **Forge launch (March 2)**: Does FamilyMind have a target launch window? Should we enter freeze/polish mode?
+
+---
+
+### Reflection (2026-03-01, pre-session)
+
+Standing-auth items were unexecuted at start of session. 281 tests green after week-long quiet period (Feb 24 – Mar 1). No flakiness — good test quality signal.
 
 ---
 
@@ -545,7 +558,7 @@ No new directives were issued since 2026-02-24, so no new feature commits. The C
 
 | Date | Change |
 |------|--------|
-| 2026-03-01 | Team Feedback reflection. No new shipping. Standing-auth items still pending. Asked CoS about Forge launch proximity and freeze/polish mode. |
+| 2026-03-01 | Executed all 3 CoS standing-auth items: duplicate route fix, routes.ts split (1060→11 modules), ESLint+Prettier configs. Bonus: fixed IStorage interface gap. 281 tests pass. |
 | 2026-02-28 | Team Feedback reflection filed. No new commits since 2026-02-24. CoS granted standing auth for 3 housekeeping items: duplicate route fix, routes.ts split, ESLint/Prettier. Premium gating escalated to Asif. |
 | 2026-02-23 | DIRECTIVE-CLX9-20260223-59 completed. Test coverage push 222 → 281 (59 new tests, 6 new files). AI routes, error cases, component render tests. Bug found: duplicate /api/family/join route. |
 | 2026-02-23 | DIRECTIVE-CLX9-20260223-56 completed. N-19 (Premium Tier) IDEA → BUILDING. Stripe foundation: SDK init, subscriptions schema, checkout/webhook/status routes, requirePremium middleware. 29 new tests. Total: 222 tests across 31 files. |

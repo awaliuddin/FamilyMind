@@ -1,7 +1,7 @@
 # NEXUS — FamilyMind Vision-to-Execution Dashboard
 
 > **Owner**: Asif Waliuddin
-> **Last Updated**: 2026-03-01
+> **Last Updated**: 2026-03-01 (evening)
 > **North Star**: *"Reduce the mental load of family organization by 40%+. Families spend less time planning and more time together."*
 
 ---
@@ -438,6 +438,44 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 ---
 
 ## Team Feedback
+
+### Reflection (2026-03-01, evening)
+
+**1. What shipped since last check-in?**
+
+Since the previous reflection (earlier today), one additional commit:
+
+- **ESLint warning cleanup** (`799e23e`): All 41 pre-existing ESLint warnings eliminated across 21 files. Codebase is now at **zero warnings, zero errors**. Changes were mostly unused imports/vars — the kind of hygiene that prevents warnings from accumulating to the point where real issues get lost in noise.
+
+**Cumulative since 2026-02-28**: 5 commits — route split, ESLint/Prettier setup, warning cleanup, 2 NEXUS reflections.
+
+**Current snapshot**: 17 shipped, 1 building (N-19), 1 idea (N-12). 289 test cases / 37 files. ESLint: 0 errors, 0 warnings. TypeScript clean. 25 commits on main.
+
+**2. What surprised us?**
+
+- **The warning count went *up* before it went down.** The route split introduced a few new unused-var warnings (function params in route handlers that Express requires but aren't always used). Fixed by prefixing with `_` and adding `argsIgnorePattern` to ESLint config. The lesson: refactoring can temporarily increase lint noise before it stabilizes.
+- **`eslint.config.js` needed `@typescript-eslint/no-unused-vars` with `argsIgnorePattern: "^_"` and `caughtErrorsIgnorePattern: "^_"`** to accommodate Express handler signatures (`_req`, `_res`) and catch blocks. This is a pattern every Express + TypeScript project in the portfolio will need.
+
+**3. Cross-project signals**
+
+- **ESLint flat config + Express pattern**: The `argsIgnorePattern: "^_"` rule is essential for any Express project using typescript-eslint. Worth noting in the ASIF tech-stack-registry as a standard config snippet.
+- **All housekeeping items from CoS standing authorization are now complete.** The standing-auth pattern worked well — gave us clear scope to execute without per-commit approval while still keeping CoS informed via reflections.
+
+**4. Priorities if given fresh directives**
+
+All housekeeping is done. The codebase is in its cleanest state ever:
+1. **N-19 Premium UI** (M, blocked on Asif's gating decision) — pricing page, subscription management, feature gating. Backend is ready and waiting.
+2. **Polish pass** (S-M) — error boundaries, loading states, empty states. Worth doing before any launch.
+3. **N-12 Mobile Apps evaluation** (L) — PWA vs Capacitor trade-off analysis.
+4. **Test coverage for new route modules** — the split created 11 domain modules; existing tests cover the API surface but module-level unit tests could improve isolation.
+
+**5. Blockers / questions for CoS**
+
+- **No blockers.** All standing-auth housekeeping is shipped and pushed.
+- **Premium gating decision**: Still the primary blocker for N-19 forward progress. Which features go behind the paywall?
+- **Launch readiness**: With 17 features shipped, 289 tests green, zero lint issues, and clean architecture — is there a target date or should we enter polish mode?
+
+---
 
 ### Reflection (2026-03-01, post-session)
 

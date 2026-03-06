@@ -168,7 +168,7 @@
 **Pillar**: MONETIZE | **Status**: BUILDING | **Priority**: P2
 **What**: Stripe-powered premium subscription system. Checkout sessions, webhook handling, subscription status tracking, and paywall middleware for premium route gating.
 **Key files**: `server/stripe.ts`, `server/routes.ts` (billing routes + `requirePremium` middleware), `server/storage.ts` (subscription CRUD), `shared/schema.ts` (subscriptions table)
-**Scope note**: Phase 1 shipped — Stripe SDK initialization (graceful degradation), subscriptions schema, checkout/webhook/status routes, `requirePremium` middleware. UI, actual Stripe keys, and premium feature gating are future work.
+**Scope note**: Phase 1 shipped — Stripe SDK initialization (graceful degradation), subscriptions schema, checkout/webhook/status routes, `requirePremium` middleware. **Asif decision (2026-03-06)**: Premium features = AI Assistant + family members 3+. Free tier = 2 family members + all non-AI features. Phase 2: pricing page UI, member cap enforcement, AI route gating.
 
 ---
 
@@ -183,17 +183,45 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 ---
 
 ## Portfolio Intelligence
+> Injected by CLX9 CoS (Emma) — Enrichment Cycle 2026-03-06
 
-*Injected by CLX9 CoS, Enrichment Cycle #3 (2026-02-18). Context from across the portfolio relevant to this project.*
-
-- **Shared patterns tracked**: FamilyMind's `useResourceMutation` hook and command palette (cmdk) pattern are listed in PORTFOLIO.md shared patterns. Other React projects in the portfolio may adopt them.
-- **First consumer vertical**: FamilyMind is the portfolio's only consumer-facing product. Its full-stack TypeScript exception (ADR-005, ADR-006) is approved and documented.
-- **Testing is the top priority**: With 11 shipped features and 0 automated tests, FamilyMind has the highest regression risk on CLX9. DIRECTIVE-CLX9-20260216-02 covers this.
-- **Mobile apps (N-12) alignment**: When evaluating Capacitor for mobile, note that DesktopAI uses Tauri for native desktop. Different tools for different platforms, both ASIF-approved.
+- **Portfolio test count**: ~16,866 across 17 projects. FamilyMind contributes 289 (281 unit + 7 E2E + ESLint clean).
+- **N-19 Premium gating**: DECIDED by Asif (2026-03-06). Premium = AI Assistant + 3+ family members. Free = 2 members + all non-AI features. DIRECTIVE-CLX9-20260306-01 issued for Phase 2 (Clerk migration + feature gating + pricing UI).
+- **Portfolio Skills available**: `clerk-auth` and `stripe-billing` skills at `~/ASIF/skills/` encode Clerk and Stripe integration patterns. Use them during N-19 Phase 2 execution.
+- **Clerk is universal auth standard**: Passport.js is DEPRECATED portfolio-wide. FamilyMind N-19 Phase 2 requires Clerk migration (in directive). Use `@clerk/express` + `@clerk/clerk-react`.
+- **SynApps (P-10)**: v1.0 feature-complete, 1,465 tests, 93% coverage. Potential future API aggregation layer for FamilyMind premium features.
+- **First consumer vertical**: FamilyMind remains the only B2C product in the portfolio. Test coverage (289) is strong but E2E at 7 is thin — consider expanding.
 
 ---
 
 ## CoS Directives
+
+### DIRECTIVE-CLX9-20260305-02 — Adopt CI Gate Protocol
+**From**: CLX9 Sr. CoS (Emma) | **Priority**: P0
+**Injected**: 2026-03-05 01:30 | **Estimate**: S | **Status**: PENDING
+
+**Action Items**:
+1. [ ] Add CI Gate Protocol section to CLAUDE.md (if not already present):
+   ```
+   ## CI Gate Protocol (ASIF Standard)
+   Before EVERY `git push`, you MUST:
+   1. Run the full test suite (`npm test`)
+   2. Verify ZERO failures (xfail/skip OK, failures NOT OK)
+   3. If tests fail → fix before pushing. No exceptions.
+   4. Include test count in commit message: "Tests: X passed, Y skipped"
+   Violating this protocol means broken CI, which means Asif gets spammed.
+   ```
+2. [ ] Install pre-push git hook from `~/ASIF/scripts/templates/pre-push-hook.sh` (copy to `.git/hooks/pre-push`, chmod +x)
+3. [ ] Run full test suite now and report results
+
+**Constraints**:
+- Do NOT skip any tests
+- Do NOT modify test files to make them pass — fix the code instead
+
+**Response** (filled by project team):
+>
+
+---
 
 ### DIRECTIVE-CLX9-20260223-59 — Test coverage push: API route testing + component snapshot coverage
 **From**: CLX9 CoS | **Priority**: P1
@@ -217,6 +245,34 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 
 **Response** (filled by project team):
 > Completed 2026-02-23. Test coverage push from 222 → **281 tests** across 37 files (target: 280+). Zero regressions on existing tests. **New test files (6)**: `ai-routes.test.ts` (7 tests — grocery predictions, schedule conflicts, chat with family context), `route-error-cases.test.ts` (30 tests — 500/error cases for all 10 route groups: grocery, calendar, ideas, vision, wishlist, recipes, budget, expenses, family, family-members), `EmptyState.test.tsx` (4 tests — render, icon, action button, no-action), `ThemeToggle.test.tsx` (5 tests — render, defaults, toggle dark/light, localStorage restore), `SkeletonLoaders.test.tsx` (6 tests — render all 6 skeleton components), `MobileBottomNav.test.tsx` (7 tests — all tabs render, mobile-only, aria-current, tab click, labels, navigation role). **Infrastructure**: Added `@vitejs/plugin-react` to vitest.config.ts for automatic JSX runtime (enables testing components that don't import React). Updated `test-helpers.ts` `MockedStorage` type for full mock method typing. **Bugs found**: `POST /api/family/join` has duplicate route registration (lines 91 and 1014 in routes.ts) — first handler wins, second is dead code. Not fixed per test-only constraint. All 281 tests pass in ~5.7s.
+
+---
+
+### DIRECTIVE-CLX9-20260306-01 — N-19 Premium Tier Phase 2: Feature gating + pricing UI
+**From**: CLX9 CoS | **Priority**: P1
+**Injected**: 2026-03-06 01:45 | **Estimate**: M (1-2 sessions) | **Status**: PENDING
+
+**Context**: Asif made the premium gating decision. AI Assistant is premium-only. Family members: 2 free, 3+ requires premium subscription. Stripe backend is already built (DIR-56). This directive gates the features and builds the pricing page.
+
+**Action Items**:
+1. [ ] Gate AI Assistant routes behind `requirePremium()` middleware — all `/api/ai/*` and `/api/chat/*` endpoints
+2. [ ] Add family member cap enforcement — `POST /api/family/members` must check subscription status. Free tier: max 2 members. Premium: unlimited. Return 403 with upgrade message when cap hit
+3. [ ] Build pricing page component — `/premium` route. Show free vs premium comparison. "Upgrade" button triggers Stripe Checkout
+4. [ ] Add upgrade prompts — when free user hits AI or member cap, show inline upgrade CTA (not just 403)
+5. [ ] Update `GET /api/billing/status` to include `memberLimit` and `aiEnabled` fields
+6. [ ] Write tests — minimum 15 new: member cap enforcement (at 2, at 3, premium unlimited), AI route gating (free blocked, premium allowed), pricing page render, upgrade prompt display
+7. [ ] Update NEXUS: N-19 status notes
+
+**Constraints**:
+- Free tier gets ALL features EXCEPT AI and 3+ members. Do NOT gate anything else
+- Upgrade prompts must be helpful, not annoying. One inline message, not modals
+- Existing tests must not break
+- Member cap = 2 humans (the account creator counts as member 1)
+- **Stripe**: Connect to Asif's existing Stripe account. Use real keys (env vars), not just mocks
+- **Auth migration**: Replace Passport.js/express-session with **Clerk** (Asif has existing Clerk account). This is a prerequisite — do auth migration FIRST, then wire premium gating. Clerk handles login/signup/session, Stripe handles billing. Use `@clerk/express` + `@clerk/clerk-react`
+
+**Response** (filled by project team):
+>
 
 ---
 

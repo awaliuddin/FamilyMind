@@ -5,7 +5,7 @@ import { insertWishListItemSchema } from "@shared/schema";
 export function registerWishlistRoutes(app: Express, isAuthenticated: RequestHandler, storage: IStorage) {
   app.get('/api/wishlist-items', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (!user?.familyId) {
@@ -22,7 +22,7 @@ export function registerWishlistRoutes(app: Express, isAuthenticated: RequestHan
 
   app.post('/api/wishlist-items', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (!user?.familyId) {

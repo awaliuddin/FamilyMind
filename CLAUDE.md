@@ -11,7 +11,7 @@ This project is **P-12** in the [ASIF portfolio](~/ASIF/PORTFOLIO.md) — the fi
   - Full-stack TypeScript is an **approved exception** to the Python-brain rule (ADR-005, ADR-006)
   - Cloud services (Neon, OpenAI, SendGrid) are approved for consumer products (ADR-006)
   - AGPL dependencies are **blocked** — check `~/ASIF/standards/tech-stack-registry.md`
-  - Test counts never decrease — current baseline: 281 tests (274 unit + 7 E2E)
+  - Test counts never decrease — current baseline: 311 tests (304 unit + 7 E2E)
 - **Handoff notes**: Check `~/ASIF/machines/HANDOFF.md` for cross-machine coordination notes.
 
 ### ASIF Governance
@@ -43,7 +43,7 @@ npm run format           # Prettier — format all files
 npm run format:check     # Prettier — check without writing
 ```
 
-281 tests (274 unit + 7 E2E) across 37 files. Manual UAT guide: `UAT-TEST-GUIDE.md`.
+311 tests (304 unit + 7 E2E) across 40 files. Manual UAT guide: `UAT-TEST-GUIDE.md`.
 
 ## Architecture
 
@@ -65,11 +65,19 @@ Full-stack TypeScript monorepo — single `package.json`, ESM (`"type": "module"
 
 ### Authentication
 
-Dual-mode auth in `server/replitAuth.ts`:
-- **Replit (production)**: OpenID Connect via Passport.js. Sessions stored in PostgreSQL `sessions` table via `connect-pg-simple`. Requires `REPLIT_DOMAINS`, `REPL_ID`, and `SESSION_SECRET`.
-- **Local dev**: When those env vars are absent, every request is auto-authenticated as a hardcoded dev user (configurable via `DEV_USER_ID`, `DEV_USER_EMAIL` env vars). No OAuth needed locally.
+Dual-mode auth in `server/auth.ts` (Clerk):
+- **Production**: `@clerk/express` — `clerkMiddleware()` + `requireAuth()`. User identity via `req.auth.userId`. First access triggers `syncUser()` which fetches Clerk profile, upserts to DB, and seeds sample data. Requires `CLERK_SECRET_KEY` env var.
+- **Local dev**: When `CLERK_SECRET_KEY` is absent, every request is auto-authenticated as a hardcoded dev user (configurable via `DEV_USER_ID`, `DEV_USER_EMAIL` env vars). No OAuth needed locally.
+- **Client**: `@clerk/react` — `ClerkProvider` wraps app when `VITE_CLERK_PUBLISHABLE_KEY` is set. When absent (dev), app renders without Clerk. `SignInButton` used on landing page.
 
 New users get sample data seeded automatically (`server/seed-data.ts`).
+
+### Premium Tier (N-19)
+
+- **Feature gating**: AI routes (`/api/chat*`, `/api/ai/*`) require `requirePremium` middleware. Family member cap: free = 2 members, premium = unlimited.
+- **Pricing page**: `/premium` route with free vs premium comparison table, Stripe Checkout integration.
+- **Billing status**: `GET /api/billing/status` returns `isPremium`, `subscription`, `memberLimit`, `aiEnabled`.
+- **Upgrade prompts**: `UpgradePrompt` component for inline CTA. 403 responses include `upgradeUrl: "/premium"`.
 
 ### Schema
 
@@ -83,9 +91,9 @@ New users get sample data seeded automatically (`server/seed-data.ts`).
 - **Shared components**: `CommandPalette` (cmdk, Cmd+K), `ThemeToggle`, `MobileBottomNav`, skeleton loaders.
 - **Dark mode**: Class-based via CSS variables, toggle in header.
 
-### AI features (optional)
+### AI features (premium-only)
 
-`server/openai.ts` — GPT-4o for family chat assistant, grocery predictions, schedule conflict detection. All features silently disabled when `OPENAI_API_KEY` is absent.
+`server/openai.ts` — GPT-4o for family chat assistant, grocery predictions, schedule conflict detection. All AI routes gated behind `requirePremium` middleware. Features silently disabled when `OPENAI_API_KEY` is absent.
 
 ## Path Aliases
 

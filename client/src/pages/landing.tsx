@@ -1,6 +1,18 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, ShoppingCart, Lightbulb, Heart, Gift, Brain, Users, Clock, Zap } from "lucide-react";
+import { SignInButton as ClerkSignInButton } from "@clerk/react";
+
+const hasClerk = Boolean(import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
+
+function AuthButton({ children }: { children: React.ReactNode }) {
+  if (hasClerk) {
+    return <ClerkSignInButton mode="modal">{children}</ClerkSignInButton>;
+  }
+  return (
+    <span onClick={() => (window.location.href = "/api/login")}>{children}</span>
+  );
+}
 
 export default function Landing() {
   return (
@@ -17,22 +29,23 @@ export default function Landing() {
               <p className="text-lg text-gray-600">AI-Powered Family Assistant</p>
             </div>
           </div>
-          
+
           <h2 className="text-2xl md:text-3xl font-semibold text-gray-700 mb-4">
             Transform Your Family Organization
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
-            An intelligent family assistant that proactively manages household operations, 
+            An intelligent family assistant that proactively manages household operations,
             anticipates needs, and streamlines family coordination through natural conversation.
           </p>
-          
-          <Button 
-            size="lg" 
-            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 text-lg"
-            onClick={() => window.location.href = '/api/login'}
-          >
-            Get Started for Free
-          </Button>
+
+          <AuthButton>
+            <Button
+              size="lg"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 text-lg cursor-pointer"
+            >
+              Get Started for Free
+            </Button>
+          </AuthButton>
         </div>
 
         {/* Features Grid */}
@@ -113,7 +126,7 @@ export default function Landing() {
         {/* Benefits Section */}
         <div className="bg-white rounded-2xl shadow-xl p-8 mb-12">
           <h3 className="text-2xl font-bold text-gray-800 text-center mb-8">Why Choose FamilyMind?</h3>
-          
+
           <div className="grid md:grid-cols-3 gap-6">
             <div className="text-center">
               <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -147,14 +160,15 @@ export default function Landing() {
           <p className="text-lg mb-6 opacity-90">
             Join thousands of families who have reduced their mental load and improved coordination with FamilyMind.
           </p>
-          <Button 
-            size="lg" 
-            variant="secondary"
-            className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold"
-            onClick={() => window.location.href = '/api/login'}
-          >
-            Start Your Free Trial
-          </Button>
+          <AuthButton>
+            <Button
+              size="lg"
+              variant="secondary"
+              className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold cursor-pointer"
+            >
+              Start Your Free Trial
+            </Button>
+          </AuthButton>
         </div>
       </div>
 

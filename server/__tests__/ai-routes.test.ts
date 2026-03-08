@@ -14,6 +14,11 @@ let mockGetFamilyAssistantResponse: ReturnType<typeof vi.fn>;
 let mockGenerateGroceryPredictions: ReturnType<typeof vi.fn>;
 let mockDetectScheduleConflicts: ReturnType<typeof vi.fn>;
 
+const activeSub = {
+  status: "active",
+  currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+};
+
 beforeAll(async () => {
   const testApp = await createTestApp();
   app = testApp.app;
@@ -28,12 +33,17 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
+function mockPremiumUser() {
+  mockStorage.getUser.mockResolvedValue(testUser);
+  mockStorage.getSubscription.mockResolvedValue(activeSub);
+}
+
 describe("GET /api/ai/grocery-predictions", () => {
-  it("returns predictions for user with family", async () => {
+  it("returns predictions for premium user with family", async () => {
     const predictions = [
       { item: "Milk", confidence: 0.9, reason: "Weekly purchase" },
     ];
-    mockStorage.getUser.mockResolvedValue(testUser);
+    mockPremiumUser();
     mockStorage.getGroceryLists.mockResolvedValue([]);
     mockStorage.getFamilyMembers.mockResolvedValue([{ id: "m1", name: "Mom" }]);
     mockGenerateGroceryPredictions.mockResolvedValue(predictions);
@@ -44,13 +54,13 @@ describe("GET /api/ai/grocery-predictions", () => {
     expect(res.body).toEqual(predictions);
   });
 
-  it("returns empty array if user has no family", async () => {
-    mockStorage.getUser.mockResolvedValue(testUserNoFamily);
+  it("blocks free user (no subscription)", async () => {
+    mockStorage.getUser.mockResolvedValue(testUser);
+    mockStorage.getSubscription.mockResolvedValue(undefined);
 
     const res = await request(app).get("/api/ai/grocery-predictions");
 
-    expect(res.status).toBe(200);
-    expect(res.body).toEqual([]);
+    expect(res.status).toBe(403);
   });
 
   it("returns 500 on storage error", async () => {
@@ -63,12 +73,12 @@ describe("GET /api/ai/grocery-predictions", () => {
 });
 
 describe("GET /api/ai/schedule-conflicts", () => {
-  it("returns conflicts for user with family", async () => {
+  it("returns conflicts for premium user with family", async () => {
     const conflicts = {
       conflicts: [{ events: ["e1", "e2"], type: "overlap" }],
       suggestions: ["Move meeting to 3pm"],
     };
-    mockStorage.getUser.mockResolvedValue(testUser);
+    mockPremiumUser();
     mockStorage.getCalendarEvents.mockResolvedValue([]);
     mockDetectScheduleConflicts.mockResolvedValue(conflicts);
 
@@ -78,13 +88,13 @@ describe("GET /api/ai/schedule-conflicts", () => {
     expect(res.body).toEqual(conflicts);
   });
 
-  it("returns empty array if user has no family", async () => {
-    mockStorage.getUser.mockResolvedValue(testUserNoFamily);
+  it("blocks free user (no subscription)", async () => {
+    mockStorage.getUser.mockResolvedValue(testUser);
+    mockStorage.getSubscription.mockResolvedValue(undefined);
 
     const res = await request(app).get("/api/ai/schedule-conflicts");
 
-    expect(res.status).toBe(200);
-    expect(res.body).toEqual([]);
+    expect(res.status).toBe(403);
   });
 
   it("returns 500 on storage error", async () => {
@@ -97,13 +107,13 @@ describe("GET /api/ai/schedule-conflicts", () => {
 });
 
 describe("POST /api/chat (with family)", () => {
-  it("returns AI response with suggestions and actions", async () => {
+  it("returns AI response with suggestions and actions for premium user", async () => {
     const aiResponse = {
       message: "Here are some dinner ideas!",
       suggestions: ["Tacos", "Pasta"],
       actions: [],
     };
-    mockStorage.getUser.mockResolvedValue(testUser);
+    mockPremiumUser();
     mockStorage.createChatMessage.mockResolvedValue({ id: "msg1", message: "test" });
     mockStorage.getFamilyMembers.mockResolvedValue([]);
     mockStorage.getCalendarEvents.mockResolvedValue([]);

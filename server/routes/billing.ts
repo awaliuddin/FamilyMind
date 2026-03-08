@@ -2,9 +2,11 @@ import type { Express, RequestHandler } from "express";
 import type { IStorage } from "../storage";
 import { stripe, isStripeConfigured, STRIPE_WEBHOOK_SECRET } from "../stripe";
 
+export const FREE_MEMBER_LIMIT = 2;
+
 export const requirePremium: RequestHandler = async (req: any, res, next) => {
   try {
-    const userId = req.user?.claims?.sub;
+    const userId = req.auth?.userId;
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
@@ -13,7 +15,10 @@ export const requirePremium: RequestHandler = async (req: any, res, next) => {
     const { storage } = await import("../storage");
     const user = await storage.getUser(userId);
     if (!user?.familyId) {
-      return res.status(403).json({ message: "Premium subscription required" });
+      return res.status(403).json({
+        message: "Premium subscription required",
+        upgradeUrl: "/premium",
+      });
     }
 
     const subscription = await storage.getSubscription(user.familyId);
@@ -22,7 +27,10 @@ export const requirePremium: RequestHandler = async (req: any, res, next) => {
       subscription.status !== "active" ||
       new Date(subscription.currentPeriodEnd) <= new Date()
     ) {
-      return res.status(403).json({ message: "Premium subscription required" });
+      return res.status(403).json({
+        message: "Premium subscription required",
+        upgradeUrl: "/premium",
+      });
     }
 
     next();
@@ -39,7 +47,7 @@ export function registerBillingRoutes(app: Express, isAuthenticated: RequestHand
         return res.status(503).json({ message: "Billing is not configured" });
       }
 
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
       if (!user?.familyId) {
         return res.status(400).json({ message: "Must be part of a family to subscribe" });
@@ -147,15 +155,25 @@ export function registerBillingRoutes(app: Express, isAuthenticated: RequestHand
 
   app.get('/api/billing/status', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
       if (!user?.familyId) {
-        return res.json({ isPremium: false, subscription: null });
+        return res.json({
+          isPremium: false,
+          subscription: null,
+          memberLimit: FREE_MEMBER_LIMIT,
+          aiEnabled: false,
+        });
       }
 
       const subscription = await storage.getSubscription(user.familyId);
       if (!subscription) {
-        return res.json({ isPremium: false, subscription: null });
+        return res.json({
+          isPremium: false,
+          subscription: null,
+          memberLimit: FREE_MEMBER_LIMIT,
+          aiEnabled: false,
+        });
       }
 
       const isPremium =
@@ -168,6 +186,8 @@ export function registerBillingRoutes(app: Express, isAuthenticated: RequestHand
           status: subscription.status,
           currentPeriodEnd: subscription.currentPeriodEnd,
         },
+        memberLimit: isPremium ? null : FREE_MEMBER_LIMIT,
+        aiEnabled: isPremium,
       });
     } catch (error) {
       console.error("Error fetching billing status:", error);

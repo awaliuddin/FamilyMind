@@ -7,12 +7,20 @@ import { useAuth } from "@/hooks/useAuth";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
+import { lazy, Suspense } from "react";
+
+const Pricing = lazy(() => import("@/pages/pricing"));
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
   return (
     <Switch>
+      <Route path="/premium">
+        <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+          <Pricing />
+        </Suspense>
+      </Route>
       {isLoading || !isAuthenticated ? (
         <Route path="/" component={Landing} />
       ) : (

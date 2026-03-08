@@ -27,8 +27,7 @@ function buildPremiumApp() {
   const app = express();
   app.use(express.json());
   app.use((req: any, _res, next) => {
-    req.user = { claims: { sub: TEST_USER_ID } };
-    req.isAuthenticated = () => true;
+    req.auth = { userId: TEST_USER_ID };
     next();
   });
   app.get("/test-premium", requirePremium, (_req: any, res: any) => {

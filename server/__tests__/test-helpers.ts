@@ -104,16 +104,18 @@ export async function createTestApp() {
     storage: mockStorage,
   }));
 
-  vi.doMock("../replitAuth", () => ({
+  vi.doMock("../auth", () => ({
     setupAuth: vi.fn(async (app: express.Express) => {
-      // Auth passthrough: attach test user to every request
+      // Auth passthrough: attach test user auth to every request
       app.use((req: any, _res: any, next: any) => {
-        req.user = { claims: { sub: TEST_USER_ID } };
-        req.isAuthenticated = () => true;
+        req.auth = { userId: TEST_USER_ID };
         next();
       });
     }),
     isAuthenticated: (_req: any, _res: any, next: any) => next(),
+    syncUser: vi.fn(async (userId: string) => {
+      return mockStorage.getUser(userId);
+    }),
   }));
 
   vi.doMock("../stripe", () => ({

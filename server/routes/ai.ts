@@ -1,12 +1,13 @@
 import type { Express, RequestHandler } from "express";
 import type { IStorage } from "../storage";
 import { getFamilyAssistantResponse, generateGroceryPredictions, detectScheduleConflicts } from "../openai";
+import { requirePremium } from "./billing";
 
 export function registerAiRoutes(app: Express, isAuthenticated: RequestHandler, storage: IStorage) {
-  // AI Chat routes
-  app.get('/api/chat-messages', isAuthenticated, async (req: any, res) => {
+  // AI Chat routes — premium only
+  app.get('/api/chat-messages', isAuthenticated, requirePremium, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const messages = await storage.getChatMessages(userId);
       res.json(messages);
     } catch (error) {
@@ -15,9 +16,9 @@ export function registerAiRoutes(app: Express, isAuthenticated: RequestHandler, 
     }
   });
 
-  app.post('/api/chat', isAuthenticated, async (req: any, res) => {
+  app.post('/api/chat', isAuthenticated, requirePremium, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const { message } = req.body;
 
       // Save user message
@@ -82,10 +83,10 @@ export function registerAiRoutes(app: Express, isAuthenticated: RequestHandler, 
     }
   });
 
-  // AI Analytics routes
-  app.get('/api/ai/grocery-predictions', isAuthenticated, async (req: any, res) => {
+  // AI Analytics routes — premium only
+  app.get('/api/ai/grocery-predictions', isAuthenticated, requirePremium, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (!user?.familyId) {
@@ -107,9 +108,9 @@ export function registerAiRoutes(app: Express, isAuthenticated: RequestHandler, 
     }
   });
 
-  app.get('/api/ai/schedule-conflicts', isAuthenticated, async (req: any, res) => {
+  app.get('/api/ai/schedule-conflicts', isAuthenticated, requirePremium, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (!user?.familyId) {

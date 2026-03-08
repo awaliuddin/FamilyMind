@@ -5,7 +5,7 @@ import { insertFamilyIdeaSchema } from "@shared/schema";
 export function registerIdeasRoutes(app: Express, isAuthenticated: RequestHandler, storage: IStorage) {
   app.get('/api/family-ideas', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (!user?.familyId) {
@@ -22,7 +22,7 @@ export function registerIdeasRoutes(app: Express, isAuthenticated: RequestHandle
 
   app.post('/api/family-ideas', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (!user?.familyId) {
@@ -41,7 +41,7 @@ export function registerIdeasRoutes(app: Express, isAuthenticated: RequestHandle
   app.post('/api/family-ideas/:id/like', isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       await storage.likeIdea(id, userId);
       res.json({ success: true });
     } catch (error) {
@@ -53,7 +53,7 @@ export function registerIdeasRoutes(app: Express, isAuthenticated: RequestHandle
   app.delete('/api/family-ideas/:id/like', isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       await storage.unlikeIdea(id, userId);
       res.json({ success: true });
     } catch (error) {

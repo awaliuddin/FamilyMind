@@ -5,7 +5,7 @@ import { insertRecipeSchema } from "@shared/schema";
 export function registerRecipeRoutes(app: Express, isAuthenticated: RequestHandler, storage: IStorage) {
   app.get('/api/recipes', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
       if (!user?.familyId) return res.json([]);
       const items = await storage.getRecipes(user.familyId);
@@ -18,7 +18,7 @@ export function registerRecipeRoutes(app: Express, isAuthenticated: RequestHandl
 
   app.post('/api/recipes', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
       if (!user?.familyId) {
         return res.status(400).json({ message: "Must be part of a family to create recipes" });
@@ -59,7 +59,7 @@ export function registerRecipeRoutes(app: Express, isAuthenticated: RequestHandl
     try {
       const { id } = req.params;
       const { listId } = req.body;
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (!user?.familyId) {

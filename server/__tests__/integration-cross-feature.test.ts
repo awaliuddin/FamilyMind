@@ -211,16 +211,16 @@ describe("Cross-feature interactions", () => {
     );
   });
 
-  it("chat AI responds differently based on family membership", async () => {
-    // User without family gets guidance response
-    mockStorage.getUser.mockResolvedValueOnce({ ...testUser, familyId: null });
-    mockStorage.createChatMessage.mockResolvedValue({ id: "msg-1", userId: TEST_USER_ID, message: "test", messageType: "user" });
+  it("chat AI is blocked for free users (premium-only)", async () => {
+    // Chat routes require premium — free users get 403
+    mockStorage.getUser.mockResolvedValue(testUser);
+    mockStorage.getSubscription.mockResolvedValue(undefined);
 
-    const noFamilyRes = await request(app)
+    const res = await request(app)
       .post("/api/chat")
       .send({ message: "What should we have for dinner?" });
 
-    expect(noFamilyRes.status).toBe(200);
-    expect(noFamilyRes.body.message).toContain("family");
+    expect(res.status).toBe(403);
+    expect(res.body.message).toBe("Premium subscription required");
   });
 });

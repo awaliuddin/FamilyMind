@@ -5,7 +5,7 @@ import { insertVisionItemSchema } from "@shared/schema";
 export function registerVisionRoutes(app: Express, isAuthenticated: RequestHandler, storage: IStorage) {
   app.get('/api/vision-items', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (!user?.familyId) {
@@ -22,7 +22,7 @@ export function registerVisionRoutes(app: Express, isAuthenticated: RequestHandl
 
   app.post('/api/vision-items', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (!user?.familyId) {

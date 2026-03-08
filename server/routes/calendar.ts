@@ -5,7 +5,7 @@ import { insertCalendarEventSchema } from "@shared/schema";
 export function registerCalendarRoutes(app: Express, isAuthenticated: RequestHandler, storage: IStorage) {
   app.get('/api/calendar-events', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (!user?.familyId) {
@@ -22,7 +22,7 @@ export function registerCalendarRoutes(app: Express, isAuthenticated: RequestHan
 
   app.post('/api/calendar-events', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (!user?.familyId) {

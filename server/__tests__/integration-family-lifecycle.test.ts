@@ -41,6 +41,7 @@ describe("Family lifecycle: create → join → add members → collaborate", ()
 
     // Step 2: Now user has a family — add a family member
     mockStorage.getUser.mockResolvedValue(testUser);
+    mockStorage.getFamilyMembers.mockResolvedValue([]); // under free cap
     const newMember = { id: "m-1", familyId: TEST_FAMILY_ID, name: "Emma", role: "child", color: "#4ecdc4" };
     mockStorage.createFamilyMember.mockResolvedValue(newMember);
 

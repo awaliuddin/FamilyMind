@@ -1,11 +1,12 @@
 import type { Express, RequestHandler } from "express";
 import type { IStorage } from "../storage";
 import { insertFamilyMemberSchema } from "@shared/schema";
+import { FREE_MEMBER_LIMIT } from "./billing";
 
 export function registerFamilyRoutes(app: Express, isAuthenticated: RequestHandler, storage: IStorage) {
   app.post('/api/family/create', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (user?.familyId) {
@@ -30,7 +31,7 @@ export function registerFamilyRoutes(app: Express, isAuthenticated: RequestHandl
 
   app.post('/api/family/join', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const { inviteCode } = req.body;
 
       const family = await storage.getFamilyByInviteCode(inviteCode);
@@ -48,7 +49,7 @@ export function registerFamilyRoutes(app: Express, isAuthenticated: RequestHandl
 
   app.get('/api/family', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (!user?.familyId) {
@@ -66,7 +67,7 @@ export function registerFamilyRoutes(app: Express, isAuthenticated: RequestHandl
   // Family members routes
   app.get('/api/family-members', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (!user?.familyId) {
@@ -83,11 +84,29 @@ export function registerFamilyRoutes(app: Express, isAuthenticated: RequestHandl
 
   app.post('/api/family-members', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (!user?.familyId) {
         return res.status(400).json({ message: "Must be part of a family to add members" });
+      }
+
+      // Check member cap for free tier
+      const members = await storage.getFamilyMembers(user.familyId);
+      if (members.length >= FREE_MEMBER_LIMIT) {
+        const subscription = await storage.getSubscription(user.familyId);
+        const isPremium =
+          subscription &&
+          subscription.status === "active" &&
+          new Date(subscription.currentPeriodEnd) > new Date();
+
+        if (!isPremium) {
+          return res.status(403).json({
+            message: `Free plan supports up to ${FREE_MEMBER_LIMIT} family members. Upgrade to Premium for unlimited members.`,
+            upgradeUrl: "/premium",
+            code: "MEMBER_LIMIT_REACHED",
+          });
+        }
       }
 
       const memberData = insertFamilyMemberSchema.parse({ ...req.body, familyId: user.familyId });

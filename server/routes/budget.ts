@@ -5,7 +5,7 @@ import { insertBudgetSchema, insertExpenseSchema } from "@shared/schema";
 export function registerBudgetRoutes(app: Express, isAuthenticated: RequestHandler, storage: IStorage) {
   app.get('/api/budgets', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
       if (!user?.familyId) return res.json([]);
       const items = await storage.getBudgets(user.familyId);
@@ -18,7 +18,7 @@ export function registerBudgetRoutes(app: Express, isAuthenticated: RequestHandl
 
   app.post('/api/budgets', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
       if (!user?.familyId) {
         return res.status(400).json({ message: "Must be part of a family to create budgets" });
@@ -93,7 +93,7 @@ export function registerBudgetRoutes(app: Express, isAuthenticated: RequestHandl
   // Monthly summary endpoint
   app.get('/api/budgets/summary/:month', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
       if (!user?.familyId) return res.json({ budgets: [], totalBudgeted: 0, totalSpent: 0 });
 

@@ -52,6 +52,7 @@ describe("POST /api/family-members", () => {
   it("creates a family member", async () => {
     const newMember = { id: "m-3", familyId: TEST_FAMILY_ID, name: "Dad", role: "parent", color: "#45b7d1" };
     mockStorage.getUser.mockResolvedValue(testUser);
+    mockStorage.getFamilyMembers.mockResolvedValue([]); // under free cap
     mockStorage.createFamilyMember.mockResolvedValue(newMember);
 
     const res = await request(app)

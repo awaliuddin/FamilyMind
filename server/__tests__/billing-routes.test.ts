@@ -29,7 +29,10 @@ describe("GET /api/billing/status", () => {
     const res = await request(app).get("/api/billing/status");
 
     expect(res.status).toBe(200);
-    expect(res.body).toEqual({ isPremium: false, subscription: null });
+    expect(res.body.isPremium).toBe(false);
+    expect(res.body.subscription).toBeNull();
+    expect(res.body.memberLimit).toBe(2);
+    expect(res.body.aiEnabled).toBe(false);
   });
 
   it("returns isPremium false when no subscription exists", async () => {
@@ -39,7 +42,10 @@ describe("GET /api/billing/status", () => {
     const res = await request(app).get("/api/billing/status");
 
     expect(res.status).toBe(200);
-    expect(res.body).toEqual({ isPremium: false, subscription: null });
+    expect(res.body.isPremium).toBe(false);
+    expect(res.body.subscription).toBeNull();
+    expect(res.body.memberLimit).toBe(2);
+    expect(res.body.aiEnabled).toBe(false);
   });
 
   it("returns isPremium true for active subscription with future period end", async () => {

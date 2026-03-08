@@ -5,7 +5,7 @@ import { insertGroceryListSchema, insertGroceryItemSchema } from "@shared/schema
 export function registerGroceryRoutes(app: Express, isAuthenticated: RequestHandler, storage: IStorage) {
   app.get('/api/grocery-lists', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (!user?.familyId) {
@@ -22,7 +22,7 @@ export function registerGroceryRoutes(app: Express, isAuthenticated: RequestHand
 
   app.post('/api/grocery-lists', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.auth.userId;
       const user = await storage.getUser(userId);
 
       if (!user?.familyId) {

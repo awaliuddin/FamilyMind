@@ -28,7 +28,7 @@
 | N-16 | [Budget Tracking](#n-16-budget) | ORGANIZE | SHIPPED | P2 | 2026-02-22 |
 | N-17 | [Automated Test Suite](#n-17-test-suite) | TRUST | SHIPPED | P1 | 2026-02-19 |
 | N-18 | [Offline-First / PWA](#n-18-pwa) | EXPERIENCE | SHIPPED | P2 | 2026-02-20 |
-| N-19 | [Premium Tier](#n-19-premium) | MONETIZE | BUILDING | P2 | 2026-02-23 |
+| N-19 | [Premium Tier](#n-19-premium) | MONETIZE | BUILDING | P2 | 2026-03-07 |
 
 ---
 
@@ -166,9 +166,9 @@
 
 ### N-19: Premium Tier
 **Pillar**: MONETIZE | **Status**: BUILDING | **Priority**: P2
-**What**: Stripe-powered premium subscription system. Checkout sessions, webhook handling, subscription status tracking, and paywall middleware for premium route gating.
-**Key files**: `server/stripe.ts`, `server/routes.ts` (billing routes + `requirePremium` middleware), `server/storage.ts` (subscription CRUD), `shared/schema.ts` (subscriptions table)
-**Scope note**: Phase 1 shipped — Stripe SDK initialization (graceful degradation), subscriptions schema, checkout/webhook/status routes, `requirePremium` middleware. **Asif decision (2026-03-06)**: Premium features = AI Assistant + family members 3+. Free tier = 2 family members + all non-AI features. Phase 2: pricing page UI, member cap enforcement, AI route gating.
+**What**: Stripe-powered premium subscription system with Clerk auth, feature gating, and pricing UI.
+**Key files**: `server/auth.ts` (Clerk auth), `server/stripe.ts`, `server/routes/billing.ts` (`requirePremium` + `FREE_MEMBER_LIMIT`), `server/routes/ai.ts` (gated routes), `client/src/pages/pricing.tsx`, `client/src/components/UpgradePrompt.tsx`
+**Scope note**: Phase 1 shipped — Stripe foundation (SDK, schema, checkout/webhook/status routes, requirePremium). **Phase 2 shipped (2026-03-07)**: Clerk auth migration (replaced Passport.js), AI route gating (4 endpoints), family member cap (free=2, premium=unlimited), pricing page (/premium), inline upgrade prompts, billing status extended (memberLimit/aiEnabled). Auth: `@clerk/express` + `@clerk/react` with dev fallback. 29 new tests (311 total across 40 files).
 
 ---
 
@@ -185,7 +185,7 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 ## Portfolio Intelligence
 > Injected by CLX9 CoS (Emma) — Enrichment Cycle 2026-03-06
 
-- **Portfolio test count**: ~16,866 across 17 projects. FamilyMind contributes 289 (281 unit + 7 E2E + ESLint clean).
+- **Portfolio test count**: ~16,866 across 17 projects. FamilyMind contributes 311 (304 unit + 7 E2E + ESLint clean).
 - **N-19 Premium gating**: DECIDED by Asif (2026-03-06). Premium = AI Assistant + 3+ family members. Free = 2 members + all non-AI features. DIRECTIVE-CLX9-20260306-01 issued for Phase 2 (Clerk migration + feature gating + pricing UI).
 - **Portfolio Skills available**: `clerk-auth` and `stripe-billing` skills at `~/ASIF/skills/` encode Clerk and Stripe integration patterns. Use them during N-19 Phase 2 execution.
 - **Clerk is universal auth standard**: Passport.js is DEPRECATED portfolio-wide. FamilyMind N-19 Phase 2 requires Clerk migration (in directive). Use `@clerk/express` + `@clerk/clerk-react`.
@@ -258,18 +258,18 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 
 ### DIRECTIVE-CLX9-20260306-01 — N-19 Premium Tier Phase 2: Feature gating + pricing UI
 **From**: CLX9 CoS | **Priority**: P1
-**Injected**: 2026-03-06 01:45 | **Estimate**: M (1-2 sessions) | **Status**: PENDING
+**Injected**: 2026-03-06 01:45 | **Estimate**: M (1-2 sessions) | **Status**: DONE
 
 **Context**: Asif made the premium gating decision. AI Assistant is premium-only. Family members: 2 free, 3+ requires premium subscription. Stripe backend is already built (DIR-56). This directive gates the features and builds the pricing page.
 
 **Action Items**:
-1. [ ] Gate AI Assistant routes behind `requirePremium()` middleware — all `/api/ai/*` and `/api/chat/*` endpoints
-2. [ ] Add family member cap enforcement — `POST /api/family/members` must check subscription status. Free tier: max 2 members. Premium: unlimited. Return 403 with upgrade message when cap hit
-3. [ ] Build pricing page component — `/premium` route. Show free vs premium comparison. "Upgrade" button triggers Stripe Checkout
-4. [ ] Add upgrade prompts — when free user hits AI or member cap, show inline upgrade CTA (not just 403)
-5. [ ] Update `GET /api/billing/status` to include `memberLimit` and `aiEnabled` fields
-6. [ ] Write tests — minimum 15 new: member cap enforcement (at 2, at 3, premium unlimited), AI route gating (free blocked, premium allowed), pricing page render, upgrade prompt display
-7. [ ] Update NEXUS: N-19 status notes
+1. [x] Gate AI Assistant routes behind `requirePremium()` middleware — all `/api/ai/*` and `/api/chat/*` endpoints
+2. [x] Add family member cap enforcement — `POST /api/family-members` checks subscription status. Free tier: max 2 members. Premium: unlimited. Returns 403 with upgrade message when cap hit
+3. [x] Build pricing page component — `/premium` route. Free vs Premium comparison with feature table. "Upgrade" button triggers Stripe Checkout
+4. [x] Add upgrade prompts — `UpgradePrompt` component shows inline CTA. 403 responses include `upgradeUrl: "/premium"` and `code` for client handling
+5. [x] Update `GET /api/billing/status` to include `memberLimit` and `aiEnabled` fields
+6. [x] Write tests — 29 new tests: feature gating (20: AI route gating, member cap, billing status, upgrade URLs), pricing page (6), upgrade prompt (3)
+7. [x] Update NEXUS: N-19 status notes
 
 **Constraints**:
 - Free tier gets ALL features EXCEPT AI and 3+ members. Do NOT gate anything else
@@ -280,7 +280,17 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 - **Auth migration**: Replace Passport.js/express-session with **Clerk** (Asif has existing Clerk account). This is a prerequisite — do auth migration FIRST, then wire premium gating. Clerk handles login/signup/session, Stripe handles billing. Use `@clerk/express` + `@clerk/clerk-react`
 
 **Response** (filled by project team):
+> All 7 action items completed. Execution summary:
 >
+> **Auth migration (prerequisite)**: Replaced Passport.js/express-session with Clerk (`@clerk/express` + `@clerk/react`). New `server/auth.ts` with `clerkMiddleware()`, `requireAuth()`, and dev fallback (auto-auth when `CLERK_SECRET_KEY` absent). Client: conditional `ClerkProvider` wrapping (when `VITE_CLERK_PUBLISHABLE_KEY` present). Updated all route files: `req.user.claims.sub` → `req.auth.userId`. Updated `.env.example` with Clerk env vars. All existing tests updated for new auth pattern.
+>
+> **Feature gating**: 4 AI endpoints gated (`GET /api/chat-messages`, `POST /api/chat`, `GET /api/ai/grocery-predictions`, `GET /api/ai/schedule-conflicts`). Family member cap: `FREE_MEMBER_LIMIT = 2` enforced in `POST /api/family-members`. All 403 responses include `upgradeUrl: "/premium"`.
+>
+> **Pricing UI**: `/premium` route with lazy-loaded `pricing.tsx` — two plan cards (Free $0/mo, Premium $9.99/mo), feature comparison table, Stripe Checkout integration. `UpgradePrompt` inline CTA component.
+>
+> **Billing status**: `GET /api/billing/status` now returns `memberLimit` (2 or null) and `aiEnabled` (boolean) alongside existing `isPremium`/`subscription` fields.
+>
+> **Tests**: 29 new tests across 3 files (20 server feature-gating + 6 pricing page + 3 upgrade prompt). All 282 existing tests preserved. **Total: 311 tests across 40 files, all green.** Delta: +30 tests, +3 files.
 
 ### DIRECTIVE-CLX9-20260222-38 — Add E2E integration tests for critical user flows
 **From**: CLX9 CoS | **Priority**: P1

@@ -183,14 +183,15 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 ---
 
 ## Portfolio Intelligence
-> Injected by CLX9 CoS (Emma) — Enrichment Cycle 2026-03-06
+> Injected by CLX9 CoS (Emma) — Enrichment Cycle 2026-03-08
 
-- **Portfolio test count**: ~16,866 across 17 projects. FamilyMind contributes 311 (304 unit + 7 E2E + ESLint clean).
-- **N-19 Premium gating**: DECIDED by Asif (2026-03-06). Premium = AI Assistant + 3+ family members. Free = 2 members + all non-AI features. DIRECTIVE-CLX9-20260306-01 issued for Phase 2 (Clerk migration + feature gating + pricing UI).
-- **Portfolio Skills available**: `clerk-auth` and `stripe-billing` skills at `~/ASIF/skills/` encode Clerk and Stripe integration patterns. Use them during N-19 Phase 2 execution.
-- **Clerk is universal auth standard**: Passport.js is DEPRECATED portfolio-wide. FamilyMind N-19 Phase 2 requires Clerk migration (in directive). Use `@clerk/express` + `@clerk/clerk-react`.
+- **Portfolio test count**: 17,004 across 14 active projects (crossed 17K). FamilyMind contributes 311 (304 unit + 7 E2E). *(CoS had stale count of 281; corrected to post-DIR-01 total.)*
+- **FamilyMind is the Clerk auth reference implementation**: First ASIF project to complete full Clerk + Stripe monetization (N-19 Premium Tier Phase 2, commit `70c9742`). Other projects needing auth (DesktopAI Consumer Tier, Faultline Cloud) will reference this implementation.
+- **Portfolio Skills available**: `clerk-auth` and `stripe-billing` skills at `~/ASIF/skills/` encode Clerk and Stripe integration patterns extracted from this project's implementation.
+- **Clerk is universal auth standard**: Passport.js is DEPRECATED portfolio-wide. FamilyMind's Clerk implementation is canonical.
 - **SynApps (P-10)**: v1.0 feature-complete, 1,465 tests, 93% coverage. Potential future API aggregation layer for FamilyMind premium features.
-- **First consumer vertical**: FamilyMind remains the only B2C product in the portfolio. Test coverage (289) is strong but E2E at 7 is thin — consider expanding.
+- **First consumer vertical**: FamilyMind remains the only B2C product in the portfolio. E2E at 7 is thin — consider expanding.
+- **2Brain (P-13) synergy**: When dx3-mcp ships `remember`/`recall`, FamilyMind could integrate semantic memory for family knowledge retrieval (recipes, preferences, schedules).
 
 ---
 

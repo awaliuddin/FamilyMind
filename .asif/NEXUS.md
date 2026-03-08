@@ -196,6 +196,35 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 
 ## CoS Directives
 
+### DIRECTIVE-CLX9-20260306-04 — Adopt CRUCIBLE Protocol (Test Quality Gates)
+**From**: CLX9 Sr. CoS (Emma) | **Priority**: P1
+**Injected**: 2026-03-06 | **Estimate**: S | **Status**: PENDING
+
+> **Estimate key**: S = hours (same session), M = 1-2 days, L = 3+ days
+
+**Context**: The CRUCIBLE Protocol is a new portfolio-wide test quality standard. FamilyMind is a Critical-tier project (Stripe billing). Applicable gates: Gate 4 (test count delta). Oracle tier: Critical (all 4 oracle types required for auth and billing paths). Full protocol: `~/ASIF/standards/crucible-protocol.md`.
+
+**Action Items**:
+1. [ ] Add the following section to CLAUDE.md:
+   ```
+   ## CRUCIBLE Protocol (Test Quality)
+   This project follows the CRUCIBLE Protocol (`~/ASIF/standards/crucible-protocol.md`).
+   Rules that apply to this project:
+   - Gate 4: Delta gate — test count decreases > 5 require justification in commit message
+   - Oracle tier: CRITICAL — minimum 4 oracle types for auth/billing features (example, property, contract, integration)
+   ```
+2. [ ] Include test count delta in commit messages going forward: "Tests: X passed (+N/-N vs previous)"
+3. [ ] Report: current test count and confirmation of CLAUDE.md update
+
+**Constraints**:
+- Do NOT add new features — this is governance text addition only
+- This is a small directive — execute alongside any other pending work
+
+**Response** (filled by project team):
+>
+
+---
+
 ### DIRECTIVE-CLX9-20260305-02 — Adopt CI Gate Protocol
 **From**: CLX9 Sr. CoS (Emma) | **Priority**: P0
 **Injected**: 2026-03-05 01:30 | **Estimate**: S | **Status**: PENDING
@@ -220,33 +249,6 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 
 **Response** (filled by project team):
 >
-
----
-
-### DIRECTIVE-CLX9-20260223-59 — Test coverage push: API route testing + component snapshot coverage
-**From**: CLX9 CoS | **Priority**: P1
-**Injected**: 2026-02-23 20:30 | **Estimate**: M (~15min) | **Status**: DONE
-
-> **Estimate key**: S = hours (same session), M = 1-2 days, L = 3+ days
-
-**Context**: FamilyMind has 222 tests and 16 shipped features. For Launch Week readiness, we need comprehensive API route coverage. Several routes lack test files entirely. Target: 280+ tests.
-
-**Action Items**:
-1. [ ] Audit all route files in `server/routes/` — identify which have NO test coverage
-2. [ ] Write tests for every uncovered route (minimum 5 tests per route file: success, validation error, auth check, edge case, not-found)
-3. [ ] Write snapshot tests for all React components that lack them — each component gets at least a render + props test
-4. [ ] Run full test suite — zero regressions on existing 222 tests
-5. [ ] Report: total tests before/after, new test files created, any bugs discovered
-
-**Constraints**:
-- Do NOT modify production code — this is a TEST-ONLY directive
-- Use existing test patterns (Vitest for unit, Playwright for E2E)
-- Focus on server routes first (highest value), then client components
-
-**Response** (filled by project team):
-> Completed 2026-02-23. Test coverage push from 222 → **281 tests** across 37 files (target: 280+). Zero regressions on existing tests. **New test files (6)**: `ai-routes.test.ts` (7 tests — grocery predictions, schedule conflicts, chat with family context), `route-error-cases.test.ts` (30 tests — 500/error cases for all 10 route groups: grocery, calendar, ideas, vision, wishlist, recipes, budget, expenses, family, family-members), `EmptyState.test.tsx` (4 tests — render, icon, action button, no-action), `ThemeToggle.test.tsx` (5 tests — render, defaults, toggle dark/light, localStorage restore), `SkeletonLoaders.test.tsx` (6 tests — render all 6 skeleton components), `MobileBottomNav.test.tsx` (7 tests — all tabs render, mobile-only, aria-current, tab click, labels, navigation role). **Infrastructure**: Added `@vitejs/plugin-react` to vitest.config.ts for automatic JSX runtime (enables testing components that don't import React). Updated `test-helpers.ts` `MockedStorage` type for full mock method typing. **Bugs found**: `POST /api/family/join` has duplicate route registration (lines 91 and 1014 in routes.ts) — first handler wins, second is dead code. Not fixed per test-only constraint. All 281 tests pass in ~5.7s.
-
----
 
 ### DIRECTIVE-CLX9-20260306-01 — N-19 Premium Tier Phase 2: Feature gating + pricing UI
 **From**: CLX9 CoS | **Priority**: P1
@@ -273,33 +275,6 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 
 **Response** (filled by project team):
 >
-
----
-
-### DIRECTIVE-CLX9-20260223-56 — N-19 Premium Tier: Stripe integration foundation + paywall middleware
-**From**: CLX9 CoS | **Priority**: P2
-**Injected**: 2026-02-23 02:20 | **Estimate**: M (~20min) | **Status**: DONE
-
-**Context**: FamilyMind has 16 shipped features and 193 tests — it's the most consumer-ready product in the portfolio. N-19 (Premium Tier) is an IDEA but Asif's strategic directive emphasizes monetization. Building the Stripe integration foundation now (without going live) creates the infrastructure for premium features. This is a revenue-enabling initiative.
-
-**Action Items**:
-1. [x] Create `server/stripe.ts` — Stripe SDK initialization with `STRIPE_SECRET_KEY` env var, graceful degradation when not configured
-2. [x] Create `shared/schema.ts` additions: `subscriptions` table (familyId, stripeCustomerId, stripePriceId, status: active/canceled/past_due, currentPeriodEnd)
-3. [x] Implement `POST /api/billing/create-checkout` — creates a Stripe Checkout session for premium upgrade
-4. [x] Implement `POST /api/billing/webhook` — handles Stripe webhook events (checkout.session.completed, customer.subscription.updated, customer.subscription.deleted)
-5. [x] Implement `GET /api/billing/status` — returns subscription status for current family
-6. [x] Create paywall middleware: `requirePremium()` Express middleware that checks subscription status before allowing access to premium routes
-7. [x] Write tests — minimum 20 new tests: Stripe mock (checkout creation, webhook handling, subscription status), paywall middleware (active/expired/no subscription), schema validation — **29 new tests**
-8. [x] Update NEXUS: N-19 → BUILDING
-
-**Constraints**:
-- Do NOT require real Stripe credentials — everything must work with mocked responses in tests
-- Paywall middleware must be additive — existing routes stay free
-- Use `stripe` npm package (MIT license)
-- Webhook verification must use `stripe.webhooks.constructEvent()` for security
-
-**Response** (filled by project team):
-> Completed 2026-02-23. Full N-19 Premium Tier foundation shipped. **server/stripe.ts**: Stripe SDK init with `STRIPE_SECRET_KEY`, graceful null when unconfigured, `isStripeConfigured()` guard. **shared/schema.ts**: `subscriptions` table (id, familyId unique, stripeCustomerId, stripePriceId, stripeSubscriptionId, status, currentPeriodEnd, timestamps) + types + Zod schema. **server/storage.ts**: `IStorage` + `DatabaseStorage` with getSubscription, upsertSubscription (on-conflict update), updateSubscription. **server/routes.ts**: `POST /api/billing/create-checkout` (Stripe Checkout session with familyId metadata), `POST /api/billing/webhook` (raw body + signature verification via `constructEvent`, handles checkout.session.completed → upsertSubscription, customer.subscription.updated → status sync, customer.subscription.deleted → cancel), `GET /api/billing/status` (isPremium = active + future periodEnd), `requirePremium()` exported middleware (checks user → family → subscription status + period). **server/index.ts**: raw body parser for webhook path before express.json(). **Tests**: 29 new tests across 4 files — billing-routes (9: status 6 + checkout 2 + webhook 1), billing-middleware (7: all requirePremium scenarios), billing-stripe-mock (8: checkout 3 + webhook events 5), schema (5: subscription validation). All 193 existing tests still pass. Zero production code changes to existing features. `stripe` npm package (MIT). **Total: 222 tests** (215 unit + 7 E2E) across 31 files. All passing in ~10.5s. N-19 IDEA → BUILDING.
 
 ### DIRECTIVE-CLX9-20260222-38 — Add E2E integration tests for critical user flows
 **From**: CLX9 CoS | **Priority**: P1
@@ -674,3 +649,57 @@ No new directives were issued since 2026-02-24, so no new feature commits. The C
 | 2026-02-18 | DIRECTIVE-CLX9-20260216-02 completed. N-17 IDEA→BUILDING. Vitest suite: 10 files, 62 tests. |
 | 2026-02-18 | CoS Directive DIRECTIVE-CLX9-20260218-03 issued: Playwright E2E tests for critical user flows. |
 | 2026-02-19 | DIRECTIVE-CLX9-20260218-03 completed. Playwright E2E: 3 files, 7 tests. N-17 BUILDING → SHIPPED. Total: 69 tests. |
+
+---
+
+## CoS Archive
+
+### DIRECTIVE-CLX9-20260223-59 — Test coverage push: API route testing + component snapshot coverage
+**From**: CLX9 CoS | **Priority**: P1
+**Injected**: 2026-02-23 20:30 | **Estimate**: M (~15min) | **Status**: DONE
+
+> **Estimate key**: S = hours (same session), M = 1-2 days, L = 3+ days
+
+**Context**: FamilyMind has 222 tests and 16 shipped features. For Launch Week readiness, we need comprehensive API route coverage. Several routes lack test files entirely. Target: 280+ tests.
+
+**Action Items**:
+1. [ ] Audit all route files in `server/routes/` — identify which have NO test coverage
+2. [ ] Write tests for every uncovered route (minimum 5 tests per route file: success, validation error, auth check, edge case, not-found)
+3. [ ] Write snapshot tests for all React components that lack them — each component gets at least a render + props test
+4. [ ] Run full test suite — zero regressions on existing 222 tests
+5. [ ] Report: total tests before/after, new test files created, any bugs discovered
+
+**Constraints**:
+- Do NOT modify production code — this is a TEST-ONLY directive
+- Use existing test patterns (Vitest for unit, Playwright for E2E)
+- Focus on server routes first (highest value), then client components
+
+**Response** (filled by project team):
+> Completed 2026-02-23. Test coverage push from 222 → **281 tests** across 37 files (target: 280+). Zero regressions on existing tests. **New test files (6)**: `ai-routes.test.ts` (7 tests — grocery predictions, schedule conflicts, chat with family context), `route-error-cases.test.ts` (30 tests — 500/error cases for all 10 route groups: grocery, calendar, ideas, vision, wishlist, recipes, budget, expenses, family, family-members), `EmptyState.test.tsx` (4 tests — render, icon, action button, no-action), `ThemeToggle.test.tsx` (5 tests — render, defaults, toggle dark/light, localStorage restore), `SkeletonLoaders.test.tsx` (6 tests — render all 6 skeleton components), `MobileBottomNav.test.tsx` (7 tests — all tabs render, mobile-only, aria-current, tab click, labels, navigation role). **Infrastructure**: Added `@vitejs/plugin-react` to vitest.config.ts for automatic JSX runtime (enables testing components that don't import React). Updated `test-helpers.ts` `MockedStorage` type for full mock method typing. **Bugs found**: `POST /api/family/join` has duplicate route registration (lines 91 and 1014 in routes.ts) — first handler wins, second is dead code. Not fixed per test-only constraint. All 281 tests pass in ~5.7s.
+
+---
+
+### DIRECTIVE-CLX9-20260223-56 — N-19 Premium Tier: Stripe integration foundation + paywall middleware
+**From**: CLX9 CoS | **Priority**: P2
+**Injected**: 2026-02-23 02:20 | **Estimate**: M (~20min) | **Status**: DONE
+
+**Context**: FamilyMind has 16 shipped features and 193 tests — it's the most consumer-ready product in the portfolio. N-19 (Premium Tier) is an IDEA but Asif's strategic directive emphasizes monetization. Building the Stripe integration foundation now (without going live) creates the infrastructure for premium features. This is a revenue-enabling initiative.
+
+**Action Items**:
+1. [x] Create `server/stripe.ts` — Stripe SDK initialization with `STRIPE_SECRET_KEY` env var, graceful degradation when not configured
+2. [x] Create `shared/schema.ts` additions: `subscriptions` table (familyId, stripeCustomerId, stripePriceId, status: active/canceled/past_due, currentPeriodEnd)
+3. [x] Implement `POST /api/billing/create-checkout` — creates a Stripe Checkout session for premium upgrade
+4. [x] Implement `POST /api/billing/webhook` — handles Stripe webhook events (checkout.session.completed, customer.subscription.updated, customer.subscription.deleted)
+5. [x] Implement `GET /api/billing/status` — returns subscription status for current family
+6. [x] Create paywall middleware: `requirePremium()` Express middleware that checks subscription status before allowing access to premium routes
+7. [x] Write tests — minimum 20 new tests: Stripe mock (checkout creation, webhook handling, subscription status), paywall middleware (active/expired/no subscription), schema validation — **29 new tests**
+8. [x] Update NEXUS: N-19 → BUILDING
+
+**Constraints**:
+- Do NOT require real Stripe credentials — everything must work with mocked responses in tests
+- Paywall middleware must be additive — existing routes stay free
+- Use `stripe` npm package (MIT license)
+- Webhook verification must use `stripe.webhooks.constructEvent()` for security
+
+**Response** (filled by project team):
+> Completed 2026-02-23. Full N-19 Premium Tier foundation shipped. **server/stripe.ts**: Stripe SDK init with `STRIPE_SECRET_KEY`, graceful null when unconfigured, `isStripeConfigured()` guard. **shared/schema.ts**: `subscriptions` table (id, familyId unique, stripeCustomerId, stripePriceId, stripeSubscriptionId, status, currentPeriodEnd, timestamps) + types + Zod schema. **server/storage.ts**: `IStorage` + `DatabaseStorage` with getSubscription, upsertSubscription (on-conflict update), updateSubscription. **server/routes.ts**: `POST /api/billing/create-checkout` (Stripe Checkout session with familyId metadata), `POST /api/billing/webhook` (raw body + signature verification via `constructEvent`, handles checkout.session.completed → upsertSubscription, customer.subscription.updated → status sync, customer.subscription.deleted → cancel), `GET /api/billing/status` (isPremium = active + future periodEnd), `requirePremium()` exported middleware (checks user → family → subscription status + period). **server/index.ts**: raw body parser for webhook path before express.json(). **Tests**: 29 new tests across 4 files — billing-routes (9: status 6 + checkout 2 + webhook 1), billing-middleware (7: all requirePremium scenarios), billing-stripe-mock (8: checkout 3 + webhook events 5), schema (5: subscription validation). All 193 existing tests still pass. Zero production code changes to existing features. `stripe` npm package (MIT). **Total: 222 tests** (215 unit + 7 E2E) across 31 files. All passing in ~10.5s. N-19 IDEA → BUILDING.

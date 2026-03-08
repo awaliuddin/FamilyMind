@@ -1,7 +1,7 @@
 # NEXUS — FamilyMind Vision-to-Execution Dashboard
 
 > **Owner**: Asif Waliuddin
-> **Last Updated**: 2026-03-01 (evening)
+> **Last Updated**: 2026-03-07
 > **North Star**: *"Reduce the mental load of family organization by 40%+. Families spend less time planning and more time together."*
 
 ---
@@ -486,6 +486,47 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 
 ## Team Feedback
 
+### Reflection (2026-03-07)
+
+**1. What shipped since last check-in?**
+
+Two commits since 2026-03-01:
+
+- **CRUCIBLE Protocol + CI Gate Protocol** (`4125801`, DIR-04 + DIR-02): Added test quality gates to CLAUDE.md (test count delta in commits, assertion quality standards). Installed pre-push hook running full test suite.
+- **N-19 Premium Tier Phase 2** (`70c9742`, DIR-01): The largest single commit in the project's history — 34 files changed, +1135/-151 lines. Auth migration (Passport.js → Clerk), feature gating (AI routes + member cap), pricing page, upgrade prompts, billing status extensions, and 29 new tests. All 311 tests green.
+
+**Current snapshot**: 17 shipped, 1 building (N-19), 1 idea (N-12). **311 tests / 40 files**, all green. ESLint: 0 errors, 0 warnings. TypeScript clean. 28 commits on main.
+
+**2. What surprised us?**
+
+- **`vi.clearAllMocks()` does NOT clear `mockResolvedValueOnce` queues.** A test that set up `mockResolvedValueOnce` but never consumed it leaked stale mock data into the next test. This caused a 403 that was hard to diagnose — the mock returned the wrong user object. Cost ~30 minutes of debugging. The fix was trivial (remove unused mock setup), but the lesson is important: in Vitest, `clearAllMocks` only clears call history, not queued values. Use `resetAllMocks` if you want a full reset, or avoid setting mocks in tests that don't use them.
+- **Clerk migration was smoother than expected.** The `req.user.claims.sub` → `req.auth.userId` change was mechanical across all route files. The dev fallback pattern (auto-auth when `CLERK_SECRET_KEY` absent) preserved the local dev experience perfectly. Client-side was even cleaner — `useAuth` hook didn't need any changes because Clerk cookies work with `credentials: "include"`.
+- **The `requirePremium` dynamic import pattern works well with vitest mocks.** Using `await import("../storage")` inside middleware (to avoid circular deps) resolves correctly to mocked modules in tests. Was worried this would be flaky but it's solid.
+
+**3. Cross-project signals**
+
+- **Clerk auth pattern is now proven.** `server/auth.ts` with dev fallback (55 lines) is the template. The `clerk-auth` skill at `~/ASIF/skills/` should reference FamilyMind as the reference implementation. Key pattern: `clerkMiddleware()` globally, `requireAuth()` per-route, `syncUser()` on first access.
+- **Feature gating pattern is reusable.** `requirePremium` middleware + `FREE_MEMBER_LIMIT` constant + `GET /api/billing/status` with capability flags (`memberLimit`, `aiEnabled`) — any SaaS in the portfolio can adopt this. The `stripe-billing` skill should be updated with the gating patterns.
+- **Vitest mock leakage gotcha**: The `mockResolvedValueOnce` queue surviving `clearAllMocks` is a portfolio-wide footgun. Worth noting in tech-stack-registry or a testing patterns doc.
+
+**4. Priorities if given fresh directives**
+
+N-19 Phase 2 is done. Remaining work:
+1. **N-19 Phase 3: Go-live** (S) — Wire real Clerk + Stripe keys, test end-to-end checkout flow, verify webhook handling in production. This is the revenue activation step.
+2. **Polish pass** (M) — Error boundaries, loading states, empty states. The pricing page could use A/B testing hooks. Mobile responsiveness of the pricing page needs verification.
+3. **Remove dead `server/replitAuth.ts`** (S) — The old auth module should be deleted now that Clerk is the standard. Left in place during migration for safety but it's dead code.
+4. **N-12 Mobile Apps evaluation** (L) — PWA covers basics; Capacitor decision still open.
+5. **E2E expansion** — Only 7 E2E tests. The premium flow (signup → upgrade → access AI) is a critical path that deserves E2E coverage.
+
+**5. Blockers / questions for CoS**
+
+- **No blockers.** DIR-01 is complete and committed.
+- **Go-live question**: N-19 backend + frontend is feature-complete. What's the timeline for wiring real Clerk/Stripe credentials? Should we set up staging environment first, or ship directly to production?
+- **Dead code cleanup**: `server/replitAuth.ts` is now unused. Permission to delete in next session?
+- **Test quality**: 311 tests is a strong count, but the CRUCIBLE Protocol's assertion quality hasn't been audited yet. Should we run `/crucible-audit` before the next feature push?
+
+---
+
 ### Reflection (2026-03-01, evening)
 
 **1. What shipped since last check-in?**
@@ -643,6 +684,8 @@ No new directives were issued since 2026-02-24, so no new feature commits. The C
 
 | Date | Change |
 |------|--------|
+| 2026-03-07 | DIRECTIVE-CLX9-20260306-01 completed. N-19 Phase 2: Clerk auth migration, AI route gating (4 endpoints), family member cap (free=2), pricing page (/premium), upgrade prompts, billing status extensions. 29 new tests. Total: 311 tests / 40 files. |
+| 2026-03-07 | DIRECTIVE-CLX9-20260306-04 + DIR-02 completed. CRUCIBLE Protocol adopted. CI Gate Protocol installed (pre-push hook). |
 | 2026-03-01 | Executed all 3 CoS standing-auth items: duplicate route fix, routes.ts split (1060→11 modules), ESLint+Prettier configs. Bonus: fixed IStorage interface gap. 281 tests pass. |
 | 2026-02-28 | Team Feedback reflection filed. No new commits since 2026-02-24. CoS granted standing auth for 3 housekeeping items: duplicate route fix, routes.ts split, ESLint/Prettier. Premium gating escalated to Asif. |
 | 2026-02-23 | DIRECTIVE-CLX9-20260223-59 completed. Test coverage push 222 → 281 (59 new tests, 6 new files). AI routes, error cases, component render tests. Bug found: duplicate /api/family/join route. |

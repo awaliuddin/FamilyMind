@@ -198,7 +198,7 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 
 ### DIRECTIVE-CLX9-20260306-04 — Adopt CRUCIBLE Protocol (Test Quality Gates)
 **From**: CLX9 Sr. CoS (Emma) | **Priority**: P1
-**Injected**: 2026-03-06 | **Estimate**: S | **Status**: PENDING
+**Injected**: 2026-03-06 | **Estimate**: S | **Status**: DONE
 
 > **Estimate key**: S = hours (same session), M = 1-2 days, L = 3+ days
 
@@ -221,13 +221,16 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 - This is a small directive — execute alongside any other pending work
 
 **Response** (filled by project team):
->
+> Completed 2026-03-07. All 3 action items done:
+> 1. Added `## CRUCIBLE Protocol (Test Quality)` section to CLAUDE.md with Gate 4 delta rule and CRITICAL oracle tier requirement.
+> 2. Commit message convention adopted — will include "Tests: X passed (+N/-N vs previous)" going forward.
+> 3. Current test count: **281 passed** (274 unit + 7 E2E) across 37 test files. CLAUDE.md updated and stale "no automated tests yet" note corrected.
 
 ---
 
 ### DIRECTIVE-CLX9-20260305-02 — Adopt CI Gate Protocol
 **From**: CLX9 Sr. CoS (Emma) | **Priority**: P0
-**Injected**: 2026-03-05 01:30 | **Estimate**: S | **Status**: PENDING
+**Injected**: 2026-03-05 01:30 | **Estimate**: S | **Status**: DONE
 
 **Action Items**:
 1. [ ] Add CI Gate Protocol section to CLAUDE.md (if not already present):
@@ -248,7 +251,10 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 - Do NOT modify test files to make them pass — fix the code instead
 
 **Response** (filled by project team):
->
+> Completed 2026-03-07. All 3 action items done:
+> 1. Added `## CI Gate Protocol (ASIF Standard)` section to CLAUDE.md with the 4-step protocol.
+> 2. Installed pre-push hook from `~/ASIF/scripts/templates/pre-push-hook.sh` to `.git/hooks/pre-push` (chmod +x).
+> 3. Full test suite: **281 passed, 0 failed** (274 unit + 7 E2E) across 37 test files.
 
 ### DIRECTIVE-CLX9-20260306-01 — N-19 Premium Tier Phase 2: Feature gating + pricing UI
 **From**: CLX9 CoS | **Priority**: P1

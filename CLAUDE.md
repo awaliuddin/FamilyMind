@@ -11,7 +11,7 @@ This project is **P-12** in the [ASIF portfolio](~/ASIF/PORTFOLIO.md) — the fi
   - Full-stack TypeScript is an **approved exception** to the Python-brain rule (ADR-005, ADR-006)
   - Cloud services (Neon, OpenAI, SendGrid) are approved for consumer products (ADR-006)
   - AGPL dependencies are **blocked** — check `~/ASIF/standards/tech-stack-registry.md`
-  - Test counts never decrease (note: no automated tests yet — priority gap)
+  - Test counts never decrease — current baseline: 281 tests (274 unit + 7 E2E)
 - **Handoff notes**: Check `~/ASIF/machines/HANDOFF.md` for cross-machine coordination notes.
 
 ### ASIF Governance
@@ -105,3 +105,17 @@ Configured in both `tsconfig.json` (paths) and `vite.config.ts` (resolve.alias).
 - **`queryKey` = URL** — Adding a query like `["/api/foo"]` will auto-fetch that URL. Don't use arbitrary keys.
 - **WSL2 mobile dev**: `powershell -ExecutionPolicy Bypass -File .\scripts\expose-mobile.ps1` to expose to LAN.
 - **Tailwind v3** with v4's `@tailwindcss/vite` plugin in devDeps — config is in `tailwind.config.ts`.
+
+## CI Gate Protocol (ASIF Standard)
+Before EVERY `git push`, you MUST:
+1. Run the full test suite (`npm test`)
+2. Verify ZERO failures (xfail/skip OK, failures NOT OK)
+3. If tests fail → fix before pushing. No exceptions.
+4. Include test count in commit message: "Tests: X passed, Y skipped"
+Violating this protocol means broken CI, which means Asif gets spammed.
+
+## CRUCIBLE Protocol (Test Quality)
+This project follows the CRUCIBLE Protocol (`~/ASIF/standards/crucible-protocol.md`).
+Rules that apply to this project:
+- Gate 4: Delta gate — test count decreases > 5 require justification in commit message
+- Oracle tier: CRITICAL — minimum 4 oracle types for auth/billing features (example, property, contract, integration)

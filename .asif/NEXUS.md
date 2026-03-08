@@ -486,6 +486,30 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 
 ## Team Feedback
 
+### Reflection (2026-03-08)
+
+No new commits or directives since 2026-03-07 reflection. All 3 directives (DIR-01, DIR-02, DIR-04) remain DONE. Codebase is idle and clean.
+
+**1. What shipped?** Nothing new. Last session shipped N-19 Phase 2 (Clerk auth + feature gating + pricing UI). 311 tests / 40 files / all green.
+
+**2. What surprised us?** No surprises — quiet period. The CI gate pre-push hook (`4125801`) worked perfectly on the push, catching the full 311-test suite before allowing remote update. Good validation that the CRUCIBLE/CI gate investment is paying off.
+
+**3. Cross-project signals:** None new. The signals from 2026-03-07 still stand: Clerk auth pattern, feature gating pattern, and Vitest mock leakage gotcha are all reusable across the portfolio.
+
+**4. Priorities if given fresh directives:**
+1. **Delete `server/replitAuth.ts`** (XS) — Dead code since Clerk migration. Asked for permission in last reflection.
+2. **N-19 Phase 3: Go-live** (S) — Wire real Clerk + Stripe credentials, test end-to-end checkout, verify webhooks in production.
+3. **CRUCIBLE audit** (S) — 311 tests is a strong count but assertion quality hasn't been audited. `/crucible-audit` would validate test effectiveness.
+4. **E2E for premium flow** (S) — signup → upgrade → access AI → downgrade is the revenue-critical path. No E2E coverage today.
+5. **Polish pass** (M) — Error boundaries, mobile pricing page, loading states.
+
+**5. Blockers / questions for CoS:**
+- **Waiting on go-live decision.** N-19 feature code is complete. Need guidance on: staging vs direct production, Clerk/Stripe credential handoff, and launch timing.
+- **`replitAuth.ts` deletion** — Still awaiting permission from last reflection. It's dead code but want explicit approval before removing.
+- **CRUCIBLE audit timing** — Should we audit before or after go-live?
+
+---
+
 ### Reflection (2026-03-07)
 
 **1. What shipped since last check-in?**

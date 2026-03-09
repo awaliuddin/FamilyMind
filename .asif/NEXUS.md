@@ -197,125 +197,7 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 
 ## CoS Directives
 
-### DIRECTIVE-CLX9-20260306-04 — Adopt CRUCIBLE Protocol (Test Quality Gates)
-**From**: CLX9 Sr. CoS (Emma) | **Priority**: P1
-**Injected**: 2026-03-06 | **Estimate**: S | **Status**: DONE
-
-> **Estimate key**: S = hours (same session), M = 1-2 days, L = 3+ days
-
-**Context**: The CRUCIBLE Protocol is a new portfolio-wide test quality standard. FamilyMind is a Critical-tier project (Stripe billing). Applicable gates: Gate 4 (test count delta). Oracle tier: Critical (all 4 oracle types required for auth and billing paths). Full protocol: `~/ASIF/standards/crucible-protocol.md`.
-
-**Action Items**:
-1. [ ] Add the following section to CLAUDE.md:
-   ```
-   ## CRUCIBLE Protocol (Test Quality)
-   This project follows the CRUCIBLE Protocol (`~/ASIF/standards/crucible-protocol.md`).
-   Rules that apply to this project:
-   - Gate 4: Delta gate — test count decreases > 5 require justification in commit message
-   - Oracle tier: CRITICAL — minimum 4 oracle types for auth/billing features (example, property, contract, integration)
-   ```
-2. [ ] Include test count delta in commit messages going forward: "Tests: X passed (+N/-N vs previous)"
-3. [ ] Report: current test count and confirmation of CLAUDE.md update
-
-**Constraints**:
-- Do NOT add new features — this is governance text addition only
-- This is a small directive — execute alongside any other pending work
-
-**Response** (filled by project team):
-> Completed 2026-03-07. All 3 action items done:
-> 1. Added `## CRUCIBLE Protocol (Test Quality)` section to CLAUDE.md with Gate 4 delta rule and CRITICAL oracle tier requirement.
-> 2. Commit message convention adopted — will include "Tests: X passed (+N/-N vs previous)" going forward.
-> 3. Current test count: **281 passed** (274 unit + 7 E2E) across 37 test files. CLAUDE.md updated and stale "no automated tests yet" note corrected.
-
----
-
-### DIRECTIVE-CLX9-20260305-02 — Adopt CI Gate Protocol
-**From**: CLX9 Sr. CoS (Emma) | **Priority**: P0
-**Injected**: 2026-03-05 01:30 | **Estimate**: S | **Status**: DONE
-
-**Action Items**:
-1. [ ] Add CI Gate Protocol section to CLAUDE.md (if not already present):
-   ```
-   ## CI Gate Protocol (ASIF Standard)
-   Before EVERY `git push`, you MUST:
-   1. Run the full test suite (`npm test`)
-   2. Verify ZERO failures (xfail/skip OK, failures NOT OK)
-   3. If tests fail → fix before pushing. No exceptions.
-   4. Include test count in commit message: "Tests: X passed, Y skipped"
-   Violating this protocol means broken CI, which means Asif gets spammed.
-   ```
-2. [ ] Install pre-push git hook from `~/ASIF/scripts/templates/pre-push-hook.sh` (copy to `.git/hooks/pre-push`, chmod +x)
-3. [ ] Run full test suite now and report results
-
-**Constraints**:
-- Do NOT skip any tests
-- Do NOT modify test files to make them pass — fix the code instead
-
-**Response** (filled by project team):
-> Completed 2026-03-07. All 3 action items done:
-> 1. Added `## CI Gate Protocol (ASIF Standard)` section to CLAUDE.md with the 4-step protocol.
-> 2. Installed pre-push hook from `~/ASIF/scripts/templates/pre-push-hook.sh` to `.git/hooks/pre-push` (chmod +x).
-> 3. Full test suite: **281 passed, 0 failed** (274 unit + 7 E2E) across 37 test files.
-
-### DIRECTIVE-CLX9-20260306-01 — N-19 Premium Tier Phase 2: Feature gating + pricing UI
-**From**: CLX9 CoS | **Priority**: P1
-**Injected**: 2026-03-06 01:45 | **Estimate**: M (1-2 sessions) | **Status**: DONE
-
-**Context**: Asif made the premium gating decision. AI Assistant is premium-only. Family members: 2 free, 3+ requires premium subscription. Stripe backend is already built (DIR-56). This directive gates the features and builds the pricing page.
-
-**Action Items**:
-1. [x] Gate AI Assistant routes behind `requirePremium()` middleware — all `/api/ai/*` and `/api/chat/*` endpoints
-2. [x] Add family member cap enforcement — `POST /api/family-members` checks subscription status. Free tier: max 2 members. Premium: unlimited. Returns 403 with upgrade message when cap hit
-3. [x] Build pricing page component — `/premium` route. Free vs Premium comparison with feature table. "Upgrade" button triggers Stripe Checkout
-4. [x] Add upgrade prompts — `UpgradePrompt` component shows inline CTA. 403 responses include `upgradeUrl: "/premium"` and `code` for client handling
-5. [x] Update `GET /api/billing/status` to include `memberLimit` and `aiEnabled` fields
-6. [x] Write tests — 29 new tests: feature gating (20: AI route gating, member cap, billing status, upgrade URLs), pricing page (6), upgrade prompt (3)
-7. [x] Update NEXUS: N-19 status notes
-
-**Constraints**:
-- Free tier gets ALL features EXCEPT AI and 3+ members. Do NOT gate anything else
-- Upgrade prompts must be helpful, not annoying. One inline message, not modals
-- Existing tests must not break
-- Member cap = 2 humans (the account creator counts as member 1)
-- **Stripe**: Connect to Asif's existing Stripe account. Use real keys (env vars), not just mocks
-- **Auth migration**: Replace Passport.js/express-session with **Clerk** (Asif has existing Clerk account). This is a prerequisite — do auth migration FIRST, then wire premium gating. Clerk handles login/signup/session, Stripe handles billing. Use `@clerk/express` + `@clerk/clerk-react`
-
-**Response** (filled by project team):
-> All 7 action items completed. Execution summary:
->
-> **Auth migration (prerequisite)**: Replaced Passport.js/express-session with Clerk (`@clerk/express` + `@clerk/react`). New `server/auth.ts` with `clerkMiddleware()`, `requireAuth()`, and dev fallback (auto-auth when `CLERK_SECRET_KEY` absent). Client: conditional `ClerkProvider` wrapping (when `VITE_CLERK_PUBLISHABLE_KEY` present). Updated all route files: `req.user.claims.sub` → `req.auth.userId`. Updated `.env.example` with Clerk env vars. All existing tests updated for new auth pattern.
->
-> **Feature gating**: 4 AI endpoints gated (`GET /api/chat-messages`, `POST /api/chat`, `GET /api/ai/grocery-predictions`, `GET /api/ai/schedule-conflicts`). Family member cap: `FREE_MEMBER_LIMIT = 2` enforced in `POST /api/family-members`. All 403 responses include `upgradeUrl: "/premium"`.
->
-> **Pricing UI**: `/premium` route with lazy-loaded `pricing.tsx` — two plan cards (Free $0/mo, Premium $9.99/mo), feature comparison table, Stripe Checkout integration. `UpgradePrompt` inline CTA component.
->
-> **Billing status**: `GET /api/billing/status` now returns `memberLimit` (2 or null) and `aiEnabled` (boolean) alongside existing `isPremium`/`subscription` fields.
->
-> **Tests**: 29 new tests across 3 files (20 server feature-gating + 6 pricing page + 3 upgrade prompt). All 282 existing tests preserved. **Total: 311 tests across 40 files, all green.** Delta: +30 tests, +3 files.
-
-### DIRECTIVE-CLX9-20260222-38 — Add E2E integration tests for critical user flows
-**From**: CLX9 CoS | **Priority**: P1
-**Injected**: 2026-02-22 23:45 | **Estimate**: M (~25min) | **Status**: DONE
-
-**Context**: FamilyMind hit 177 tests (target was 170+). These are mostly unit tests. The app has 16 SHIPPED features but no end-to-end integration tests. Critical user flows need validation: family creation → member invite → task assignment → completion → activity feed.
-
-**Action Items**:
-1. [x] Add 5+ E2E integration tests covering: create family, add member, create task, assign to member, mark complete — **5 tests** (family lifecycle file)
-2. [x] Add 5+ E2E tests for: budget tracking (create budget → add expense → check balance), meal planning flow, shopping list flow — **5 tests** (budget flow file)
-3. [x] Add 3+ tests for cross-feature interactions (task completion → activity feed, expense → budget update) — **6 tests** (cross-feature file)
-4. [x] Target: 190+ total tests — **193 total**
-5. [ ] Commit and push
-
-**Constraints**:
-- Use existing test helpers and mock patterns
-- Mock external services (database, auth) — test the integration logic, not infrastructure
-- Keep all 177 existing tests passing
-- Follow existing test file naming conventions
-
-**Response** (filled by project team):
-> Completed 2026-02-22. Added 16 integration tests across 3 new files, all following existing Vitest + supertest patterns with mock storage. **integration-family-lifecycle.test.ts** (5 tests): create family → add member → create idea multi-step flow, join via invite → view shared data, idea voting lifecycle (create → like → unlike), no-family user blocked from all creation endpoints (5 resource types), duplicate family creation rejection. **integration-budget-flow.test.ts** (5 tests): budget → expenses → monthly summary full flow, multi-month expense date filtering, multi-budget aggregation, budget CRUD lifecycle (create → update → delete), expense CRUD lifecycle. **integration-cross-feature.test.ts** (6 tests): grocery list full lifecycle (create → add items → check → delete), calendar event lifecycle with date conversion, vision board lifecycle (create → progress update → delete), wishlist lifecycle (create → purchase → delete), recipe → grocery cross-feature flow (create recipe → create list → add ingredients), chat AI family-context response. All 177 existing tests still pass. Zero production code changes. **Total: 193 tests** (186 unit + 7 E2E) across 28 files. All passing in ~4.5s.
-
----
+(No pending directives. Last archived: 2026-03-09 ORBIT CLX9-7.)
 
 ### DIRECTIVE-CLX9-20260222-23 — Start N-17 Automated Test Suite: cover all 11 shipped features
 **From**: CLX9 CoS | **Priority**: P1
@@ -576,8 +458,10 @@ Since the previous reflection (earlier today), one additional commit:
 
 **4. Priorities if given fresh directives**
 
+> **CoS Note (2026-03-09)**: N-19 Premium Tier is DONE (DIRECTIVE-CLX9-20260306-01 completed). Asif made the gating decision: AI Assistant = premium-only, 2 free members. Clerk auth migrated, Stripe billing live, 311 tests. References below to "blocked on Asif" are STALE — decision was made and executed.
+
 All housekeeping is done. The codebase is in its cleanest state ever:
-1. **N-19 Premium UI** (M, blocked on Asif's gating decision) — pricing page, subscription management, feature gating. Backend is ready and waiting.
+1. ~~**N-19 Premium UI** (M, blocked on Asif's gating decision)~~ **DONE** — DIRECTIVE-CLX9-20260306-01 shipped. 29 new tests, Clerk + Stripe live.
 2. **Polish pass** (S-M) — error boundaries, loading states, empty states. Worth doing before any launch.
 3. **N-12 Mobile Apps evaluation** (L) — PWA vs Capacitor trade-off analysis.
 4. **Test coverage for new route modules** — the split created 11 domain modules; existing tests cover the API surface but module-level unit tests could improve isolation.
@@ -585,8 +469,8 @@ All housekeeping is done. The codebase is in its cleanest state ever:
 **5. Blockers / questions for CoS**
 
 - **No blockers.** All standing-auth housekeeping is shipped and pushed.
-- **Premium gating decision**: Still the primary blocker for N-19 forward progress. Which features go behind the paywall?
-- **Launch readiness**: With 17 features shipped, 289 tests green, zero lint issues, and clean architecture — is there a target date or should we enter polish mode?
+- ~~**Premium gating decision**: Still the primary blocker for N-19 forward progress.~~ **RESOLVED** — Asif decided 2026-03-06. Executed same session.
+- **Launch readiness**: With 17 features shipped, 311 tests green, zero lint issues, and clean architecture — is there a target date or should we enter polish mode?
 
 ---
 
@@ -617,7 +501,7 @@ Executed all 3 CoS standing-auth housekeeping items in one session (commit `9356
 **4. Priorities if given fresh directives**
 
 All housekeeping is done. Remaining work is feature-level:
-1. **N-19 Premium UI** (M, blocked on Asif's gating decision) — pricing page, subscription management, feature gating
+1. ~~**N-19 Premium UI** (M, blocked on Asif's gating decision)~~ **DONE** — Directive executed 2026-03-07.
 2. **Clean up 41 ESLint warnings** (S) — unused imports/vars across the codebase. Quick hygiene pass.
 3. **N-12 Mobile Apps evaluation** (L) — PWA vs Capacitor trade-off analysis
 4. **Polish pass** — if Forge launches March 2 and FamilyMind follows, focus on UX polish, loading states, error boundaries
@@ -625,7 +509,7 @@ All housekeeping is done. Remaining work is feature-level:
 **5. Blockers / questions for CoS**
 
 - **No blockers.** All standing-auth items executed and pushed.
-- **Premium gating decision**: Still waiting on Asif. Backend foundation is idle and ready.
+- ~~**Premium gating decision**: Still waiting on Asif.~~ **RESOLVED** — Decision made 2026-03-06, directive executed.
 - **Forge launch (March 2)**: Does FamilyMind have a target launch window? Should we enter freeze/polish mode?
 
 ---
@@ -661,7 +545,7 @@ No new directives were issued since 2026-02-24, so no new feature commits. The C
 1. **Fix duplicate `/api/family/join` route** (5 min, standing auth granted) — dead code cleanup
 2. **Split `routes.ts` into domain modules** (M, standing auth granted) — `routes/grocery.ts`, `routes/calendar.ts`, `routes/billing.ts`, etc. 680 lines is a maintainability smell
 3. **ESLint + Prettier configs** (S, standing auth granted) — no config files exist despite README mentions
-4. **N-19 Premium UI** (M, blocked on Asif's product decision) — pricing page, subscription management, feature gating
+4. ~~**N-19 Premium UI** (M, blocked on Asif's product decision)~~ **DONE** — Resolved 2026-03-06.
 5. **N-12 Mobile Apps evaluation** (L) — PWA covers basics; evaluate if Capacitor adds enough value for the user base
 
 **5. Blockers / questions for CoS**
@@ -787,3 +671,127 @@ No new directives were issued since 2026-02-24, so no new feature commits. The C
 
 **Response** (filled by project team):
 > Completed 2026-02-23. Full N-19 Premium Tier foundation shipped. **server/stripe.ts**: Stripe SDK init with `STRIPE_SECRET_KEY`, graceful null when unconfigured, `isStripeConfigured()` guard. **shared/schema.ts**: `subscriptions` table (id, familyId unique, stripeCustomerId, stripePriceId, stripeSubscriptionId, status, currentPeriodEnd, timestamps) + types + Zod schema. **server/storage.ts**: `IStorage` + `DatabaseStorage` with getSubscription, upsertSubscription (on-conflict update), updateSubscription. **server/routes.ts**: `POST /api/billing/create-checkout` (Stripe Checkout session with familyId metadata), `POST /api/billing/webhook` (raw body + signature verification via `constructEvent`, handles checkout.session.completed → upsertSubscription, customer.subscription.updated → status sync, customer.subscription.deleted → cancel), `GET /api/billing/status` (isPremium = active + future periodEnd), `requirePremium()` exported middleware (checks user → family → subscription status + period). **server/index.ts**: raw body parser for webhook path before express.json(). **Tests**: 29 new tests across 4 files — billing-routes (9: status 6 + checkout 2 + webhook 1), billing-middleware (7: all requirePremium scenarios), billing-stripe-mock (8: checkout 3 + webhook events 5), schema (5: subscription validation). All 193 existing tests still pass. Zero production code changes to existing features. `stripe` npm package (MIT). **Total: 222 tests** (215 unit + 7 E2E) across 31 files. All passing in ~10.5s. N-19 IDEA → BUILDING.
+
+---
+
+### DIRECTIVE-CLX9-20260306-04 — Adopt CRUCIBLE Protocol (Test Quality Gates)
+**From**: CLX9 Sr. CoS (Emma) | **Priority**: P1
+**Injected**: 2026-03-06 | **Estimate**: S | **Status**: DONE
+
+> **Estimate key**: S = hours (same session), M = 1-2 days, L = 3+ days
+
+**Context**: The CRUCIBLE Protocol is a new portfolio-wide test quality standard. FamilyMind is a Critical-tier project (Stripe billing). Applicable gates: Gate 4 (test count delta). Oracle tier: Critical (all 4 oracle types required for auth and billing paths). Full protocol: `~/ASIF/standards/crucible-protocol.md`.
+
+**Action Items**:
+1. [ ] Add the following section to CLAUDE.md:
+   ```
+   ## CRUCIBLE Protocol (Test Quality)
+   This project follows the CRUCIBLE Protocol (`~/ASIF/standards/crucible-protocol.md`).
+   Rules that apply to this project:
+   - Gate 4: Delta gate — test count decreases > 5 require justification in commit message
+   - Oracle tier: CRITICAL — minimum 4 oracle types for auth/billing features (example, property, contract, integration)
+   ```
+2. [ ] Include test count delta in commit messages going forward: "Tests: X passed (+N/-N vs previous)"
+3. [ ] Report: current test count and confirmation of CLAUDE.md update
+
+**Constraints**:
+- Do NOT add new features — this is governance text addition only
+- This is a small directive — execute alongside any other pending work
+
+**Response** (filled by project team):
+> Completed 2026-03-07. All 3 action items done:
+> 1. Added `## CRUCIBLE Protocol (Test Quality)` section to CLAUDE.md with Gate 4 delta rule and CRITICAL oracle tier requirement.
+> 2. Commit message convention adopted — will include "Tests: X passed (+N/-N vs previous)" going forward.
+> 3. Current test count: **281 passed** (274 unit + 7 E2E) across 37 test files. CLAUDE.md updated and stale "no automated tests yet" note corrected.
+
+---
+
+### DIRECTIVE-CLX9-20260305-02 — Adopt CI Gate Protocol
+**From**: CLX9 Sr. CoS (Emma) | **Priority**: P0
+**Injected**: 2026-03-05 01:30 | **Estimate**: S | **Status**: DONE
+
+**Action Items**:
+1. [ ] Add CI Gate Protocol section to CLAUDE.md (if not already present):
+   ```
+   ## CI Gate Protocol (ASIF Standard)
+   Before EVERY `git push`, you MUST:
+   1. Run the full test suite (`npm test`)
+   2. Verify ZERO failures (xfail/skip OK, failures NOT OK)
+   3. If tests fail → fix before pushing. No exceptions.
+   4. Include test count in commit message: "Tests: X passed, Y skipped"
+   Violating this protocol means broken CI, which means Asif gets spammed.
+   ```
+2. [ ] Install pre-push git hook from `~/ASIF/scripts/templates/pre-push-hook.sh` (copy to `.git/hooks/pre-push`, chmod +x)
+3. [ ] Run full test suite now and report results
+
+**Constraints**:
+- Do NOT skip any tests
+- Do NOT modify test files to make them pass — fix the code instead
+
+**Response** (filled by project team):
+> Completed 2026-03-07. All 3 action items done:
+> 1. Added `## CI Gate Protocol (ASIF Standard)` section to CLAUDE.md with the 4-step protocol.
+> 2. Installed pre-push hook from `~/ASIF/scripts/templates/pre-push-hook.sh` to `.git/hooks/pre-push` (chmod +x).
+> 3. Full test suite: **281 passed, 0 failed** (274 unit + 7 E2E) across 37 test files.
+
+---
+
+### DIRECTIVE-CLX9-20260306-01 — N-19 Premium Tier Phase 2: Feature gating + pricing UI
+**From**: CLX9 CoS | **Priority**: P1
+**Injected**: 2026-03-06 01:45 | **Estimate**: M (1-2 sessions) | **Status**: DONE
+
+**Context**: Asif made the premium gating decision. AI Assistant is premium-only. Family members: 2 free, 3+ requires premium subscription. Stripe backend is already built (DIR-56). This directive gates the features and builds the pricing page.
+
+**Action Items**:
+1. [x] Gate AI Assistant routes behind `requirePremium()` middleware — all `/api/ai/*` and `/api/chat/*` endpoints
+2. [x] Add family member cap enforcement — `POST /api/family-members` checks subscription status. Free tier: max 2 members. Premium: unlimited. Returns 403 with upgrade message when cap hit
+3. [x] Build pricing page component — `/premium` route. Free vs Premium comparison with feature table. "Upgrade" button triggers Stripe Checkout
+4. [x] Add upgrade prompts — `UpgradePrompt` component shows inline CTA. 403 responses include `upgradeUrl: "/premium"` and `code` for client handling
+5. [x] Update `GET /api/billing/status` to include `memberLimit` and `aiEnabled` fields
+6. [x] Write tests — 29 new tests: feature gating (20: AI route gating, member cap, billing status, upgrade URLs), pricing page (6), upgrade prompt (3)
+7. [x] Update NEXUS: N-19 status notes
+
+**Constraints**:
+- Free tier gets ALL features EXCEPT AI and 3+ members. Do NOT gate anything else
+- Upgrade prompts must be helpful, not annoying. One inline message, not modals
+- Existing tests must not break
+- Member cap = 2 humans (the account creator counts as member 1)
+- **Stripe**: Connect to Asif's existing Stripe account. Use real keys (env vars), not just mocks
+- **Auth migration**: Replace Passport.js/express-session with **Clerk** (Asif has existing Clerk account). This is a prerequisite — do auth migration FIRST, then wire premium gating. Clerk handles login/signup/session, Stripe handles billing. Use `@clerk/express` + `@clerk/clerk-react`
+
+**Response** (filled by project team):
+> All 7 action items completed. Execution summary:
+>
+> **Auth migration (prerequisite)**: Replaced Passport.js/express-session with Clerk (`@clerk/express` + `@clerk/react`). New `server/auth.ts` with `clerkMiddleware()`, `requireAuth()`, and dev fallback (auto-auth when `CLERK_SECRET_KEY` absent). Client: conditional `ClerkProvider` wrapping (when `VITE_CLERK_PUBLISHABLE_KEY` present). Updated all route files: `req.user.claims.sub` → `req.auth.userId`. Updated `.env.example` with Clerk env vars. All existing tests updated for new auth pattern.
+>
+> **Feature gating**: 4 AI endpoints gated (`GET /api/chat-messages`, `POST /api/chat`, `GET /api/ai/grocery-predictions`, `GET /api/ai/schedule-conflicts`). Family member cap: `FREE_MEMBER_LIMIT = 2` enforced in `POST /api/family-members`. All 403 responses include `upgradeUrl: "/premium"`.
+>
+> **Pricing UI**: `/premium` route with lazy-loaded `pricing.tsx` — two plan cards (Free $0/mo, Premium $9.99/mo), feature comparison table, Stripe Checkout integration. `UpgradePrompt` inline CTA component.
+>
+> **Billing status**: `GET /api/billing/status` now returns `memberLimit` (2 or null) and `aiEnabled` (boolean) alongside existing `isPremium`/`subscription` fields.
+>
+> **Tests**: 29 new tests across 3 files (20 server feature-gating + 6 pricing page + 3 upgrade prompt). All 282 existing tests preserved. **Total: 311 tests across 40 files, all green.** Delta: +30 tests, +3 files.
+
+---
+
+### DIRECTIVE-CLX9-20260222-38 — Add E2E integration tests for critical user flows
+**From**: CLX9 CoS | **Priority**: P1
+**Injected**: 2026-02-22 23:45 | **Estimate**: M (~25min) | **Status**: DONE
+
+**Context**: FamilyMind hit 177 tests (target was 170+). These are mostly unit tests. The app has 16 SHIPPED features but no end-to-end integration tests. Critical user flows need validation: family creation → member invite → task assignment → completion → activity feed.
+
+**Action Items**:
+1. [x] Add 5+ E2E integration tests covering: create family, add member, create task, assign to member, mark complete — **5 tests** (family lifecycle file)
+2. [x] Add 5+ E2E tests for: budget tracking (create budget → add expense → check balance), meal planning flow, shopping list flow — **5 tests** (budget flow file)
+3. [x] Add 3+ tests for cross-feature interactions (task completion → activity feed, expense → budget update) — **6 tests** (cross-feature file)
+4. [x] Target: 190+ total tests — **193 total**
+5. [ ] Commit and push
+
+**Constraints**:
+- Use existing test helpers and mock patterns
+- Mock external services (database, auth) — test the integration logic, not infrastructure
+- Keep all 177 existing tests passing
+- Follow existing test file naming conventions
+
+**Response** (filled by project team):
+> Completed 2026-02-22. Added 16 integration tests across 3 new files, all following existing Vitest + supertest patterns with mock storage. **integration-family-lifecycle.test.ts** (5 tests): create family → add member → create idea multi-step flow, join via invite → view shared data, idea voting lifecycle (create → like → unlike), no-family user blocked from all creation endpoints (5 resource types), duplicate family creation rejection. **integration-budget-flow.test.ts** (5 tests): budget → expenses → monthly summary full flow, multi-month expense date filtering, multi-budget aggregation, budget CRUD lifecycle (create → update → delete), expense CRUD lifecycle. **integration-cross-feature.test.ts** (6 tests): grocery list full lifecycle (create → add items → check → delete), calendar event lifecycle with date conversion, vision board lifecycle (create → progress update → delete), wishlist lifecycle (create → purchase → delete), recipe → grocery cross-feature flow (create recipe → create list → add ingredients), chat AI family-context response. All 177 existing tests still pass. Zero production code changes. **Total: 193 tests** (186 unit + 7 E2E) across 28 files. All passing in ~4.5s.

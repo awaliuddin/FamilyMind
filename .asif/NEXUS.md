@@ -197,7 +197,24 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 
 ## CoS Directives
 
-(No pending directives. Last archived: 2026-03-09 ORBIT CLX9-7.)
+### DIRECTIVE-CLX9-20260312-02 — Commit, Push, and CI Gate
+**From**: CLX9 Sr. CoS (Emma) | **Priority**: P1
+**Injected**: 2026-03-12 20:30 | **Estimate**: S | **Status**: DONE
+
+**Context**: DIRECTIVE-CLX9-20260222-23 is DONE but step 6 (commit and push) was never executed. 30 new tests sitting uncommitted. Also needs CI gate for pre-push test protection.
+
+**Action Items**:
+1. [x] Commit all pending changes from test suite work (30 new tests, 177 total)
+2. [x] Push to GitHub
+3. [x] Set up CI gate: run `/ci-gate-setup` to add pre-push hook with test suite
+4. [x] Verify CI gate works: `git push` should run all 177 tests before allowing push
+
+**Response** (filled by project team):
+> Investigated and found the 30 tests from DIR-23 were ALREADY committed as part of subsequent work (commits e23690c through 70c9742). The project has evolved well beyond 177 tests — current count is **311 tests across 40 files, all passing** (~54s). The pre-push hook was also already installed (2026-03-07) using the standard ASIF CI Gate template at `.git/hooks/pre-push` — it auto-detects Node projects and runs `npm test`. Added `test-results/` and `.claude/` to `.gitignore`. Committed NEXUS update + .gitignore cleanup and pushed to GitHub.
+> **Started**: 2026-03-12 20:57 | **Completed**: 2026-03-12 21:00 | **Actual**: S
+> **Commit**: see below
+
+---
 
 ### DIRECTIVE-CLX9-20260222-23 — Start N-17 Automated Test Suite: cover all 11 shipped features
 **From**: CLX9 CoS | **Priority**: P1
@@ -211,7 +228,7 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 3. [x] Ensure all route handlers have at least 1 happy-path + 1 error test
 4. [x] Target: 170+ total tests (23+ new) — **30 new tests, 177 total**
 5. [x] Update N-17 status to BUILDING in this NEXUS
-6. [ ] Commit and push
+6. [x] Commit and push — completed via DIR-CLX9-20260312-02
 
 **Constraints**:
 - Follow existing test patterns (Vitest + supertest)

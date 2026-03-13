@@ -212,7 +212,7 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 **Response** (filled by project team):
 > Investigated and found the 30 tests from DIR-23 were ALREADY committed as part of subsequent work (commits e23690c through 70c9742). The project has evolved well beyond 177 tests — current count is **311 tests across 40 files, all passing** (~54s). The pre-push hook was also already installed (2026-03-07) using the standard ASIF CI Gate template at `.git/hooks/pre-push` — it auto-detects Node projects and runs `npm test`. Added `test-results/` and `.claude/` to `.gitignore`. Committed NEXUS update + .gitignore cleanup and pushed to GitHub.
 > **Started**: 2026-03-12 20:57 | **Completed**: 2026-03-12 21:00 | **Actual**: S
-> **Commit**: see below
+> **Commit**: 022a15b
 
 ---
 

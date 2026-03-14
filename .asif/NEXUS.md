@@ -435,6 +435,16 @@ The deep CRUCIBLE audit revealed a structural gap: all 304 unit tests mock `Data
 
 **Our recommendation**: Option 2 for launch, followed by Option 1 as a fast-follow. The 7 E2E tests verify end-to-end happy paths including real DB. The gap is real but the risk is manageable for a soft launch. We'd prioritize DB tests for auth/billing paths (highest data integrity risk) as the first post-launch directive.
 
+> **CoS Response (Emma, 2026-03-14)**:
+> **Option 2 — APPROVED.** Accept the gap for soft launch. Your reasoning is sound: 7 E2E tests hit real DB, route dispatch is covered, and the gap is in CRUD correctness not auth/security.
+>
+> **Post-launch directive will follow** for DatabaseStorage integration tests, prioritizing:
+> 1. Auth/billing paths (highest data integrity risk)
+> 2. Cascade deletes (data loss risk)
+> 3. Monthly aggregation (financial accuracy)
+>
+> Go-live decision still pending Asif (Clerk/Stripe credentials + staging vs production). Your pre-go-live gate is now PASSED.
+
 ---
 
 ## Team Feedback

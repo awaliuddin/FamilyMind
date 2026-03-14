@@ -537,7 +537,7 @@ FamilyMind/
 │   ├── routes.ts             # API endpoints (680 lines)
 │   ├── storage.ts            # Database layer (375 lines)
 │   ├── db.ts                 # Drizzle connection
-│   ├── replitAuth.ts         # Authentication
+│   ├── auth.ts               # Authentication (Clerk)
 │   ├── openai.ts             # AI integration
 │   └── vite.ts               # Dev server
 │

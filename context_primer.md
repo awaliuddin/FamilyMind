@@ -56,7 +56,7 @@ The application is **100% functional** on Replit. User wants to export for local
 ├── server/
 │   ├── routes.ts                      # All API endpoints
 │   ├── storage.ts                     # Database operations
-│   ├── replitAuth.ts                  # ⚠️ NEEDS LOCAL MODIFICATION
+│   ├── auth.ts                        # Authentication (Clerk)
 │   ├── openai.ts                      # AI integration
 │   └── db.ts                          # Database connection
 ├── shared/
@@ -85,36 +85,19 @@ The application is **100% functional** on Replit. User wants to export for local
 - AI assistant has access to complete family context
 - Real-time updates via TanStack Query invalidation
 
-## Authentication System (Needs Modification)
+## Authentication System (Clerk)
 
-### **Current: Replit OAuth**
+### **Current: Clerk Auth**
 ```typescript
-// server/replitAuth.ts - Uses OpenID Connect
-- Passport.js with OpenID Connect strategy
-- Session storage in PostgreSQL
-- Automatic user creation/updates
-- Domain-based strategy selection
+// server/auth.ts - Dual-mode Clerk authentication
+- Production: @clerk/express middleware + requireAuth()
+- Local dev: auto-authenticated dev user (no Clerk key needed)
+- User sync via syncUser() on first access
+- New users get sample data seeded automatically
 ```
 
-### **Local Development Challenge**
-The current authentication system uses:
-- `REPLIT_DOMAINS` environment variable
-- Replit OAuth provider endpoints
-- Domain-specific callback URLs
-
-### **Suggested Modifications for Local**
-1. **Option A: Disable Auth Temporarily**
-   - Mock the `isAuthenticated` middleware
-   - Hard-code a test user in development
-   
-2. **Option B: Switch to Local OAuth Provider**
-   - Google OAuth, GitHub OAuth, or Auth0
-   - Modify `server/replitAuth.ts` to use new provider
-   - Update callback URLs and environment variables
-
-3. **Option C: Local Username/Password**
-   - Implement simple local authentication
-   - Add login/register forms
+### **Local Development**
+When `CLERK_SECRET_KEY` is absent, every request is auto-authenticated as a hardcoded dev user (configurable via `DEV_USER_ID`, `DEV_USER_EMAIL` env vars). No OAuth setup needed locally.
    - Use bcrypt for password hashing
 
 ## Environment Variables Needed
@@ -184,22 +167,8 @@ npm run db:push  # Apply database schema
 npm run dev      # Start development server
 ```
 
-### **2. Authentication Modification Required**
-The main blocker for local development is authentication. Choose one approach:
-
-**Quick Fix (Disable Auth):**
-```typescript
-// In server/routes.ts, replace isAuthenticated middleware:
-const mockAuth = (req: any, res: any, next: any) => {
-  req.user = { claims: { sub: "test-user-id" } };
-  next();
-};
-```
-
-**Production Fix (New OAuth Provider):**
-- Replace `server/replitAuth.ts` with new provider
-- Update environment variables
-- Modify callback URLs
+### **2. Authentication**
+Auth works automatically in local dev — no Clerk key needed. Set `DEV_USER_ID` and `DEV_USER_EMAIL` in `.env` to customize the dev user.
 
 ### **3. Database Setup**
 - Install PostgreSQL locally OR use cloud service (Neon, Supabase)

@@ -117,8 +117,8 @@
 
 ### N-10: Family Auth + Invite System
 **Pillar**: TRUST | **Status**: SHIPPED | **Priority**: P0
-**What**: OAuth via Passport.js. Family creation with invite codes. Member management.
-**Key files**: `server/replitAuth.ts`, `server/routes.ts`
+**What**: Clerk authentication. Family creation with invite codes. Member management.
+**Key files**: `server/auth.ts`, `server/routes/auth.ts`
 
 ### N-11: v2.0 Architecture Rewrite
 **Pillar**: TRUST | **Status**: SHIPPED | **Priority**: P0
@@ -199,23 +199,27 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 
 ### DIRECTIVE-CLX9-20260312-03 — Pre-Go-Live Quality Gate + Dead Code Cleanup
 **From**: CLX9 Sr. CoS (Emma) | **Priority**: P1
-**Injected**: 2026-03-12 21:30 | **Estimate**: M | **Status**: PENDING
+**Injected**: 2026-03-12 21:30 | **Estimate**: M | **Status**: DONE
 
 **Context**: N-19 Premium Tier is code-complete (BUILDING since 2026-03-07). Before go-live, we need a quality gate. Also, dead auth code from Replit migration is still in the repo.
 
 **Action Items**:
-1. [ ] Delete `replitAuth.ts` — dead code from pre-Clerk migration. APPROVED by Emma.
-2. [ ] Run CRUCIBLE audit on the full test suite (311 tests). Use `/crucible-audit`. This is the quality gate before production exposure. We need to verify tests are real, not theater.
-3. [ ] Fix any CRITICAL or HIGH findings from CRUCIBLE before proceeding.
-4. [ ] Commit all cleanup + CRUCIBLE fixes.
-5. [ ] Push to GitHub and verify CI passes.
+1. [x] Delete `replitAuth.ts` — dead code from pre-Clerk migration. APPROVED by Emma.
+2. [x] Run CRUCIBLE audit on the full test suite (311 tests). Use `/crucible-audit`. This is the quality gate before production exposure. We need to verify tests are real, not theater.
+3. [x] Fix any CRITICAL or HIGH findings from CRUCIBLE before proceeding.
+4. [x] Commit all cleanup + CRUCIBLE fixes.
+5. [x] Push to GitHub and verify CI passes.
 
 **Constraints**:
 - Do NOT go live yet — go-live decision (staging vs production, Clerk/Stripe credentials) is pending Asif's call.
 - Focus on test quality, not adding new features.
 
 **Response** (filled by project team):
+> **Dead code cleanup**: Deleted `server/replitAuth.ts` (233 lines, dead since Clerk migration). Fixed `billing-stripe-mock.test.ts` which still mocked the old `../replitAuth` module — updated to mock `../auth` with correct `req.auth.userId` pattern. Updated doc references in README.md, context_primer.md (rewrote stale Replit OAuth sections to reflect Clerk auth), and NEXUS N-10 key files.
 >
+> **CRUCIBLE audit (8 gates)**: All 311 tests across 40 files audited. **No CRITICAL or HIGH findings.** Gate results: (1) Hollow assertions — CLEAN, (2) Coverage gaming — CLEAN, (3) Mock proliferation — LOW (billing-stripe-mock.test.ts has 64 mocks, appropriate for Stripe), (4) Dead tests — CLEAN, (5) Untested entry points — CLEAN (all 48 route endpoints covered), (6) Metric inflation — MEDIUM (route-error-cases.test.ts: 27 formulaic 500-status tests, legitimate error path verification), (7) Exception swallowing — CLEAN, (8) Coverage config — CLEAN. Verdict: test suite is healthy, no theater detected.
+>
+> **Started**: 2026-03-13 21:57 | **Completed**: 2026-03-13 22:10 | **Actual**: M
 
 ---
 

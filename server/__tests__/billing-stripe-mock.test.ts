@@ -76,15 +76,15 @@ const mockStripeWebhooksConstructEvent = vi.fn();
 
 vi.doMock("../storage", () => ({ storage: mockStorage }));
 
-vi.doMock("../replitAuth", () => ({
+vi.doMock("../auth", () => ({
   setupAuth: vi.fn(async (app: express.Express) => {
     app.use((req: any, _res: any, next: any) => {
-      req.user = { claims: { sub: TEST_USER_ID } };
-      req.isAuthenticated = () => true;
+      req.auth = { userId: TEST_USER_ID };
       next();
     });
   }),
   isAuthenticated: (_req: any, _res: any, next: any) => next(),
+  syncUser: vi.fn(async () => null),
 }));
 
 vi.doMock("../openai", () => ({

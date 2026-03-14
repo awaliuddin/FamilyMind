@@ -49,32 +49,27 @@ describe("Pricing page", () => {
 
   it("shows $0/month for free plan", () => {
     renderWithProviders(<Pricing />);
-
-    expect(screen.getByText("$0")).toBeDefined();
+    // getByText throws if not found — assertion is implicit
+    screen.getByText("$0");
   });
 
   it("shows $9.99/month for premium plan", () => {
     renderWithProviders(<Pricing />);
-
-    expect(screen.getByText("$9.99")).toBeDefined();
+    screen.getByText("$9.99");
   });
 
   it("renders Upgrade to Premium button", () => {
     renderWithProviders(<Pricing />);
-
-    expect(screen.getByText("Upgrade to Premium")).toBeDefined();
+    screen.getByText("Upgrade to Premium");
   });
 
   it("shows AI assistant as premium-only feature", () => {
     renderWithProviders(<Pricing />);
-
-    // "AI assistant" appears in the comparison table and plan card
     expect(screen.getAllByText(/AI assistant/).length).toBeGreaterThan(0);
   });
 
   it("shows unlimited family members as premium feature", () => {
     renderWithProviders(<Pricing />);
-
     expect(screen.getAllByText("Unlimited family members").length).toBeGreaterThan(0);
   });
 });

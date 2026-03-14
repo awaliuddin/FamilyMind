@@ -614,8 +614,6 @@ updateItem.mutate({ id, completed: true }, {
 ```bash
 npm run test           # Unit tests (Vitest)
 npm run test:e2e       # E2E tests (Playwright)
-npm run test:a11y      # Accessibility tests
-npm run test:coverage  # Code coverage report
 ```
 
 ### Manual Testing

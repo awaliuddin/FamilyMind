@@ -12,33 +12,33 @@ import {
 } from "../shared/SkeletonLoaders";
 
 describe("SkeletonLoaders", () => {
-  it("renders GroceryListSkeleton without errors", () => {
+  it("renders GroceryListSkeleton with animate-pulse", () => {
     const { container } = render(<GroceryListSkeleton />);
-    expect(container.firstChild).toBeDefined();
+    expect(container.querySelector(".animate-pulse")).not.toBeNull();
   });
 
-  it("renders CalendarEventSkeleton without errors", () => {
+  it("renders CalendarEventSkeleton with animate-pulse", () => {
     const { container } = render(<CalendarEventSkeleton />);
-    expect(container.firstChild).toBeDefined();
+    expect(container.querySelector(".animate-pulse")).not.toBeNull();
   });
 
-  it("renders IdeaCardSkeleton without errors", () => {
+  it("renders IdeaCardSkeleton with animate-pulse", () => {
     const { container } = render(<IdeaCardSkeleton />);
-    expect(container.firstChild).toBeDefined();
+    expect(container.querySelector(".animate-pulse")).not.toBeNull();
   });
 
-  it("renders VisionCardSkeleton without errors", () => {
+  it("renders VisionCardSkeleton with animate-pulse", () => {
     const { container } = render(<VisionCardSkeleton />);
-    expect(container.firstChild).toBeDefined();
+    expect(container.querySelector(".animate-pulse")).not.toBeNull();
   });
 
-  it("renders WishlistCardSkeleton without errors", () => {
+  it("renders WishlistCardSkeleton with animate-pulse", () => {
     const { container } = render(<WishlistCardSkeleton />);
-    expect(container.firstChild).toBeDefined();
+    expect(container.querySelector(".animate-pulse")).not.toBeNull();
   });
 
-  it("renders DashboardStatSkeleton without errors", () => {
+  it("renders DashboardStatSkeleton with animate-pulse", () => {
     const { container } = render(<DashboardStatSkeleton />);
-    expect(container.firstChild).toBeDefined();
+    expect(container.querySelector(".animate-pulse")).not.toBeNull();
   });
 });

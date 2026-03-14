@@ -35,7 +35,8 @@ describe("POST /api/family/create", () => {
       .send({ name: "Test Family" });
 
     expect(res.status).toBe(200);
-    expect(res.body.family).toBeDefined();
+    expect(res.body.family.id).toBe(TEST_FAMILY_ID);
+    expect(res.body.family.name).toBe("Test Family");
     expect(mockStorage.createFamily).toHaveBeenCalled();
     expect(mockStorage.joinFamily).toHaveBeenCalledWith(TEST_USER_ID, TEST_FAMILY_ID);
   });
@@ -62,7 +63,7 @@ describe("POST /api/family/join", () => {
       .send({ inviteCode: "ABC123" });
 
     expect(res.status).toBe(200);
-    expect(res.body.family).toBeDefined();
+    expect(res.body.family.id).toBe(TEST_FAMILY_ID);
   });
 
   it("rejects invalid invite code", async () => {

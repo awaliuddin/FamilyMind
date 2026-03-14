@@ -217,9 +217,20 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 **Response** (filled by project team):
 > **Dead code cleanup**: Deleted `server/replitAuth.ts` (233 lines, dead since Clerk migration). Fixed `billing-stripe-mock.test.ts` which still mocked the old `../replitAuth` module — updated to mock `../auth` with correct `req.auth.userId` pattern. Updated doc references in README.md, context_primer.md (rewrote stale Replit OAuth sections to reflect Clerk auth), and NEXUS N-10 key files.
 >
-> **CRUCIBLE audit (8 gates)**: All 311 tests across 40 files audited. **No CRITICAL or HIGH findings.** Gate results: (1) Hollow assertions — CLEAN, (2) Coverage gaming — CLEAN, (3) Mock proliferation — LOW (billing-stripe-mock.test.ts has 64 mocks, appropriate for Stripe), (4) Dead tests — CLEAN, (5) Untested entry points — CLEAN (all 48 route endpoints covered), (6) Metric inflation — MEDIUM (route-error-cases.test.ts: 27 formulaic 500-status tests, legitimate error path verification), (7) Exception swallowing — CLEAN, (8) Coverage config — CLEAN. Verdict: test suite is healthy, no theater detected.
+> **CRUCIBLE audit (8 gates, deep scan)**: 311 tests across 40 files. Findings and remediations:
+> - **(1) Hollow assertions — FIXED**: 23 hollow `.toBeDefined()` calls found in SkeletonLoaders, EmptyState, pricing, family-routes tests. Fixed: skeleton tests now assert `.animate-pulse` class; EmptyState/pricing use `getByText()` throw-on-miss semantics; family-routes now assert `family.id`/`family.name`.
+> - **(2) Coverage config — FIXED**: README advertised phantom scripts `npm run test:coverage` and `npm run test:a11y` that don't exist. Removed from README.
+> - **(3) Mislabeled integration tests — FIXED**: 4 files named `integration-*.test.ts` used mock storage (not real DB). Renamed to `*-flow.test.ts` to accurately reflect they test route dispatch logic.
+> - **(4) Mock proliferation — NOTED**: All server tests mock `DatabaseStorage` entirely. Route dispatch logic is tested; SQL/data integrity is not. The 7 Playwright E2E tests are the only real integration tests.
+> - **(5) Dead tests — CLEAN**: 0 skipped/todo.
+> - **(6) Untested server modules — NOTED**: `storage.ts` (539 lines), `auth.ts` (syncUser), `openai.ts`, `seed-data.ts`, `ws.ts` have zero direct test coverage.
+> - **(7) Exception swallowing — CLEAN**.
+> - **(8) Route error tests — NOTED**: 30 tests in `route-error-cases.test.ts` assert only status 500, not response body.
 >
-> **Started**: 2026-03-13 21:57 | **Completed**: 2026-03-13 22:10 | **Actual**: M
+> **Structural gap escalated to CoS**: `DatabaseStorage` (539 lines of SQL logic) has zero test coverage — see Team Questions below. All route tests verify dispatch only, not data integrity. This is the main pre-go-live risk.
+>
+> **Commits**: `3e599e2` (replitAuth cleanup + initial CRUCIBLE), followed by CRUCIBLE remediation commit.
+> **Started**: 2026-03-13 21:57 | **Completed**: 2026-03-13 22:12 | **Actual**: M
 
 ---
 
@@ -407,6 +418,22 @@ IDEA ──> RESEARCHED ──> DECIDED ──> BUILDING ──> SHIPPED
 
 **Response** (filled by project team):
 > Completed 2026-02-21. Recipe-to-grocery integration tests: 4 tests in `server/__tests__/recipe-grocery-integration.test.ts` covering full ingredient-to-grocery flow (label format: "quantity unit name"), partial ingredients (name-only), empty ingredients, and no-family rejection. Meal plan schema: `meal_plans` table added to `shared/schema.ts` (id, familyId→families, recipeId→recipes, date varchar, mealType varchar, createdAt). Schema-only — no UI, no API routes. Schema validation: 3 recipe tests + 3 meal plan tests added to `shared/__tests__/schema.test.ts`. Zero production code changes to existing recipes/grocery code. **Total: 125 tests** (118 unit + 7 E2E) across 22 files.
+
+---
+
+## Team Questions
+
+### Q: DatabaseStorage (539 lines) has zero test coverage — pre-go-live blocker? (2026-03-13)
+**From**: CLX9 project team | **Context**: CRUCIBLE audit findings from DIR-CLX9-20260312-03
+
+The deep CRUCIBLE audit revealed a structural gap: all 304 unit tests mock `DatabaseStorage` entirely. Route dispatch logic is tested, but the SQL layer (Drizzle ORM queries, join logic, date filtering, expense aggregation, invite code generation) has zero direct test coverage. The only tests that hit real infrastructure are the 7 Playwright E2E tests (not in `npm test`).
+
+**Options**:
+1. **Add DatabaseStorage integration tests** (M-L effort) — requires a test database (real Neon or in-memory SQLite via Drizzle). Would cover CRUD correctness, cascade deletes, monthly aggregation, invite code uniqueness.
+2. **Accept the gap for go-live** — route dispatch + E2E coverage provides reasonable confidence for launch. Add DB tests post-launch.
+3. **Defer go-live until DB tests exist** — safest for data integrity but delays launch.
+
+**Our recommendation**: Option 2 for launch, followed by Option 1 as a fast-follow. The 7 E2E tests verify end-to-end happy paths including real DB. The gap is real but the risk is manageable for a soft launch. We'd prioritize DB tests for auth/billing paths (highest data integrity risk) as the first post-launch directive.
 
 ---
 

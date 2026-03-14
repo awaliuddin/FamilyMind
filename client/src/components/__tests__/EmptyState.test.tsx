@@ -14,8 +14,9 @@ describe("EmptyState", () => {
       />,
     );
 
-    expect(screen.getByText("No items yet")).toBeDefined();
-    expect(screen.getByText("Add your first item")).toBeDefined();
+    // getByText throws if not found — no .toBeDefined() needed
+    screen.getByText("No items yet");
+    screen.getByText("Add your first item");
   });
 
   it("renders the icon", () => {
@@ -27,7 +28,7 @@ describe("EmptyState", () => {
       />,
     );
 
-    expect(screen.getByTestId("icon")).toBeDefined();
+    screen.getByTestId("icon");
   });
 
   it("renders action button when action prop is provided", () => {
@@ -42,7 +43,6 @@ describe("EmptyState", () => {
     );
 
     const button = screen.getByText("Add Item");
-    expect(button).toBeDefined();
     fireEvent.click(button);
     expect(onClick).toHaveBeenCalledOnce();
   });

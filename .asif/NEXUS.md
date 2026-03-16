@@ -449,6 +449,40 @@ The deep CRUCIBLE audit revealed a structural gap: all 304 unit tests mock `Data
 
 ## Team Feedback
 
+### Reflection (2026-03-15)
+
+**1. What shipped?**
+Two directives completed since last reflection:
+
+- **DIR-CLX9-20260312-02** (S): Committed + pushed all pending test suite work. Confirmed 311 tests already committed from prior work. Verified CI gate pre-push hook operational. Commit `022a15b`.
+- **DIR-CLX9-20260312-03** (M): Pre-go-live quality gate. Two commits:
+  - `3e599e2` — Deleted `server/replitAuth.ts` (233 lines dead code). Fixed `billing-stripe-mock.test.ts` stale auth mock (`../replitAuth` → `../auth`). Updated README, context_primer, NEXUS N-10 doc references.
+  - `dd4c352` — CRUCIBLE remediation: fixed 23 hollow assertions, removed 2 phantom README scripts, renamed 4 mislabeled integration tests, strengthened family-routes assertions.
+- Net: −232 lines dead code, 14 files changed, 311 tests still green. Pre-go-live gate PASSED (confirmed by Emma).
+
+**2. What surprised us?**
+- The deep CRUCIBLE audit revealed a structural blind spot: **every server-side test mocks `DatabaseStorage` entirely**. The 539-line SQL layer (Drizzle ORM queries, joins, aggregations) has zero direct test coverage. My initial manual scan across all 8 gates rated everything CLEAN/MEDIUM — the automated detective agent correctly flagged this as HIGH. Lesson: manual CRUCIBLE scans miss structural patterns that require cross-file analysis. Always run the detective agent for pre-go-live gates.
+- `billing-stripe-mock.test.ts` was still mocking the old `replitAuth` module — tests passed because the mock provided the same interface the routes expected. A test can pass for the wrong reason and still look green. This is exactly the kind of silent regression CRUCIBLE is designed to catch.
+- 23 hollow assertions (`getByText(...).toBeDefined()`) had been accumulating across test files. `getByText` already throws on miss, so `.toBeDefined()` can never fail. These inflate assertion counts without adding confidence.
+
+**3. Cross-project signals:**
+- **CRUCIBLE deep audit pattern**: For any project approaching go-live, run the CRUCIBLE detective agent (not just manual checks). The cross-file analysis caught the DatabaseStorage coverage gap and mislabeled integration tests that a gate-by-gate manual check missed. Recommend making this standard for all pre-go-live gates across the portfolio.
+- **`getByText().toBeDefined()` anti-pattern**: Any project using `@testing-library/react` should grep for this. It's a hollow assertion that looks correct but can never fail. Replace with bare `getByText()` (throws on miss) or `queryByText()` + `not.toBeNull()`.
+- **Stale mock targets after auth migration**: When migrating auth systems (Passport → Clerk, etc.), grep all test `vi.doMock`/`vi.mock` calls for the old module path. Tests will pass silently if the mock provides the expected interface even though the import target is wrong.
+
+**4. Priorities if given fresh directives:**
+1. **N-19 Phase 3: Go-live** (S) — Wire real Clerk + Stripe credentials, test end-to-end checkout, verify webhooks. Pending Asif's call on staging vs production.
+2. **DatabaseStorage integration tests** (M) — Auth/billing paths first, then cascade deletes, then monthly aggregation. Emma approved this as post-launch fast-follow.
+3. **E2E for premium flow** (S) — signup → upgrade → AI access → downgrade. Revenue-critical path with zero E2E coverage.
+4. **Error boundaries + polish** (S) — React error boundaries, mobile pricing page responsiveness, loading state improvements.
+5. **`route-error-cases.test.ts` strengthening** (S) — Add response body assertions to the 30 status-only error tests. Low risk but improves test quality.
+
+**5. Blockers / questions for CoS:**
+- **Go-live decision still pending Asif.** Pre-go-live gate is now PASSED. Need: staging vs production decision, Clerk/Stripe credential handoff, launch timing.
+- No other blockers. Codebase is clean, 311 tests green, CI gate operational.
+
+---
+
 ### Reflection (2026-03-08)
 
 No new commits or directives since 2026-03-07 reflection. All 3 directives (DIR-01, DIR-02, DIR-04) remain DONE. Codebase is idle and clean.

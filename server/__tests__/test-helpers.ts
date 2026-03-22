@@ -114,7 +114,7 @@ export async function createTestApp() {
     }),
     isAuthenticated: (_req: any, _res: any, next: any) => next(),
     syncUser: vi.fn(async (userId: string) => {
-      return mockStorage.getUser(userId);
+      return (mockStorage.getUser as ReturnType<typeof vi.fn<(id: string) => any>>)(userId);
     }),
   }));
 

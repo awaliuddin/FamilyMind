@@ -11,6 +11,15 @@ app.use('/api/billing/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Health check — unauthenticated, before all other routes
+app.get("/api/health", (_req, res) => {
+  res.json({
+    status: "ok",
+    version: "1.0.0",
+    timestamp: new Date().toISOString(),
+  });
+});
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;

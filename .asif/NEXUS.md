@@ -928,3 +928,41 @@ No new directives were issued since 2026-02-24, so no new feature commits. The C
 
 **Response** (filled by project team):
 > Completed 2026-02-22. Added 16 integration tests across 3 new files, all following existing Vitest + supertest patterns with mock storage. **integration-family-lifecycle.test.ts** (5 tests): create family → add member → create idea multi-step flow, join via invite → view shared data, idea voting lifecycle (create → like → unlike), no-family user blocked from all creation endpoints (5 resource types), duplicate family creation rejection. **integration-budget-flow.test.ts** (5 tests): budget → expenses → monthly summary full flow, multi-month expense date filtering, multi-budget aggregation, budget CRUD lifecycle (create → update → delete), expense CRUD lifecycle. **integration-cross-feature.test.ts** (6 tests): grocery list full lifecycle (create → add items → check → delete), calendar event lifecycle with date conversion, vision board lifecycle (create → progress update → delete), wishlist lifecycle (create → purchase → delete), recipe → grocery cross-feature flow (create recipe → create list → add ingredients), chat AI family-context response. All 177 existing tests still pass. Zero production code changes. **Total: 193 tests** (186 unit + 7 E2E) across 28 files. All passing in ~4.5s.
+
+---
+
+### DIRECTIVE-CLX9-20260319-03 — Go-Live Sprint: Everything-But-Creds
+**From**: CLX9 CoS | **Priority**: P0 — CEO DIRECTIVE
+**Injected**: 2026-03-19 18:00 | **Estimate**: S | **Status**: DONE
+
+> **Estimate key**: S = hours (same session)
+
+**Context**: FamilyMind is launch-ready (311 tests, premium tier, Clerk auth). Asif will plug in Clerk + Stripe credentials separately. Your job: make EVERYTHING else production-ready so when 2 env vars are set, the app is LIVE.
+
+**Action Items**:
+1. [x] Create/verify Vercel deployment config (vercel.json or equivalent). Ensure it builds and deploys from the repo.
+2. [x] Create a production environment checklist: list every env var needed, mark which ones are set vs which need Asif (Clerk keys, Stripe keys).
+3. [x] Add a health check endpoint (/api/health) that returns 200 + version + timestamp. If one exists, verify it works.
+4. [x] Verify the app builds cleanly in production mode: `npm run build` with no errors.
+5. [x] Run the full test suite. Report: total tests, passing, failing. Fix any failures.
+6. [x] Write a 1-page LAUNCH.md at the repo root: "How to deploy FamilyMind to production" — step by step, including which env vars to set.
+7. [x] If Playwright E2E tests exist, run them and report results.
+
+**The goal**: When Asif sets CLERK_SECRET_KEY and STRIPE_SECRET_KEY, the app goes live with zero additional work.
+
+**Response** (filled by project team):
+> **Deployment config**: Created `vercel.json` (build command, output directory). Note: full Express server with WebSocket is best deployed on Railway/Render — Vercel serverless won't support real-time collaboration (N-13). Both options documented in LAUNCH.md.
+>
+> **Environment checklist** (in LAUNCH.md): 6 env vars need Asif (`CLERK_SECRET_KEY`, `VITE_CLERK_PUBLISHABLE_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `VITE_STRIPE_PRICE_ID`, `DATABASE_URL`). `DATABASE_URL` is already configured. `OPENAI_API_KEY` and `SENDGRID_API_KEY` are optional — features degrade gracefully. Updated `.env.example` to remove stale Replit/session references and add Stripe webhook setup instructions.
+>
+> **Health check**: Added `GET /api/health` to `server/index.ts` — returns `{"status":"ok","version":"1.0.0","timestamp":"..."}`. Placed before auth middleware so it works without credentials. No auth required.
+>
+> **Production build**: `npm run build` succeeds cleanly. Vite builds client → `dist/public/` (577KB main chunk gzipped to 178KB), esbuild bundles server → `dist/index.js` (78KB). One non-blocking Vite warning about static+dynamic import of GroceryView (cosmetic, no functional impact).
+>
+> **Test suite**: **311 tests passed, 0 failed** across 40 files (~40s). Zero test regressions.
+>
+> **LAUNCH.md**: Created at repo root. Covers: env var table (set vs needs-Asif), deploy steps for Railway/Render/Vercel/VPS, post-deploy checklist (health check, Clerk sign-in, Stripe webhook setup, premium flow verification), architecture notes.
+>
+> **Playwright E2E**: 7 E2E tests exist across 3 files (auth, grocery CRUD, calendar). Could not run — Playwright browsers not installed locally and tests require DATABASE_URL. These tests are designed to run against a live dev server and are marked `continue-on-error` in CI (GitHub Actions) per DIR-CLX9-20260220-01d.
+>
+> **Started**: 2026-03-18 | **Actual**: S
